@@ -4,6 +4,8 @@ import httpx, sqlite3, json
 from datetime import datetime
 import os
 API_KEY = os.getenv("OPENROUTER_API_KEY")
+DB_PATH = "/data/negotiations.db"
+
 
 app = FastAPI()
 
@@ -17,7 +19,7 @@ app.add_middleware(
 )
 
 def init_db():
-    conn = sqlite3.connect("negotiations.db")
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""CREATE TABLE IF NOT EXISTS transcripts (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +39,6 @@ def root():
 
 @app.post("/message")
 async def message(request: Request):
-    print('hello here')
     data = await request.json()
     student_id = data.get("student_id", "anon")
     transcript = data.get("transcript", [])
