@@ -37,6 +37,7 @@ def root():
 
 @app.post("/message")
 async def message(request: Request):
+    print('hello here')
     data = await request.json()
     student_id = data.get("student_id", "anon")
     transcript = data.get("transcript", [])
