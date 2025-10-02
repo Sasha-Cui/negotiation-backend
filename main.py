@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx, sqlite3, json
 from datetime import datetime
-
-API_KEY = "your_openrouter_api_key_here"
+import os
+API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 app = FastAPI()
 
