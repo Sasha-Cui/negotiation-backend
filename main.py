@@ -30,6 +30,11 @@ def init_db():
 
 init_db()
 
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Negotiation backend is running!"}
+
+
 @app.post("/message")
 async def message(request: Request):
     data = await request.json()
