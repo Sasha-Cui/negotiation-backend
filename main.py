@@ -4,8 +4,7 @@ import httpx, sqlite3, json
 from datetime import datetime
 import os
 API_KEY = os.getenv("OPENROUTER_API_KEY")
-DB_PATH = "/data/negotiations.db"
-
+DB_PATH = os.getenv("DB_PATH", "/data/negotiations.db")
 
 app = FastAPI()
 
@@ -56,7 +55,7 @@ async def message(request: Request):
     bot_msg = r.json()["choices"][0]["message"]
     transcript.append(bot_msg)
 
-    conn = sqlite3.connect("negotiations.db")
+    conn = sqlite3.connect("data/negotiations.db")
     c = conn.cursor()
     c.execute("INSERT INTO transcripts (student_id, timestamp, transcript) VALUES (?,?,?)",
               (student_id, datetime.utcnow().isoformat(), json.dumps(transcript)))
