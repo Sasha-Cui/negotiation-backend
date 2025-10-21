@@ -138,7 +138,7 @@ async def feedback(request: Request):
     payload = {
         "model": "openai/gpt-4o",
         "messages": [
-            {"role": "system", "content": "You are a negotiation coach. Give constructive, specific, and actionable feedback."},
+            {"role": "system", "content": "You are a negotiation coach. Give constructive, specific, and actionable feedback on the user only  Do NOT give any feedback to the bot."},
             {"role": "user", "content": f"Here is a transcript:\n{json.dumps(transcript, ensure_ascii=False)}"}
         ]
     }
