@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx, sqlite3, json
 from datetime import datetime
@@ -35,6 +36,12 @@ init_db()
 def root():
     return {"status": "ok", "message": "Negotiation backend is running!"}
 
+
+######## code for downloading db ########
+@app.get("/download_db")
+def download_db():
+    return FileResponse(DB_PATH, filename="negotiations.db")
+######## code for downloading db ########
 
 @app.post("/message")
 async def message(request: Request):
