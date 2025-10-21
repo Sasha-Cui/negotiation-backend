@@ -55,7 +55,7 @@ async def message(request: Request):
     bot_msg = r.json()["choices"][0]["message"]
     transcript.append(bot_msg)
 
-    conn = sqlite3.connect("data/negotiations.db")
+    conn = sqlite3.connect("/data/negotiations.db")
     c = conn.cursor()
     c.execute("INSERT INTO transcripts (student_id, timestamp, transcript) VALUES (?,?,?)",
               (student_id, datetime.utcnow().isoformat(), json.dumps(transcript)))
