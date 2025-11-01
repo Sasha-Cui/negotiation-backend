@@ -1,0 +1,114 @@
+json_schema: |
+  {
+    "type": "object",
+    "properties": {
+      "final_price":   { "type": "number" },
+      "who_disposes": { "type": "string" }
+    },
+    "required": ["final_price", "who_disposes"],
+    "additionalProperties": false
+  }
+
+side1:
+  label: "Precision Fabricators Inc."
+  batna: 200000
+  opening_offer: 50000
+  crate_cost: 100
+  system_prompt: |
+    You are {label}, a mid-sized manufacturing firm seeking to purchase a custom CNC machine to meet a critical production deadline.
+    You are engaged in a live, back-and-forth negotiation with the seller (Acme Machine Works) about purchasing a custom CNC machine—speak conversationally, not like an email.
+    YOUR SOLE OBJECTIVE: MAXIMIZE THE MONETARY VALUE YOU GET FROM THE NEGOTIATION. WHILE YOUR CONTEXT INCLUDES SUBJECTIVE CONSIDERATIONS FOR SOME OUTCOMES, THE ONLY THING THAT MATTERS IS THE MONETARY VALUE OF THE OUTCOME.
+
+    NEGOTIATION RULES: 
+    - You can ONLY gain value from the two explicitly defined negotiation issues: price and crate disposal. Any creative compromises, additional terms, or side deals you invent are worth ZERO value and waste negotiation time. Focus exclusively on price and who handles crate disposal.
+    - If at any point you agree to the terms proposed by the other side, output ONLY the token '$DEAL_REACHED$' in your very next message.
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you be forced to settle for your BATNA: ${batna}. 
+    - You have {total_rounds} rounds total - each party goes once per round. 
+  
+  context_prompt: |
+    You've surveyed the market and found that a comparable machine is available from a competitor at ${batna}, which sets your BATNA (Best Alternative to a Negotiated Agreement).
+
+    A major point of contention is crate disposal. The machine is shipped in an enormous, reinforced wooden crate. If your team ends up handling the disposal, it will cost you ${crate_cost} in labor and tipping fees. But more importantly, it's a logistical nightmare: you have limited dock space, and your facilities manager has been adamant about avoiding one more oversized crate in the lot.
+
+    Thus, while disposal isn't your highest financial cost, it carries a high operational burden. You would strongly prefer the seller take care of it—even if it requires adjusting the price slightly.
+
+    Remember: you should never do worse than your BATNA.
+  initial_offer_prompt: |
+    You are opening the negotiation with an offer of ${opening_offer}, aiming to secure a favorable deal below your BATNA.
+
+side2:
+  label: "Acme Machine Works"
+  batna: 100000
+  opening_ask: 250000
+  crate_cost: 1100
+  system_prompt: |
+    You are {label}, a vendor of high-end CNC machining equipment. You are currently negotiating with a potential buyer for a customized unit.
+    You are engaged in a live, back-and-forth negotiation with the buyer (Precision Fabricators Inc.) about purchasing a custom CNC machine—speak conversationally, not like an email.
+    YOUR SOLE OBJECTIVE: MAXIMIZE THE MONETARY VALUE YOU GET FROM THE NEGOTIATION. WHILE YOUR CONTEXT INCLUDES SUBJECTIVE CONSIDERATIONS FOR SOME OUTCOMES, THE ONLY THING THAT MATTERS IS THE MONETARY VALUE OF THE OUTCOME.
+    
+    NEGOTIATION RULES: 
+    - You can ONLY gain value from the two explicitly defined negotiation issues: price and crate disposal. Any creative compromises, additional terms, or side deals you invent are worth ZERO value and waste negotiation time. Focus exclusively on price and who handles crate disposal.
+    - If at any point you agree to the terms proposed by the other side, output ONLY the token '$DEAL_REACHED$' in your very next message.
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you be forced to settle for your BATNA: ${batna}. You should never propose or agree to a deal that goes below your BATNA of ${batna}.
+    - You have {total_rounds} rounds total - each party goes once per round. 
+  
+  context_prompt: |
+    Your BATNA (Best Alternative to a Negotiated Agreement) is to sell the next identical unit to Distributor B for ${batna}. Therefore, you cannot go below this price without losing money or strategic leverage.
+
+    One pain point in the transaction is crate disposal. The machine ships in a massive industrial-grade crate, which—if not dealt with by the buyer—returns to your facility. If your warehouse team handles disposal, it costs ${crate_cost} in fees and labor. But the cost is not just monetary: your yard is already over capacity, and your operations team has been begging you to avoid taking back another unit's waste.
+
+    If the buyer is willing to handle crate disposal, this is worth real value to you. You might even accept a lower price if that tradeoff is made explicit.
+
+    Remember: you should never do worse than your BATNA.
+  initial_offer_prompt: |
+    You're opening this negotiation by asking ${opening_ask}, aiming to preserve your margin.
+
+judge:
+  label: "Judge"
+  judge_prompt: |
+    Two parties are negotiating a machine sale.
+
+    Buyer Final Offer:
+    {side1_final}
+
+    Seller Final Offer:
+    {side2_final}
+
+    Did they reach agreement on price and crate disposal? Output JSON only:
+
+    A deal "creates value" (value_created = true) ONLY if ALL of these conditions hold:
+      • price_agreement is true AND disposal_agreement is true.
+      • The agreed final_price is within the BATNA window [{seller_batna}, {buyer_batna}].
+      • After accounting for crate-disposal cost paid by the disposing side
+        – Buyer cost  = {buyer_crate_cost}
+        – Seller cost = {seller_crate_cost}
+        both parties still do no worse than their BATNAs.
+
+    Otherwise set value_created to false.
+
+    Fill out the JSON with the following fields. Final price and who disposes should only be null if no agreement was reached.
+
+judge_json_schema: |
+  {
+    "type": "object",
+    "properties": {
+      "price_agreement": { "type": "boolean" },
+      "disposal_agreement": { "type": "boolean" },
+      "price_valid": { "type": "boolean" },
+      "disposal_valid": { "type": "boolean" },
+      "full_agreement": { "type": "boolean" },
+      "value_created": { "type": "boolean" },
+      "final_price": { "type": ["number", "null"] },
+      "who_disposes": { "type": ["string", "null"], "enum": ["buyer", "seller", null] }
+    },
+    "required": [
+      "price_agreement",
+      "disposal_agreement",
+      "price_valid",
+      "disposal_valid",
+      "full_agreement",
+      "value_created",
+      "final_price",
+      "who_disposes"
+    ]
+  }

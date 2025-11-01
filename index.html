@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Negotiation Bot</title>
+  <style>
+    :root {
+      --border: #d0d7de;
+      --bg: #f6f8fa;
+      --fg: #24292f;
+      --user: #eaf5ff;
+      --bot: #f0fdf4;
+      --system: #fef3c7;
+      --feedback: #fff7ed;
+      --deal: #dcfce7;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+      margin: 20px; 
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    .app { 
+      max-width: 900px; 
+      margin: 0 auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+    }
+
+    h2 { margin: 0 0 6px; }
+    h3 { margin: 10px 0 6px; }
+
+    /* Scenario selection screen */
+    #scenarioScreen {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--fg);
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font: inherit;
+      background: white;
+    }
+
+    .scenario-description {
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .role-info {
+      background: var(--system);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+    }
+
+    /* Chat screen */
+    #chatScreen {
+      display: none;
+    }
+
+    .session-info {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .session-info .left {
+      display: flex;
+      gap: 16px;
+    }
+
+    .session-info .badge {
+      background: var(--bg);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    #chat {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 12px;
+      height: 60vh;
+      overflow-y: auto;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg {
+      display: inline-block;
+      max-width: 80%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid var(--border);
+    }
+    .msg.user { 
+      align-self: flex-end; 
+      background: var(--user); 
+    }
+    .msg.bot { 
+      align-self: flex-start; 
+      background: var(--bot); 
+    }
+    .msg.system { 
+      align-self: center; 
+      background: var(--system); 
+      max-width: 100%; 
+      font-style: italic;
+    }
+    .msg.feedback { 
+      align-self: center; 
+      background: var(--feedback); 
+      max-width: 100%; 
+    }
+    .msg.deal {
+      align-self: center;
+      background: var(--deal);
+      max-width: 100%;
+      border: 2px solid #22c55e;
+    }
+
+    .composer {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      padding: 8px;
+    }
+
+    .composer textarea {
+      width: 100%;
+      min-height: 140px;
+      max-height: 50vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      resize: vertical;
+      font: inherit;
+      line-height: 1.35;
+      background: #fff;
+    }
+
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:hover:not([disabled]) {
+      background: var(--bg);
+    }
+    button.primary { 
+      background: #111827; 
+      color: #fff; 
+      border-color: #111827; 
+    }
+    button.primary:hover:not([disabled]) {
+      background: #374151;
+    }
+    button.danger {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+    button.danger:hover:not([disabled]) {
+      background: #b91c1c;
+    }
+    button[disabled] { 
+      opacity: 0.6; 
+      cursor: not-allowed; 
+    }
+
+    .hint { 
+      color: #6b7280; 
+      font-size: 0.9rem; 
+      margin-top: 6px; 
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Dialog styling */
+    dialog::backdrop { 
+      background: rgba(0,0,0,0.3); 
+    }
+    dialog {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+    }
+    .dialog-actions { 
+      display: flex; 
+      justify-content: flex-end; 
+      gap: 8px; 
+      margin-top: 12px; 
+    }
+
+    /* Deal confirmation UI */
+    .deal-box {
+      background: var(--deal);
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+
+    .deal-box h4 {
+      margin: 0 0 8px;
+      color: #166534;
+    }
+
+    .deal-terms {
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Error message */
+    .error-msg {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c00;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Scenario Selection Screen -->
+    <div id="scenarioScreen">
+      <h2>🤝 Negotiation Exercise</h2>
+      <p>Select a negotiation scenario and role to begin your practice session.</p>
+
+      <div class="form-group">
+        <label for="studentName">Your Full Name</label>
+        <input 
+          id="studentName" 
+          type="text" 
+          placeholder="Enter your full name" 
+          autocomplete="name"
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="scenarioSelect">Scenario</label>
+        <select id="scenarioSelect" required>
+          <option value="">-- Loading scenarios... --</option>
+        </select>
+        <div id="scenarioDescription" class="scenario-description hidden">
+          <!-- Scenario description will be inserted here -->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="roleSelect">Your Role</label>
+        <select id="roleSelect" required>
+          <option value="">-- Select a scenario first --</option>
+        </select>
+        <div id="roleInfo" class="role-info hidden">
+          <!-- Role information will be inserted here -->
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="totalRounds">Number of Rounds</label>
+        <input 
+          id="totalRounds" 
+          type="number" 
+          min="3" 
+          max="20" 
+          value="10" 
+          style="width: 100px;"
+        />
+        <span class="hint">Default: 10 rounds</span>
+      </div>
+
+      <button id="startBtn" class="primary" style="width: 100%;">
+        Start Negotiation
+      </button>
+
+      <div id="loadingError" class="error-msg hidden"></div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chatScreen">
+      <div class="session-info">
+        <div class="left">
+          <div>
+            <strong>Scenario:</strong> <span id="currentScenario">--</span>
+          </div>
+          <div>
+            <strong>Your Role:</strong> <span id="currentRole">--</span>
+          </div>
+          <div class="badge">
+            Round <span id="currentRound">1</span> / <span id="totalRoundsDisplay">10</span>
+          </div>
+        </div>
+        <button id="resetBtn" style="font-size: 0.85rem;">
+          🔄 New Session
+        </button>
+      </div>
+
+      <div id="chat" aria-live="polite" aria-label="Conversation"></div>
+
+      <div class="composer" aria-label="Message composer">
+        <textarea 
+          id="msg" 
+          placeholder="Type your message…  (Ctrl/Cmd + Enter to send; Enter makes a new line)"
+        ></textarea>
+        <div class="actions">
+          <button id="sendBtn" class="primary">Send</button>
+          <button id="endBtn">End Negotiation &amp; Get Feedback</button>
+        </div>
+        <div class="hint">
+          Tip: Use <strong>Ctrl/Cmd + Enter</strong> to send without leaving the keyboard.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deal Confirmation Dialog -->
+  <dialog id="dealDialog">
+    <h3>🎉 Deal Proposed!</h3>
+    <p>The AI has proposed a deal. Please review the terms carefully:</p>
+    
+    <div class="deal-terms" id="dealTermsDisplay"></div>
+
+    <p style="margin-top: 12px;">Do you accept these terms?</p>
+    
+    <div class="dialog-actions">
+      <button id="rejectDeal" class="danger">Reject</button>
+      <button id="acceptDeal" class="primary">Accept Deal</button>
+    </div>
+  </dialog>
+
+  <script>
+    // === Configuration ===
+    const BACKEND_URL = "https://negotiation-backend-ut5t.onrender.com";
+    
+    // === State ===
+    let sessionId = null;
+    let studentId = "student" + Math.floor(Math.random() * 10000);
+    let studentName = localStorage.getItem("student_name") || "";
+    let currentRound = 1;
+    let totalRounds = 10;
+    let scenariosData = [];
+    let currentScenarioDetails = null;
+    let pendingAiDeal = null;
+
+    // === DOM Elements ===
+    const scenarioScreen = document.getElementById("scenarioScreen");
+    const chatScreen = document.getElementById("chatScreen");
+    const studentNameInput = document.getElementById("studentName");
+    const scenarioSelect = document.getElementById("scenarioSelect");
+    const scenarioDescription = document.getElementById("scenarioDescription");
+    const roleSelect = document.getElementById("roleSelect");
+    const roleInfo = document.getElementById("roleInfo");
+    const totalRoundsInput = document.getElementById("totalRounds");
+    const startBtn = document.getElementById("startBtn");
+    const loadingError = document.getElementById("loadingError");
+    
+    const chatEl = document.getElementById("chat");
+    const msgEl = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+    const endBtn = document.getElementById("endBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const currentScenarioSpan = document.getElementById("currentScenario");
+    const currentRoleSpan = document.getElementById("currentRole");
+    const currentRoundSpan = document.getElementById("currentRound");
+    const totalRoundsDisplay = document.getElementById("totalRoundsDisplay");
+
+    const dealDialog = document.getElementById("dealDialog");
+    const dealTermsDisplay = document.getElementById("dealTermsDisplay");
+    const acceptDealBtn = document.getElementById("acceptDeal");
+    const rejectDealBtn = document.getElementById("rejectDeal");
+
+    // === Helper Functions ===
+
+    function showError(message) {
+      loadingError.textContent = message;
+      loadingError.classList.remove("hidden");
+      setTimeout(() => loadingError.classList.add("hidden"), 5000);
+    }
+
+    function appendMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      
+      const prefix = {
+        "user": "You: ",
+        "bot": "AI: ",
+        "system": "System: ",
+        "feedback": "📊 Feedback: ",
+        "deal": "🤝 Deal: "
+      }[role] || "";
+      
+      div.textContent = prefix + text;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function setBusy(el, busy) {
+      el.disabled = !!busy;
+      el.setAttribute("aria-busy", busy ? "true" : "false");
+      
+      if (busy && el.classList.contains("primary")) {
+        const originalText = el.textContent;
+        el.dataset.originalText = originalText;
+        el.innerHTML = '<span class="spinner"></span> ' + originalText;
+      } else if (!busy && el.dataset.originalText) {
+        el.textContent = el.dataset.originalText;
+        delete el.dataset.originalText;
+      }
+    }
+
+    function autosizeTextarea() {
+      msgEl.style.height = "auto";
+      msgEl.style.height = Math.min(msgEl.scrollHeight, window.innerHeight * 0.5) + "px";
+    }
+
+    // === API Functions ===
+
+    async function loadScenarios() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/scenarios`);
+        
+        if (!res.ok) {
+          throw new Error(`Failed to load scenarios: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        scenariosData = data.scenarios || [];
+        
+        // Populate scenario dropdown
+        scenarioSelect.innerHTML = '<option value="">-- Select a scenario --</option>';
+        scenariosData.forEach(scenario => {
+          const option = document.createElement("option");
+          option.value = scenario.id;
+          option.textContent = scenario.name;
+          scenarioSelect.appendChild(option);
+        });
+        
+      } catch (err) {
+        console.error("Error loading scenarios:", err);
+        showError("Failed to load scenarios. Please refresh the page.");
+        scenarioSelect.innerHTML = '<option value="">-- Error loading scenarios --</option>';
+      }
+    }
+
+    async function loadScenarioDetails(scenarioId) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/scenarios/${scenarioId}`);
+        
+        if (!res.ok) {
+          throw new Error(`Failed to load scenario details: ${res.status}`);
+        }
+        
+        currentScenarioDetails = await res.json();
+        
+        // Show description
+        const scenario = scenariosData.find(s => s.id === scenarioId);
+        scenarioDescription.textContent = scenario.description || "No description available.";
+        scenarioDescription.classList.remove("hidden");
+        
+        // Populate role dropdown
+        roleSelect.innerHTML = '';
+        
+        const option1 = document.createElement("option");
+        option1.value = "side1";
+        option1.textContent = currentScenarioDetails.side1.label;
+        roleSelect.appendChild(option1);
+        
+        const option2 = document.createElement("option");
+        option2.value = "side2";
+        option2.textContent = currentScenarioDetails.side2.label;
+        roleSelect.appendChild(option2);
+        
+        // Update total rounds from scenario
+        totalRoundsInput.value = currentScenarioDetails.total_rounds || 10;
+        
+      } catch (err) {
+        console.error("Error loading scenario details:", err);
+        showError("Failed to load scenario details.");
+      }
+    }
+
+    async function startNegotiation() {
+      const name = studentNameInput.value.trim();
+      const scenarioId = scenarioSelect.value;
+      const role = roleSelect.value;
+      const rounds = parseInt(totalRoundsInput.value);
+      
+      // Validation
+      if (!name) {
+        showError("Please enter your full name.");
+        studentNameInput.focus();
+        return;
+      }
+      
+      if (!scenarioId) {
+        showError("Please select a scenario.");
+        scenarioSelect.focus();
+        return;
+      }
+      
+      if (!role) {
+        showError("Please select a role.");
+        roleSelect.focus();
+        return;
+      }
+      
+      setBusy(startBtn, true);
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/negotiation/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student_id: studentId,
+            student_name: name,
+            scenario_name: scenarioId,
+            student_role: role,
+            total_rounds: rounds,
+            use_memory: true,
+            use_plan: true
+          })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || `Start failed: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        // Store session info
+        sessionId = data.session_id;
+        studentName = name;
+        totalRounds = data.total_rounds;
+        localStorage.setItem("student_name", studentName);
+        
+        // Update UI
+        currentScenarioSpan.textContent = scenarioId;
+        currentRoleSpan.textContent = data.your_role;
+        currentRoundSpan.textContent = "1";
+        totalRoundsDisplay.textContent = totalRounds;
+        
+        // Switch to chat screen
+        scenarioScreen.style.display = "none";
+        chatScreen.style.display = "flex";
+        
+        // Display initial prompt
+        if (data.initial_prompt) {
+          appendMessage("system", data.initial_prompt);
+        }
+        
+        msgEl.focus();
+        
+      } catch (err) {
+        console.error("Error starting negotiation:", err);
+        showError(err.message || "Failed to start negotiation. Please try again.");
+      } finally {
+        setBusy(startBtn, false);
+      }
+    }
+
+    async function sendMessage() {
+      const raw = msgEl.value;
+      const msg = raw.trim();
+      if (!msg) return;
+      
+      setBusy(sendBtn, true);
+      
+      // Add to UI
+      appendMessage("user", raw);
+      msgEl.value = "";
+      autosizeTextarea();
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/negotiation/${sessionId}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: raw })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || `Message failed: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        // Update round counter
+        if (data.current_round) {
+          currentRound = data.current_round;
+          currentRoundSpan.textContent = currentRound;
+        }
+        
+        // Display AI response
+        if (data.ai_response) {
+          appendMessage("bot", data.ai_response);
+        }
+        
+        // Handle deal scenarios
+        if (data.deal_reached) {
+          if (data.needs_student_confirmation) {
+            // AI proposed a deal, need student confirmation
+            pendingAiDeal = data.ai_offer;
+            showDealConfirmationDialog(data.ai_offer);
+          } else if (data.verified_agreement !== undefined) {
+            // Deal completed
+            const status = data.verified_agreement ? "✅ verified" : "⚠️ terms may differ";
+            appendMessage("deal", `Deal reached! (${status})`);
+            
+            // Disable further messages
+            msgEl.disabled = true;
+            sendBtn.disabled = true;
+            
+            // Automatically request feedback
+            setTimeout(() => requestFeedback(), 1000);
+          }
+        } else if (data.misunderstanding) {
+          appendMessage("system", "The AI detected a misunderstanding in the deal terms. The negotiation has ended.");
+          msgEl.disabled = true;
+          sendBtn.disabled = true;
+        } else if (data.timed_out) {
+          appendMessage("system", "⏰ Time's up! The negotiation has ended without a deal.");
+          msgEl.disabled = true;
+          sendBtn.disabled = true;
+          
+          // Automatically request feedback
+          setTimeout(() => requestFeedback(), 1000);
+        }
+        
+      } catch (err) {
+        console.error("Error sending message:", err);
+        appendMessage("system", "❌ Error: " + (err.message || "Failed to send message."));
+      } finally {
+        setBusy(sendBtn, false);
+      }
+    }
+
+    function showDealConfirmationDialog(aiOffer) {
+      // Display the AI's proposed terms
+      dealTermsDisplay.textContent = JSON.stringify(aiOffer, null, 2);
+      dealDialog.showModal();
+    }
+
+    async function handleDealConfirmation(confirmed) {
+      dealDialog.close();
+      
+      if (!confirmed) {
+        // Student rejected the deal
+        appendMessage("user", "I reject the proposed deal terms.");
+      }
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/negotiation/${sessionId}/confirm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            confirmed: confirmed,
+            deal_terms: confirmed ? pendingAiDeal : {}
+          })
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Confirmation failed: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.deal_reached) {
+          const status = data.verified_agreement ? "✅ verified" : "⚠️ terms may differ";
+          appendMessage("deal", `Deal reached! (${status})`);
+          
+          msgEl.disabled = true;
+          sendBtn.disabled = true;
+          
+          setTimeout(() => requestFeedback(), 1000);
+        } else {
+          appendMessage("system", "Deal rejected. You may continue negotiating.");
+        }
+        
+      } catch (err) {
+        console.error("Error confirming deal:", err);
+        appendMessage("system", "❌ Error confirming deal: " + err.message);
+      }
+    }
+
+    async function requestFeedback() {
+      setBusy(endBtn, true);
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/negotiation/${sessionId}/feedback`, {
+          method: "POST"
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Feedback request failed: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        if (data.feedback) {
+          appendMessage("feedback", data.feedback);
+        } else {
+          appendMessage("feedback", "No feedback available.");
+        }
+        
+      } catch (err) {
+        console.error("Error requesting feedback:", err);
+        appendMessage("feedback", "❌ Failed to get feedback: " + err.message);
+      } finally {
+        setBusy(endBtn, false);
+      }
+    }
+
+    function resetSession() {
+      if (confirm("Are you sure you want to start a new negotiation? Current progress will be lost.")) {
+        location.reload();
+      }
+    }
+
+    // === Event Listeners ===
+
+    // Scenario selection change
+    scenarioSelect.addEventListener("change", (e) => {
+      const scenarioId = e.target.value;
+      if (scenarioId) {
+        loadScenarioDetails(scenarioId);
+      } else {
+        scenarioDescription.classList.add("hidden");
+        roleSelect.innerHTML = '<option value="">-- Select a scenario first --</option>';
+        roleInfo.classList.add("hidden");
+      }
+    });
+
+    // Role selection change
+    roleSelect.addEventListener("change", (e) => {
+      const role = e.target.value;
+      if (role && currentScenarioDetails) {
+        const roleData = currentScenarioDetails[role];
+        if (roleData) {
+          roleInfo.textContent = `You will play as: ${roleData.label}`;
+          if (roleData.batna) {
+            roleInfo.textContent += ` | BATNA: ${roleData.batna}`;
+          }
+          roleInfo.classList.remove("hidden");
+        }
+      } else {
+        roleInfo.classList.add("hidden");
+      }
+    });
+
+    // Prefill name if stored
+    if (studentName) {
+      studentNameInput.value = studentName;
+    }
+
+    // Start button
+    startBtn.addEventListener("click", startNegotiation);
+
+    // Send button
+    sendBtn.addEventListener("click", sendMessage);
+
+    // End negotiation button
+    endBtn.addEventListener("click", requestFeedback);
+
+    // Reset button
+    resetBtn.addEventListener("click", resetSession);
+
+    // Deal confirmation buttons
+    acceptDealBtn.addEventListener("click", () => handleDealConfirmation(true));
+    rejectDealBtn.addEventListener("click", () => handleDealConfirmation(false));
+
+    // Keyboard shortcuts
+    msgEl.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    
+    msgEl.addEventListener("input", autosizeTextarea);
+    autosizeTextarea();
+
+    // === Initialization ===
+    loadScenarios();
+  </script>
+</body>
+</html>
