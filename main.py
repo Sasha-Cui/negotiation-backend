@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 import os
 import uuid
+from openai_wrapper import OpenAIWrapper
 
 # === CONFIG ===
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -85,35 +86,8 @@ def ensure_schema():
 
 ensure_schema()
 
-# === OpenAI Wrapper (简化版，来自 runner.py) ===
-class OpenAIWrapper:
-    """Simplified OpenAI API wrapper for negotiation"""
-    
-    def __init__(self, model: str, label: str = "Agent"):
-        self.model = model
-        self.label = label
-        self.api_key = API_KEY
-    
-    def chat(self, messages: list, response_format: dict = None) -> dict:
-        """Call OpenRouter API"""
-        headers = {"Authorization": f"Bearer {self.api_key}"}
-        payload = {"model": self.model, "messages": messages}
-        
-        if response_format:
-            payload["response_format"] = {"type": "json_schema", "json_schema": response_format}
-        
-        import requests
-        r = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=90
-        )
-        r.raise_for_status()
-        resp_json = r.json()
-        return resp_json["choices"][0]["message"]
 
-# === Helper Functions (来自 runner.py) ===
+# === Helper Functions  ===
 
 def last_round_window(transcript: list, k_rounds: int = 2) -> str:
     """提取最近 k 轮的对话"""
@@ -287,9 +261,13 @@ def load_scenario(scenario_name: str) -> dict:
     return config
 
 def list_available_scenarios() -> list:
-    """列出所有可用的场景"""
+    """列出所有可用的场景 - 支持没有 name/description/num_rounds 字段的 YAML 文件"""
     scenarios_path = Path(SCENARIOS_DIR)
+    
+    print(f"Loading scenarios from {SCENARIOS_DIR}...")
+    
     if not scenarios_path.exists():
+        print(f"Warning: Scenarios directory not found: {SCENARIOS_DIR}")
         return []
     
     scenarios = []
@@ -298,15 +276,31 @@ def list_available_scenarios() -> list:
             with open(yaml_file, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
             
+            # Generate friendly name from filename if not provided
+            # Example: "Top_talent.yaml" → "Top Talent"
+            default_name = yaml_file.stem.replace('_', ' ').title()
+            
+            # Extract role labels with safe defaults
+            side1_label = config.get("side1", {}).get("label", "Side 1")
+            side2_label = config.get("side2", {}).get("label", "Side 2")
+            
+            # Generate description from side labels if not provided
+            default_description = f"Negotiation between {side1_label} and {side2_label}"
+            
             scenarios.append({
                 "id": yaml_file.stem,
-                "name": config.get("name", yaml_file.stem),
-                "description": config.get("description", ""),
-                "side1_label": config["side1"]["label"],
-                "side2_label": config["side2"]["label"],
+                "name": config.get("name", default_name),
+                "description": config.get("description", default_description),
+                "side1_label": side1_label,
+                "side2_label": side2_label,
             })
+            
+            print(f"  - {yaml_file.name}")
+            
         except Exception as e:
             print(f"Warning: Failed to load scenario {yaml_file}: {e}")
+    
+    print(f"Found {len(scenarios)} scenarios")
     
     return scenarios
 
@@ -792,24 +786,30 @@ def get_scenarios():
 
 @app.get("/scenarios/{scenario_name}")
 def get_scenario_details(scenario_name: str):
-    """获取特定场景的详细信息（不含敏感信息）"""
+    """获取特定场景的详细信息（不含敏感信息） - 支持没有 name/description/num_rounds 的 YAML"""
     try:
         config = load_scenario(scenario_name)
     except HTTPException:
         raise
     
+    # Generate friendly defaults if fields are missing
+    default_name = scenario_name.replace('_', ' ').title()
+    side1_label = config.get("side1", {}).get("label", "Side 1")
+    side2_label = config.get("side2", {}).get("label", "Side 2")
+    default_description = f"Negotiation between {side1_label} and {side2_label}"
+    
     return {
         "scenario_name": scenario_name,
-        "name": config.get("name", scenario_name),
-        "description": config.get("description", ""),
+        "name": config.get("name", default_name),
+        "description": config.get("description", default_description),
         "total_rounds": config.get("num_rounds", 10),
         "side1": {
-            "label": config["side1"]["label"],
-            "batna": config["side1"].get("batna"),
+            "label": side1_label,
+            "batna": config.get("side1", {}).get("batna"),
         },
         "side2": {
-            "label": config["side2"]["label"],
-            "batna": config["side2"].get("batna"),
+            "label": side2_label,
+            "batna": config.get("side2", {}).get("batna"),
         }
     }
 
@@ -827,7 +827,7 @@ async def start_negotiation(request: Request):
         "ai_model": str (optional, default: "openai/gpt-4o-mini"),
         "use_memory": bool (optional, default: true),
         "use_plan": bool (optional, default: true),
-        "total_rounds": int (optional, uses scenario default)
+        "total_rounds": int (optional, uses scenario default or 10)
     }
     """
     if not API_KEY:
@@ -849,7 +849,7 @@ async def start_negotiation(request: Request):
     # 加载场景
     scenario_config = load_scenario(scenario_name)
     
-    # 可选参数
+    # 可选参数 - 支持没有 num_rounds 的 YAML，默认 10 轮
     ai_model = data.get("ai_model", "openai/gpt-4o-mini")
     use_memory = data.get("use_memory", True)
     use_plan = data.get("use_plan", True)
