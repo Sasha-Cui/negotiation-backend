@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Negotiation Bot</title>
+  <style>
+    :root {
+      --border: #d0d7de;
+      --bg: #f6f8fa;
+      --fg: #24292f;
+      --user: #eaf5ff;
+      --bot: #f0fdf4;
+      --feedback: #fff7ed;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; color: var(--fg); }
+
+    .app { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    h2 { margin: 0 0 6px; }
+
+    #chat {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 12px;
+      height: 60vh;                  /* Larger conversation area */
+      overflow-y: auto;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .msg {
+      display: inline-block;
+      max-width: 80%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      line-height: 1.35;
+      white-space: pre-wrap;         /* preserve newlines */
+      word-wrap: break-word;
+      border: 1px solid var(--border);
+    }
+    .msg.user      { align-self: flex-end; background: var(--user); }
+    .msg.bot       { align-self: flex-start; background: var(--bot); }
+    .msg.feedback  { align-self: center; background: var(--feedback); max-width: 100%; }
+
+    .composer {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      padding: 8px;
+    }
+
+    .composer textarea {
+      width: 100%;
+      min-height: 140px;             /* A large, multi-line box */
+      max-height: 50vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      resize: vertical;              /* Let users make it even bigger */
+      font: inherit;
+      line-height: 1.35;
+      background: #fff;
+    }
+
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.primary { background: #111827; color: #fff; border-color: #111827; }
+    button[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+    .hint { color: #6b7280; font-size: 0.9rem; margin-top: 6px; }
+
+    /* Simple dialog styling */
+    dialog::backdrop { background: rgba(0,0,0,0.3); }
+    dialog {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 420px;
+    }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2>Negotiation Exercise</h2>
+
+    <div id="chat" aria-live="polite" aria-label="Conversation"></div>
+
+    <div class="composer" aria-label="Message composer">
+      <textarea id="msg" placeholder="Type your message…  (Ctrl/Cmd + Enter to send; Enter makes a new line)"></textarea>
+      <div class="actions">
+        <button id="sendBtn" class="primary">Send</button>
+        <button id="endBtn">End Negotiation &amp; Receive Feedback</button>
+      </div>
+      <div class="hint">Tip: Use <strong>Ctrl/Cmd + Enter</strong> to send without leaving the keyboard.</div>
+    </div>
+  </div>
+
+  <!-- Name collection dialog -->
+  <dialog id="nameDialog">
+    <form id="nameForm">
+      <h3 style="margin:0 0 10px;">Enter your name to receive feedback</h3>
+      <label for="studentName">Full name</label>
+      <input id="studentName" type="text" name="studentName" autocomplete="name" required />
+      <div class="dialog-actions">
+        <button type="button" id="cancelName">Cancel</button>
+        <button type="submit" class="primary" id="submitName">Submit &amp; Get Feedback</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    // --- Config & State ---
+    const BACKEND_URL = "https://negotiation-backend-ut5t.onrender.com";
+    let transcript = [];
+    const student_id = "student" + Math.floor(Math.random() * 10000);
+    let student_name = localStorage.getItem("student_name") || "";
+
+    // --- Elements ---
+    const chatEl = document.getElementById("chat");
+    const msgEl = document.getElementById("msg");
+    const sendBtn = document.getElementById("sendBtn");
+    const endBtn = document.getElementById("endBtn");
+    const nameDialog = document.getElementById("nameDialog");
+    const nameForm = document.getElementById("nameForm");
+    const studentNameInput = document.getElementById("studentName");
+    const cancelNameBtn = document.getElementById("cancelName");
+
+    // Prefill dialog if name was saved previously
+    if (student_name) studentNameInput.value = student_name;
+
+    // --- Helpers ---
+    function appendMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      // Use textContent for safety (avoid injecting HTML)
+      div.textContent = (role === "user" ? "You: " :
+                         role === "bot" ? "Bot: " :
+                         role === "feedback" ? "Feedback: " : "") + text;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function setBusy(el, busy) {
+      el.disabled = !!busy;
+      el.setAttribute("aria-busy", busy ? "true" : "false");
+    }
+
+    function autosizeTextarea() {
+      // Simple auto-grow
+      msgEl.style.height = "auto";
+      msgEl.style.height = Math.min(msgEl.scrollHeight, window.innerHeight * 0.5) + "px";
+    }
+
+    // --- Send message flow ---
+    async function send() {
+      const raw = msgEl.value;
+      const msg = raw.trim();
+      if (!msg) return;
+
+      setBusy(sendBtn, true);
+
+      // Add to UI & local transcript
+      appendMessage("user", raw);
+      transcript.push({ role: "user", content: raw });
+      msgEl.value = "";
+      autosizeTextarea();
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id, message: raw, transcript })
+        });
+
+        if (!res.ok) throw new Error(`Message request failed: ${res.status}`);
+        const data = await res.json();
+
+        // Server is source of truth for transcript
+        transcript = Array.isArray(data.transcript) ? data.transcript : transcript;
+
+        appendMessage("bot", data.reply ?? "(no reply)");
+      } catch (err) {
+        appendMessage("bot", "Sorry — something went wrong sending your message.");
+        // Optionally log: console.error(err);
+      } finally {
+        setBusy(sendBtn, false);
+      }
+    }
+
+    // --- Feedback flow (requires name) ---
+    function requireNameThenFeedback() {
+      if (student_name && student_name.trim().length > 0) {
+        requestFeedback();
+        return;
+      }
+      // Open dialog to collect name
+      studentNameInput.value = student_name || "";
+      nameDialog.showModal();
+      setTimeout(() => studentNameInput.focus(), 0);
+    }
+
+    async function requestFeedback() {
+      setBusy(endBtn, true);
+      try {
+        // Also record name directly in transcript for auditing,
+        // in case backend ignores the extra field.
+        const nameMarker = `StudentName: ${student_name}`;
+        const alreadyTagged = transcript.some(
+          t => t.role === "system" && String(t.content).startsWith("StudentName:")
+        );
+        if (!alreadyTagged) {
+          transcript.push({ role: "system", content: nameMarker });
+        }
+
+        const res = await fetch(`${BACKEND_URL}/feedback`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id, student_name, transcript })
+        });
+
+        if (!res.ok) throw new Error(`Feedback request failed: ${res.status}`);
+        const data = await res.json();
+
+        appendMessage("feedback", data.feedback ?? "(no feedback returned)");
+      } catch (err) {
+        appendMessage("feedback", "Sorry — something went wrong fetching your feedback.");
+        // Optionally log: console.error(err);
+      } finally {
+        setBusy(endBtn, false);
+        chatEl.scrollTop = chatEl.scrollHeight;
+      }
+    }
+
+    // --- Event wiring ---
+    sendBtn.addEventListener("click", send);
+    endBtn.addEventListener("click", requireNameThenFeedback);
+
+    // Ctrl/Cmd+Enter to send; plain Enter inserts a newline (multi-line typing)
+    msgEl.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        send();
+      }
+    });
+    msgEl.addEventListener("input", autosizeTextarea);
+    autosizeTextarea(); // initial
+
+    // Name dialog handlers
+    nameForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const val = studentNameInput.value.trim();
+      if (!val) {
+        studentNameInput.focus();
+        return;
+      }
+      student_name = val;
+      localStorage.setItem("student_name", student_name);
+      nameDialog.close();
+      requestFeedback();
+    });
+
+    cancelNameBtn.addEventListener("click", () => {
+      nameDialog.close();
+      // Intentionally do not request feedback if they cancel
+    });
+  </script>
+</body>
+</html>

@@ -18,7 +18,7 @@ from openai import APIError, APIStatusError, APITimeoutError, APIConnectionError
 
 # ---- Env ----
 load_dotenv()
-_DEFAULT_API_KEY = os.getenv("OPENAI_API_KEY")
+_DEFAULT_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 _DEFAULT_BASE_URL = os.getenv("OPENAI_BASE_URL")
 _DEFAULT_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
 _DEFAULT_TIMEOUT = int(os.getenv("OPENAI_HTTP_TIMEOUT_SEC", "120"))
@@ -82,9 +82,9 @@ class OpenAIWrapper:
         self.max_retries = max_retries
         self.backoff = backoff
         self.debug = debug
-
+        
         if not self.api_key:
-            raise RuntimeError("OPENAI_API_KEY not set")
+            raise RuntimeError("API key not set (set OPENROUTER_API_KEY or OPENAI_API_KEY)")
 
         _maybe_warn_base_url(self.base_url)
 
