@@ -665,45 +665,75 @@ class NegotiationSession:
     
     @staticmethod
     def load_from_db(session_id: str) -> Optional['NegotiationSession']:
-        """从数据库加载"""
         conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # 关键：按列名访问
         c = conn.cursor()
-        
-        c.execute("SELECT * FROM negotiation_sessions WHERE session_id = ?", (session_id,))
+
+        c.execute("""
+            SELECT
+                session_id,
+                student_id,
+                student_name,
+                scenario_name,
+                student_role,
+                ai_role,
+                ai_model,
+                student_goes_first,
+                use_memory,
+                use_plan,
+                current_round,
+                total_rounds,
+                transcript,
+                ai_memory,
+                ai_plan,
+                student_deal_json,
+                ai_deal_json,
+                deal_reached,
+                deal_failed,
+                status,
+                created_at,
+                updated_at
+            FROM negotiation_sessions
+            WHERE session_id = ?
+        """, (session_id,))
         row = c.fetchone()
         conn.close()
-        
+
         if not row:
             return None
-        
-        # 重建 session
+
+        # 用列名取值，避免列顺序差异
         session = NegotiationSession(
-            session_id=row[0],
-            student_id=row[1],
-            student_name=row[2],
-            scenario_name=row[3],
-            student_role=row[4],
-            ai_model=row[6],
-            student_goes_first=row[7],
-            use_memory=row[8],
-            use_plan=row[9],
+            session_id=row["session_id"],
+            student_id=row["student_id"],
+            student_name=row["student_name"],
+            scenario_name=row["scenario_name"],
+            student_role=row["student_role"],
+            ai_model=row["ai_model"],
+            student_goes_first=bool(row["student_goes_first"]),
+            use_memory=bool(row["use_memory"]),
+            use_plan=bool(row["use_plan"]),
         )
-        
+
         # 恢复状态
-        session.ai_role = row[5]
-        session.current_round = row[10]
-        session.total_rounds = row[11]
-        session.transcript = json.loads(row[12])
-        session.ai_memory = row[13] or ""
-        session.ai_plan = row[14] or ""
-        session.student_deal_json = json.loads(row[15]) if row[15] else None
-        session.ai_deal_json = json.loads(row[16]) if row[16] else None
-        session.deal_reached = row[17]
-        session.deal_failed = row[18]
-        session.status = row[19]
-        session.created_at = row[20]
-        session.updated_at = row[21]
-        
+        session.ai_role       = row["ai_role"]
+        session.current_round = int(row["current_round"])
+        session.total_rounds  = int(row["total_rounds"])
+
+        # JSON/文本字段
+        session.transcript         = json.loads(row["transcript"]) if row["transcript"] else []
+        session.ai_memory          = row["ai_memory"] or ""
+        session.ai_plan            = row["ai_plan"] or ""
+        session.student_deal_json  = json.loads(row["student_deal_json"]) if row["student_deal_json"] else None
+        session.ai_deal_json       = json.loads(row["ai_deal_json"]) if row["ai_deal_json"] else None
+
+        # 标志位/元信息
+        session.deal_reached = bool(row["deal_reached"])
+        session.deal_failed  = bool(row["deal_failed"])
+        session.status       = row["status"]
+        session.created_at   = row["created_at"]
+        session.updated_at   = row["updated_at"]
+
         return session
 
 # ============================================================================
