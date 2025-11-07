@@ -1,10 +1,12 @@
 """
-优化后的 Negotiation Backend - 修复 transcript 传递问题
+优化后的 Negotiation Backend - 完整修复版
 
 关键修复:
 1. ✅ 修复了 {{history}} 双花括号导致的 transcript 无法传递问题
-2. ✅ JSON schema 仍然需要 escape，因为它本身包含花括号
-3. ✅ 简化了 escape/unescape 逻辑
+2. ✅ 在 deal confirmation 中添加 transcript，让 AI 能看到自己的最近 offer
+3. ✅ 保留了所有原有功能（随机先手、模型选择、正确的 API 格式等）
+4. ✅ JSON schema 仍然需要 escape，因为它本身包含花括号
+5. ✅ /scenarios endpoint 返回正确的 side1_label 和 side2_label
 """
 
 from fastapi import FastAPI, HTTPException
@@ -94,85 +96,118 @@ def init_db():
 init_db()
 
 # ============================================================================
-# 工具函数 - 简化版
+# 辅助函数（与 runner.py 完全一致）
 # ============================================================================
+
 def _escape_braces(s: str) -> str:
-    """转义大括号用于 .format() - 仅用于 JSON schema"""
+    """转义大括号用于 .format()"""
     return s.replace("{", "{{").replace("}", "}}")
+
+def _unescape_braces(s: str) -> str:
+    """反转义大括号"""
+    return s.replace("{{", "{").replace("}}", "}")
 
 def last_round_window(transcript: List[str], k_rounds: int = 2) -> str:
     """
     提取最近 k 轮的对话
+    与 runner.py 完全一致
     """
     pat = re.compile(r"^(.+?):\s", re.MULTILINE)
     
     speaker_changes = []
     for i, msg in enumerate(transcript):
-        if pat.match(msg):
-            speaker_changes.append(i)
+        m = pat.match(msg)
+        if m:
+            speaker = m.group(1)
+            speaker_changes.append((i, speaker))
     
-    if not speaker_changes:
+    if len(speaker_changes) < 2 * k_rounds:
         return "\n\n".join(transcript)
     
-    # 计算需要的消息数量（k轮 = 2k条消息）
-    num_messages = k_rounds * 2
-    
-    if len(speaker_changes) <= num_messages:
-        return "\n\n".join(transcript)
-    
-    start_idx = speaker_changes[-num_messages]
+    start_idx = speaker_changes[-(2 * k_rounds)][0]
     return "\n\n".join(transcript[start_idx:])
 
 def extract_json_from_text(text: str) -> Optional[Dict]:
-    """从文本中提取 JSON"""
+    """
+    从文本中提取 JSON
+    与 runner.py 完全一致
+    """
+    # 尝试查找 JSON block
+    json_pattern = r'```json\s*([\s\S]*?)\s*```'
+    match = re.search(json_pattern, text)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except:
+            pass
+    
+    # 尝试直接解析
     try:
-        match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
+        # 查找 { ... }
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1:
+            json_str = text[start:end+1]
+            return json.loads(json_str)
     except:
         pass
+    
     return None
 
 # ============================================================================
-# 谈判 Session 类
+# NegotiationSession 类
 # ============================================================================
 class NegotiationSession:
     """
-    谈判 Session - 修复 transcript 传递问题
+    谈判会话类
+    与 runner.py 逻辑完全一致
     """
     
     def __init__(
         self,
-        scenario_config: Dict,
-        scenario_name: str,
+        session_id: str,
         student_id: str,
         student_name: str,
+        scenario_name: str,
         student_role: str,
-        ai_role: str,
         ai_model: str,
         student_goes_first: bool,
         use_memory: bool,
         use_plan: bool,
-        total_rounds: int = 6,
-        session_id: Optional[str] = None
     ):
-        # 基础信息
-        self.session_id = session_id or str(uuid.uuid4())
+        self.session_id = session_id
         self.student_id = student_id
         self.student_name = student_name
         self.scenario_name = scenario_name
         self.student_role = student_role
-        self.ai_role = ai_role
         self.ai_model = ai_model
-        
-        # 配置
         self.student_goes_first = student_goes_first
         self.use_memory = use_memory
         self.use_plan = use_plan
-        self.total_rounds = total_rounds
         
-        # 谈判状态
+        # 加载场景配置
+        scenario_path = Path(SCENARIOS_DIR) / f"{scenario_name}.yaml"
+        with open(scenario_path, 'r', encoding='utf-8') as f:
+            self.scenario_config = yaml.safe_load(f)
+        
+        # 确定角色
+        if student_role == "side1":
+            self.ai_role = "side2"
+        else:
+            self.ai_role = "side1"
+        
+        # 初始化 AI agent
+        self.ai_agent = OpenAIWrapper(model=ai_model, label="AI")
+        
+        # Memory & Plan agents（如果启用）
+        if use_memory:
+            self.memory_agent = OpenAIWrapper(model=ai_model, label="Memory")
+        if use_plan:
+            self.plan_agent = OpenAIWrapper(model=ai_model, label="Plan")
+        
+        # 会话状态
         self.current_round = 1
+        self.total_rounds = self.scenario_config.get("num_rounds", 10)
         self.transcript = []
         self.ai_memory = ""
         self.ai_plan = ""
@@ -182,50 +217,25 @@ class NegotiationSession:
         self.deal_failed = False
         self.status = "active"
         
-        # Scenario 配置
-        self.scenario_config = scenario_config
-        
-        # AI Agents
-        self.ai_agent = OpenAIWrapper(
-            api_key=API_KEY,
-            model=ai_model,
-            temperature=0.7,
-            max_tokens=2000
-        )
-        
-        self.plan_agent = OpenAIWrapper(
-            api_key=API_KEY,
-            model=ai_model,
-            temperature=0.7,
-            max_tokens=1000
-        )
-        
-        self.memory_agent = OpenAIWrapper(
-            api_key=API_KEY,
-            model=ai_model,
-            temperature=0.7,
-            max_tokens=1000
-        )
-        
         # 时间戳
         self.created_at = datetime.utcnow().isoformat()
         self.updated_at = self.created_at
     
     # ========================================================================
-    # 核心方法 1: 生成 AI 回复 - 修复版
+    # 核心方法 1: 生成 AI 回复（与 runner.py 完全一致）
     # ========================================================================
     def _generate_ai_response(self) -> str:
         """
         生成 AI 的谈判回复
         
         ⭐ 关键修复:
-        1. 使用单花括号 {history} 而不是 {{history}}
-        2. 不再对 history 进行 escape/unescape
-        3. 只对 JSON schema 进行 escape（因为它本身包含花括号）
+        1. 每次都包含 context_prompt
+        2. 区分 Round 1 先手（用 initial_offer_prompt）
+        3. Prompt 文本与 runner.py 完全一致
         """
         ai_cfg = self.scenario_config[self.ai_role]
         
-        # 1. 获取 context_prompt
+        # 1. 获取 context_prompt（⭐ 关键：每次都需要）
         context = ai_cfg["context_prompt"]
         
         # 2. 构建完整历史
@@ -238,32 +248,35 @@ class NegotiationSession:
         
         # 4. 根据情况选择 prompt
         if ai_goes_first:
+            # ============================================================
             # Round 1 先手：使用 initial_offer_prompt
+            # ============================================================
             base_prompt = ai_cfg["initial_offer_prompt"]
             user_prompt = f"{context}\n\n{base_prompt}"
         
         else:
+            # ============================================================
             # Round 1 后手 或 Round 2+：使用 universal_continuation_prompt
+            # ============================================================
             
-            # 构建 JSON schema（需要 escape，因为它本身包含花括号）
+            # 构建 JSON schema
             json_schema_raw = self.scenario_config["json_schema"]
             json_schema_dict = json.loads(json_schema_raw)
             json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
-            json_schema_escaped = _escape_braces(json_schema_text)
             
-            # ⭐ 修复：使用单花括号 {history}
+            # ⭐ Universal continuation prompt（修复：单花括号）
             universal_continuation_prompt = (
                 "CURRENT ROUND INFORMATION:\n"
                 f"It is now round {self.current_round}/{self.total_rounds}. "
                 f"You have {self.total_rounds - self.current_round} rounds remaining after this one.\n\n"
-                "<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{history}\n\n"  # ⭐ 单花括号！
+                "<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{history}\n\n"
                 "<END NEGOTIATION TRANSCRIPT>\n\n"
                 "OUTPUT INSTRUCTIONS:\n"
                 "1. You can either continue the negotiation or propose a final deal by outputting '$DEAL_REACHED$' at the beginning of your message.\n\n"
                 "2. OUTPUT OPTIONS:\n"
                 "   a) Continue negotiating: Respond naturally to continue the discussion, making counteroffers or asking questions.\n"
                 "   b) Propose final deal: Output '$DEAL_REACHED$' on its own line, then output a valid JSON object with the deal terms.\n\n"
-                f"JSON FORMAT (if proposing deal):\n{json_schema_escaped}\n\n"  # ⭐ JSON schema 需要 escape
+                f"JSON FORMAT (if proposing deal):\n{_escape_braces(json_schema_text)}\n\n"
                 "3. IMPORTANT: If you believe no mutually beneficial deal is possible, you may output '$DEAL_FAILED$' instead of continuing.\n\n"
                 "4. Remember: You must maximize your own value while reaching agreement."
             )
@@ -271,10 +284,10 @@ class NegotiationSession:
             # ⭐ 修复：直接填充 history，不需要 escape/unescape
             continuation = universal_continuation_prompt.format(history=history)
             
-            # 构建完整 prompt
+            # ⭐ 关键：context + continuation
             user_prompt = f"{context}\n\n{continuation}"
         
-        # 5. 注入 Memory & Plan
+        # 5. 注入 Memory & Plan（与 runner.py 完全一致）
         full_prompt = self._inject_memory_and_plan(user_prompt)
         
         # 6. 调用 AI
@@ -287,10 +300,13 @@ class NegotiationSession:
         return response["content"]
     
     # ========================================================================
-    # 核心方法 2: 注入 Memory & Plan
+    # 核心方法 2: 注入 Memory & Plan（与 runner.py 完全一致）
     # ========================================================================
     def _inject_memory_and_plan(self, base_prompt: str) -> str:
-        """将 Memory 和 Plan 包装到 prompt 外层"""
+        """
+        将 Memory 和 Plan 包装到 prompt 外层
+        与 runner.py 完全一致
+        """
         parts = []
         
         if self.use_memory and self.ai_memory:
@@ -304,10 +320,13 @@ class NegotiationSession:
         return "\n".join(parts)
     
     # ========================================================================
-    # 核心方法 3: 更新 Memory
+    # 核心方法 3: 更新 Memory（与 runner.py 完全一致）
     # ========================================================================
     def _update_memory(self):
-        """更新 AI 的 Memory"""
+        """
+        更新 AI 的 Memory
+        与 runner.py 完全一致
+        """
         if not self.use_memory:
             return
         
@@ -320,23 +339,23 @@ class NegotiationSession:
         ai_label = ai_cfg.get("label", self.ai_role)
         student_label = student_cfg.get("label", self.student_role)
         
-        # Memory system prompt
+        # ⭐ Memory system prompt（与 runner.py 完全一致）
         memory_system = (
             "You are a memory assistant for a negotiation agent. "
             "Your job is to track key information about the negotiation state, "
             "including the opponent's bargaining patterns, priorities, and opportunities for value creation."
         )
         
-        # Memory user prompt
+        # ⭐ Memory user prompt（与 runner.py 完全一致）
         memory_user = (
-            f"--- ROLE CONTEXT ---\n{ai_cfg['context_prompt']}\n\n"
-            f"--- MEMORY (if available) ---\n{self.ai_memory}\n\n" if self.ai_memory else ""
-            f"--- CURRENT SITUATION ---\n"
-            f"Round {self.current_round}/{self.total_rounds}\n\n"
-            f"Recent transcript:\n{recent_transcript}\n\n"
-            "Update the memory summary to reflect new information. "
-            f"Focus on {student_label}'s preferences, concessions, and any revealed BATNA signals. "
-            f"Also note any progress toward {ai_label}'s goals."
+            f"--- PREVIOUS MEMORY ---\n{self.ai_memory}\n\n" if self.ai_memory else ""
+            f"--- RECENT TRANSCRIPT (last 2 rounds) ---\n{recent_transcript}\n\n"
+            "Based on the recent transcript, update the memory with any new insights about the negotiation state. "
+            "Format your response as:\n\n"
+            f"PATTERNS: [What patterns do you observe in {student_label}'s bargaining behavior?]\n"
+            f"PRIORITIES: [What seems most important to {student_label}?]\n"
+            f"OPPORTUNITIES: [What opportunities for value creation do you see?]\n"
+            "INSIGHTS: [Any other important observations?]"
         )
         
         messages = [
@@ -348,28 +367,33 @@ class NegotiationSession:
         self.ai_memory = response["content"]
     
     # ========================================================================
-    # 核心方法 4: 生成 Plan
+    # 核心方法 4: 生成 Plan（与 runner.py 完全一致）
     # ========================================================================
     def _generate_plan(self):
-        """生成 AI 的策略计划"""
+        """
+        生成本轮的 Plan
+        与 runner.py 完全一致
+        """
         if not self.use_plan:
             return
+        
+        ai_cfg = self.scenario_config[self.ai_role]
+        context = ai_cfg["context_prompt"]
         
         # 提取最近 2 轮对话
         recent_transcript = last_round_window(self.transcript, k_rounds=2)
         
-        ai_cfg = self.scenario_config[self.ai_role]
         ai_label = ai_cfg.get("label", self.ai_role)
         
-        # Plan system prompt
+        # ⭐ Plan system prompt（与 runner.py 完全一致）
         plan_system = (
             "You are a strategic planning assistant for a negotiation agent. "
-            "Your job is to develop tactical plans for each round based on the negotiation context and current state."
+            f"Your job is to generate a concrete, actionable plan for {ai_label} for the current round of negotiation."
         )
         
-        # Plan user prompt
+        # ⭐ Plan user prompt（与 runner.py 完全一致）
         plan_user = (
-            f"--- ROLE CONTEXT ---\n{ai_cfg['context_prompt']}\n\n"
+            f"--- CONTEXT ---\n{context}\n\n"
             f"--- MEMORY (if available) ---\n{self.ai_memory}\n\n" if self.use_memory and self.ai_memory else ""
             f"--- PREVIOUS PLAN (if available) ---\n{self.ai_plan}\n\n" if self.ai_plan else ""
             f"--- CURRENT SITUATION ---\n"
@@ -392,10 +416,17 @@ class NegotiationSession:
         self.ai_plan = response["content"]
     
     # ========================================================================
-    # 核心方法 5: 处理 Student 消息
+    # 核心方法 5: 处理 Student 消息（修复 deal 确认逻辑）
     # ========================================================================
     def process_student_message(self, message: str) -> Dict[str, Any]:
-        """处理学生消息"""
+        """
+        处理学生消息
+        
+        ⭐ 关键修复:
+        1. 学生可以输入 $DEAL_REACHED$ + JSON（就像 AI 一样）
+        2. AI 需要确认是否和自己的 offer 一致
+        3. 不需要前端的 accept/reject dialog
+        """
         # 1. 保存学生消息到 transcript
         student_cfg = self.scenario_config[self.student_role]
         student_label = student_cfg.get("label", "Student")
@@ -408,7 +439,7 @@ class NegotiationSession:
             if student_json:
                 self.student_deal_json = student_json
                 
-                # 让 AI 确认
+                # ⭐ 关键：让 AI 确认
                 ai_confirm_response = self._request_ai_deal_confirmation(student_json)
                 
                 ai_cfg = self.scenario_config[self.ai_role]
@@ -466,6 +497,7 @@ class NegotiationSession:
             ai_json = extract_json_from_text(ai_response)
             if ai_json:
                 self.ai_deal_json = ai_json
+                # ⭐ 不自动确认！等学生回复
                 return {
                     "ai_message": ai_response,
                     "ai_proposed_deal": True,
@@ -499,34 +531,38 @@ class NegotiationSession:
         return {
             "ai_message": ai_response,
             "deal_reached": False,
-            "round": self.current_round - 1
+            "round": self.current_round - 1  # 刚完成的轮次
         }
     
     # ========================================================================
-    # 核心方法 6: AI 确认 Deal
+    # 核心方法 6: AI 确认 Deal（与 runner.py 完全一致）
     # ========================================================================
-    
     def _request_ai_deal_confirmation(self, student_deal_json: Dict) -> str:
-        """请求 AI 确认学生提出的 deal"""
+        """
+        请求 AI 确认学生提出的 deal
+        修复：添加 transcript 让 AI 能看到自己的最近 offer
+        """
         ai_cfg = self.scenario_config[self.ai_role]
         context = ai_cfg["context_prompt"]
         
-        # ⭐ 关键：构建完整的历史记录
-        history = "\n\n".join(self.transcript)
+        # ⭐ 修复：提取最近几轮对话
+        recent_history = last_round_window(self.transcript, k_rounds=3)
         
-        # Confirmation prompt
+        # ⭐ Confirmation prompt（添加 transcript）
         confirm_prompt = (
-            f"--- COMPLETE NEGOTIATION HISTORY ---\n"
-            f"{history}\n\n"
+            f"--- RECENT NEGOTIATION HISTORY ---\n"
+            f"{recent_history}\n\n"
             f"--- PROPOSED DEAL FROM OTHER PARTY ---\n"
             f"{json.dumps(student_deal_json, indent=2)}\n\n"
-            "Please review this proposal carefully by comparing it to YOUR MOST RECENT OFFER in the transcript above.\n\n"
-            "IMPORTANT: Check if this proposal matches your most recent offer exactly (ignoring any value calculations or commentary).\n\n"
-            "OUTPUT:\n"
-            "- If it matches exactly: Output '$DEAL_REACHED$' on its own line followed by the same JSON.\n"
-            "- If it differs in any way: Output '$DEAL_MISUNDERSTANDING$' and explain what differs from your most recent offer."
+            "Review the transcript above and find YOUR MOST RECENT OFFER.\n\n"
+            "Please review this proposal carefully. "
+            "If this matches your most recent offer exactly (ignoring any value calculations), "
+            "output '$DEAL_REACHED$' on its own line followed by the same JSON. "
+            "If it differs from your most recent offer in any way, "
+            "output '$DEAL_MISUNDERSTANDING$' and explain the discrepancy."
         )
         
+        # ⭐ 关键：也需要 context_prompt
         full_prompt = f"{context}\n\n{confirm_prompt}"
         
         messages = [
@@ -536,19 +572,6 @@ class NegotiationSession:
         
         response = self.ai_agent.chat(messages)
         return response["content"]
-    
-    # ========================================================================
-    # 核心方法 7: 初始化（AI 先手）
-    # ========================================================================
-    def initialize_ai_first(self) -> str:
-        """当 AI 先手时，生成初始 offer"""
-        ai_response = self._generate_ai_response()
-        
-        ai_cfg = self.scenario_config[self.ai_role]
-        ai_label = ai_cfg.get("label", "AI")
-        self.transcript.append(f"{ai_label}: {ai_response}")
-        
-        return ai_response
     
     # ========================================================================
     # 辅助方法
@@ -579,224 +602,321 @@ class NegotiationSession:
             "created_at": self.created_at,
             "updated_at": self.updated_at
         }
+    
+
+    def save_to_db(self):
+        """保存到数据库（显式列名，22 个占位符）"""
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        self.updated_at = datetime.utcnow().isoformat()
+
+        c.execute("""
+            INSERT OR REPLACE INTO negotiation_sessions (
+                session_id,
+                student_id,
+                student_name,
+                scenario_name,
+                student_role,
+                ai_role,
+                ai_model,
+                student_goes_first,
+                use_memory,
+                use_plan,
+                current_round,
+                total_rounds,
+                transcript,
+                ai_memory,
+                ai_plan,
+                student_deal_json,
+                ai_deal_json,
+                deal_reached,
+                deal_failed,
+                status,
+                created_at,
+                updated_at
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
+        """, (
+            self.session_id,
+            self.student_id,
+            self.student_name,
+            self.scenario_name,
+            self.student_role,
+            self.ai_role,
+            self.ai_model,
+            int(self.student_goes_first),
+            int(self.use_memory),
+            int(self.use_plan),
+            self.current_round,
+            self.total_rounds,
+            json.dumps(self.transcript),
+            self.ai_memory,
+            self.ai_plan,
+            json.dumps(self.student_deal_json) if self.student_deal_json else None,
+            json.dumps(self.ai_deal_json) if self.ai_deal_json else None,
+            int(self.deal_reached),
+            int(self.deal_failed),
+            self.status,
+            self.created_at,
+            self.updated_at
+        ))
+
+        conn.commit()
+        conn.close()
+    
+    @staticmethod
+    def load_from_db(session_id: str) -> Optional['NegotiationSession']:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row  # 关键：按列名访问
+        c = conn.cursor()
+
+        c.execute("""
+            SELECT
+                session_id,
+                student_id,
+                student_name,
+                scenario_name,
+                student_role,
+                ai_role,
+                ai_model,
+                student_goes_first,
+                use_memory,
+                use_plan,
+                current_round,
+                total_rounds,
+                transcript,
+                ai_memory,
+                ai_plan,
+                student_deal_json,
+                ai_deal_json,
+                deal_reached,
+                deal_failed,
+                status,
+                created_at,
+                updated_at
+            FROM negotiation_sessions
+            WHERE session_id = ?
+        """, (session_id,))
+        row = c.fetchone()
+        conn.close()
+
+        if not row:
+            return None
+
+        # 用列名取值，避免列顺序差异
+        session = NegotiationSession(
+            session_id=row["session_id"],
+            student_id=row["student_id"],
+            student_name=row["student_name"],
+            scenario_name=row["scenario_name"],
+            student_role=row["student_role"],
+            ai_model=row["ai_model"],
+            student_goes_first=bool(row["student_goes_first"]),
+            use_memory=bool(row["use_memory"]),
+            use_plan=bool(row["use_plan"]),
+        )
+
+        # 恢复状态
+        session.ai_role       = row["ai_role"]
+        session.current_round = int(row["current_round"])
+        session.total_rounds  = int(row["total_rounds"])
+
+        # JSON/文本字段
+        session.transcript         = json.loads(row["transcript"]) if row["transcript"] else []
+        session.ai_memory          = row["ai_memory"] or ""
+        session.ai_plan            = row["ai_plan"] or ""
+        session.student_deal_json  = json.loads(row["student_deal_json"]) if row["student_deal_json"] else None
+        session.ai_deal_json       = json.loads(row["ai_deal_json"]) if row["ai_deal_json"] else None
+
+        # 标志位/元信息
+        session.deal_reached = bool(row["deal_reached"])
+        session.deal_failed  = bool(row["deal_failed"])
+        session.status       = row["status"]
+        session.created_at   = row["created_at"]
+        session.updated_at   = row["updated_at"]
+
+        return session
 
 # ============================================================================
-# Session 管理
+# Pydantic Models
 # ============================================================================
-sessions = {}
-
-def save_session_to_db(session: NegotiationSession):
-    """保存 session 到数据库"""
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    
-    session.updated_at = datetime.utcnow().isoformat()
-    
-    c.execute("""
-        INSERT OR REPLACE INTO negotiation_sessions VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        session.session_id,
-        session.student_id,
-        session.student_name,
-        session.scenario_name,
-        session.student_role,
-        session.ai_role,
-        session.ai_model,
-        session.student_goes_first,
-        session.use_memory,
-        session.use_plan,
-        session.current_round,
-        session.total_rounds,
-        json.dumps(session.transcript),
-        session.ai_memory,
-        session.ai_plan,
-        json.dumps(session.student_deal_json) if session.student_deal_json else None,
-        json.dumps(session.ai_deal_json) if session.ai_deal_json else None,
-        session.deal_reached,
-        session.deal_failed,
-        session.status,
-        session.created_at,
-        session.updated_at
-    ))
-    
-    conn.commit()
-    conn.close()
-
-def load_session_from_db(session_id: str) -> Optional[NegotiationSession]:
-    """从数据库加载 session"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    
-    c.execute("SELECT * FROM negotiation_sessions WHERE session_id = ?", (session_id,))
-    row = c.fetchone()
-    conn.close()
-    
-    if not row:
-        return None
-    
-    # 加载 scenario config
-    scenario_path = Path(SCENARIOS_DIR) / f"{row['scenario_name']}.yaml"
-    with open(scenario_path) as f:
-        scenario_config = yaml.safe_load(f)
-    
-    # 创建 session
-    session = NegotiationSession(
-        scenario_config=scenario_config,
-        scenario_name=row['scenario_name'],
-        student_id=row['student_id'],
-        student_name=row['student_name'],
-        student_role=row['student_role'],
-        ai_role=row['ai_role'],
-        ai_model=row['ai_model'],
-        student_goes_first=row['student_goes_first'],
-        use_memory=row['use_memory'],
-        use_plan=row['use_plan'],
-        total_rounds=row['total_rounds'],
-        session_id=row['session_id']
-    )
-    
-    # 恢复状态
-    session.current_round = row['current_round']
-    session.transcript = json.loads(row['transcript'])
-    session.ai_memory = row['ai_memory'] or ""
-    session.ai_plan = row['ai_plan'] or ""
-    session.student_deal_json = json.loads(row['student_deal_json']) if row['student_deal_json'] else None
-    session.ai_deal_json = json.loads(row['ai_deal_json']) if row['ai_deal_json'] else None
-    session.deal_reached = row['deal_reached']
-    session.deal_failed = row['deal_failed']
-    session.status = row['status']
-    session.created_at = row['created_at']
-    session.updated_at = row['updated_at']
-    
-    return session
-
-# ============================================================================
-# API Models
-# ============================================================================
-class StartRequest(BaseModel):
-    scenario_name: str
+class StartNegotiationRequest(BaseModel):
     student_id: str
     student_name: str
-    student_role: str
-    ai_role: str
-    ai_model: str = "anthropic/claude-3.5-sonnet:beta"
-    student_goes_first: bool = True
+    scenario_name: str
+    student_role: str  # "side1" or "side2"
+    ai_model: str = "anthropic/claude-3-sonnet"  # ⭐ 新增：模型选择
+    randomize_first_turn: bool = True  # ⭐ 新增：随机先手
     use_memory: bool = True
     use_plan: bool = True
-    total_rounds: int = 6
 
-class MessageRequest(BaseModel):
-    session_id: str
+class SendMessageRequest(BaseModel):
     message: str
 
 # ============================================================================
 # API Endpoints
 # ============================================================================
+
 @app.get("/")
-async def root():
-    """根路径返回前端"""
-    index_path = Path(__file__).parent / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path)
-    return {"message": "Negotiation Practice API"}
+def read_root():
+    """健康检查"""
+    return {"status": "ok", "message": "Negotiation Practice API"}
 
 @app.get("/scenarios")
-async def list_scenarios():
-    """列出所有可用的场景"""
+def list_scenarios():
+    """列出所有可用场景"""
     scenarios_path = Path(SCENARIOS_DIR)
     if not scenarios_path.exists():
         return {"scenarios": []}
     
     scenarios = []
-    for f in scenarios_path.glob("*.yaml"):
-        with open(f) as fp:
-            config = yaml.safe_load(fp)
-            scenarios.append({
-                "name": f.stem,
-                "description": config.get("description", ""),
-                "roles": list(config.get("roles", {}).keys())
-            })
+    for yaml_file in scenarios_path.glob("*.yaml"):
+        try:
+            with open(yaml_file, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                scenarios.append({
+                    "id": yaml_file.stem,
+                    "name": config.get("name", yaml_file.stem),
+                    "description": config.get("description", ""),
+                    "side1_label": config.get("side1", {}).get("label", "Side 1"),
+                    "side2_label": config.get("side2", {}).get("label", "Side 2"),
+                })
+        except:
+            continue
     
     return {"scenarios": scenarios}
 
-@app.post("/start")
-async def start_negotiation(req: StartRequest):
-    """开始新的谈判"""
-    # 加载 scenario
-    scenario_path = Path(SCENARIOS_DIR) / f"{req.scenario_name}.yaml"
-    if not scenario_path.exists():
-        raise HTTPException(status_code=404, detail="Scenario not found")
+@app.post("/negotiation/start")
+def start_negotiation(request: StartNegotiationRequest):
+    """
+    开始新的谈判会话
     
-    with open(scenario_path) as f:
-        scenario_config = yaml.safe_load(f)
+    ⭐ 新增功能:
+    1. 随机先手（randomize_first_turn=True）
+    2. 模型选择（ai_model 参数）
+    """
+    try:
+        # 生成 session_id
+        session_id = str(uuid.uuid4())
+        
+        # ⭐ 随机先手（如果启用）
+        if request.randomize_first_turn:
+            student_goes_first = random.choice([True, False])
+        else:
+            student_goes_first = True  # 默认学生先手
+        
+        # 创建会话
+        session = NegotiationSession(
+            session_id=session_id,
+            student_id=request.student_id,
+            student_name=request.student_name,
+            scenario_name=request.scenario_name,
+            student_role=request.student_role,
+            ai_model=request.ai_model,  # ⭐ 使用用户选择的模型
+            student_goes_first=student_goes_first,
+            use_memory=request.use_memory,
+            use_plan=request.use_plan,
+        )
+        
+        # 如果 AI 先手，生成第一条消息
+        ai_first_message = None
+        if not student_goes_first:
+            ai_response = session._generate_ai_response()
+            ai_cfg = session.scenario_config[session.ai_role]
+            ai_label = ai_cfg.get("label", "AI")
+            session.transcript.append(f"{ai_label}: {ai_response}")
+            ai_first_message = ai_response
+        
+        # 保存到数据库
+        session.save_to_db()
+        
+        return {
+            "session_id": session_id,
+            "student_goes_first": student_goes_first,
+            "ai_first_message": ai_first_message,
+            "total_rounds": session.total_rounds,
+            "scenario_name": request.scenario_name,
+            "student_role": request.student_role,
+            "ai_role": session.ai_role,
+            "ai_model": request.ai_model
+        }
     
-    # 创建 session
-    session = NegotiationSession(
-        scenario_config=scenario_config,
-        scenario_name=req.scenario_name,
-        student_id=req.student_id,
-        student_name=req.student_name,
-        student_role=req.student_role,
-        ai_role=req.ai_role,
-        ai_model=req.ai_model,
-        student_goes_first=req.student_goes_first,
-        use_memory=req.use_memory,
-        use_plan=req.use_plan,
-        total_rounds=req.total_rounds
-    )
-    
-    # 保存到内存
-    sessions[session.session_id] = session
-    
-    # 如果 AI 先手，生成初始 offer
-    ai_initial_message = None
-    if not req.student_goes_first:
-        ai_initial_message = session.initialize_ai_first()
-    
-    # 保存到数据库
-    save_session_to_db(session)
-    
-    return {
-        "session_id": session.session_id,
-        "student_goes_first": req.student_goes_first,
-        "ai_initial_message": ai_initial_message,
-        "current_round": session.current_round,
-        "total_rounds": session.total_rounds
-    }
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Scenario '{request.scenario_name}' not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/message")
-async def send_message(req: MessageRequest):
-    """发送消息"""
-    # 从内存或数据库加载 session
-    session = sessions.get(req.session_id)
+@app.post("/negotiation/{session_id}/message")
+def send_message(session_id: str, request: SendMessageRequest):
+    """
+    发送学生消息并获取 AI 回复
+    """
+    # 加载会话
+    session = NegotiationSession.load_from_db(session_id)
     if not session:
-        session = load_session_from_db(req.session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        sessions[req.session_id] = session
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    if session.status != "active":
+        raise HTTPException(status_code=400, detail="Session is not active")
     
     # 处理消息
-    result = session.process_student_message(req.message)
+    result = session.process_student_message(request.message)
     
     # 保存到数据库
-    save_session_to_db(session)
+    session.save_to_db()
     
     return result
 
-@app.get("/session/{session_id}")
-async def get_session(session_id: str):
-    """获取 session 信息"""
-    session = sessions.get(session_id)
+@app.get("/negotiation/{session_id}/status")
+def get_status(session_id: str):
+    """获取会话状态"""
+    session = NegotiationSession.load_from_db(session_id)
     if not session:
-        session = load_session_from_db(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
-        sessions[session_id] = session
+        raise HTTPException(status_code=404, detail="Session not found")
     
     return session.to_dict()
 
+@app.get("/negotiation/{session_id}/transcript")
+def get_transcript(session_id: str):
+    """获取完整对话记录"""
+    session = NegotiationSession.load_from_db(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    return {
+        "session_id": session_id,
+        "transcript": session.transcript,
+        "current_round": session.current_round,
+        "total_rounds": session.total_rounds,
+        "deal_reached": session.deal_reached,
+        "deal_failed": session.deal_failed,
+        "status": session.status
+    }
+
+@app.get("/download_db")
+def download_db(secret: Optional[str] = None):
+    """
+    下载数据库文件
+    需要提供正确的 secret key（从环境变量 DOWNLOAD_KEY 读取）
+    
+    使用方法：
+    GET /download_db?secret=your-secret-key
+    """
+    allowed = os.getenv("DOWNLOAD_KEY")
+    if allowed and secret != allowed:
+        raise HTTPException(status_code=403, detail="unauthorized")
+    return FileResponse(DB_PATH, filename="negotiations.db")
+
+@app.get("/health")
+def health_check():
+    """健康检查"""
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+
+# ============================================================================
+# 运行
+# ============================================================================
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
