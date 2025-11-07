@@ -600,15 +600,41 @@ class NegotiationSession:
             "updated_at": self.updated_at
         }
     
+
     def save_to_db(self):
-        """保存到数据库"""
+        """保存到数据库（显式列名，22 个占位符）"""
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        
+
         self.updated_at = datetime.utcnow().isoformat()
-        
+
         c.execute("""
-            INSERT OR REPLACE INTO negotiation_sessions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO negotiation_sessions (
+                session_id,
+                student_id,
+                student_name,
+                scenario_name,
+                student_role,
+                ai_role,
+                ai_model,
+                student_goes_first,
+                use_memory,
+                use_plan,
+                current_round,
+                total_rounds,
+                transcript,
+                ai_memory,
+                ai_plan,
+                student_deal_json,
+                ai_deal_json,
+                deal_reached,
+                deal_failed,
+                status,
+                created_at,
+                updated_at
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
         """, (
             self.session_id,
             self.student_id,
@@ -617,9 +643,9 @@ class NegotiationSession:
             self.student_role,
             self.ai_role,
             self.ai_model,
-            self.student_goes_first,
-            self.use_memory,
-            self.use_plan,
+            int(self.student_goes_first),
+            int(self.use_memory),
+            int(self.use_plan),
             self.current_round,
             self.total_rounds,
             json.dumps(self.transcript),
@@ -627,13 +653,13 @@ class NegotiationSession:
             self.ai_plan,
             json.dumps(self.student_deal_json) if self.student_deal_json else None,
             json.dumps(self.ai_deal_json) if self.ai_deal_json else None,
-            self.deal_reached,
-            self.deal_failed,
+            int(self.deal_reached),
+            int(self.deal_failed),
             self.status,
             self.created_at,
             self.updated_at
         ))
-        
+
         conn.commit()
         conn.close()
     
