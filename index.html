@@ -230,84 +230,91 @@
             color: var(--error-red);
             padding: 12px;
             border-radius: 8px;
+            border: 1px solid #fcc;
             margin-top: 12px;
-            border-left: 3px solid var(--error-red);
         }
 
         /* ===================================================================
-           Chat Screen Layout
+           Chat Screen - Two Column Layout
            =================================================================== */
         #chatScreen {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 400px;
             gap: 20px;
-            height: calc(100vh - 160px);
-            min-height: 600px;
+            height: calc(100vh - 100px);
         }
 
-        /* Left Side - Chat Area (70%) */
-        .chat-area {
-            flex: 0 0 70%;
-            display: flex;
-            flex-direction: column;
+        /* ===================================================================
+           Left Column - Chat Interface
+           =================================================================== */
+        .chat-main {
             background: var(--bg-white);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
         .chat-header {
-            background: var(--bg-gray);
-            padding: 16px 20px;
+            padding: 20px;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: var(--bg-white);
         }
 
-        .chat-header-info {
+        .chat-header h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .chat-info {
             display: flex;
-            align-items: center;
             gap: 20px;
-        }
-
-        .chat-header-info > div {
             font-size: 14px;
-        }
-
-        .chat-header-info strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .chat-header-info span {
             color: var(--text-secondary);
         }
 
-        .round-badge {
-            background: var(--primary-blue);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 13px;
+        .chat-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 600;
         }
 
+        .status-badge.active {
+            background: var(--deal-bg);
+            color: var(--success-green);
+        }
+
+        .status-badge.completed {
+            background: var(--student-bg);
+            color: var(--primary-blue);
+        }
+
+        /* ===================================================================
+           Messages Area
+           =================================================================== */
         .messages-container {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            scroll-behavior: smooth;
+            background: var(--bg-gray);
         }
 
-        /* Message Styles */
         .message {
-            margin-bottom: 16px;
             display: flex;
             gap: 12px;
-            animation: fadeIn 0.3s ease-in;
+            margin-bottom: 16px;
+            animation: messageSlide 0.3s ease-out;
         }
 
-        @keyframes fadeIn {
+        @keyframes messageSlide {
             from {
                 opacity: 0;
                 transform: translateY(10px);
@@ -316,14 +323,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .message.student {
-            flex-direction: row-reverse;
-        }
-
-        .message.system {
-            justify-content: center;
         }
 
         .message-avatar {
@@ -335,208 +334,246 @@
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
-        }
-
-        .message.student .message-avatar {
-            background: var(--primary-blue);
-            color: white;
-        }
-
-        .message.ai .message-avatar {
-            background: var(--success-green);
-            color: white;
-        }
-
-        .message.system .message-avatar {
-            background: var(--warning-yellow);
-            color: white;
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
         }
 
         .message-content {
-            max-width: 70%;
+            flex: 1;
+            background: var(--bg-white);
             padding: 12px 16px;
-            border-radius: var(--radius);
-            font-size: 14px;
-            line-height: 1.5;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-text {
+            line-height: 1.6;
+            white-space: pre-wrap;
             word-wrap: break-word;
         }
 
         .message.student .message-content {
             background: var(--student-bg);
-            border-bottom-right-radius: 4px;
+            border-left: 3px solid var(--primary-blue);
         }
 
         .message.ai .message-content {
             background: var(--ai-bg);
-            border-bottom-left-radius: 4px;
+            border-left: 3px solid var(--success-green);
         }
 
         .message.system .message-content {
             background: var(--system-bg);
-            text-align: center;
-            font-style: italic;
-            max-width: 80%;
+            border-left: 3px solid var(--warning-yellow);
         }
 
         .message.deal .message-content {
             background: var(--deal-bg);
-            border: 2px solid var(--success-green);
+            border-left: 3px solid var(--success-green);
         }
 
-        .message-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .message-text pre {
+        .message pre {
             background: rgba(0, 0, 0, 0.05);
-            padding: 8px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 6px;
             overflow-x: auto;
-            font-size: 12px;
-            margin: 8px 0;
-        }
-
-        .message-text code {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 2px 6px;
-            border-radius: 3px;
             font-size: 13px;
-            font-family: 'Courier New', monospace;
+            margin-top: 8px;
         }
 
-        /* Input Area */
+        /* ===================================================================
+           Input Area
+           =================================================================== */
         .input-area {
+            padding: 16px 20px;
             border-top: 1px solid var(--border-color);
-            padding: 20px;
             background: var(--bg-white);
         }
 
-        .input-wrapper {
+        .input-controls {
             display: flex;
             gap: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        #messageInput {
+        .input-controls textarea {
             flex: 1;
-            min-height: 100px;
+            min-height: 60px;
             max-height: 200px;
             resize: vertical;
-            font-size: 14px;
-            line-height: 1.5;
         }
 
-        .input-actions {
+        .input-buttons {
             display: flex;
+            flex-direction: column;
             gap: 8px;
-            align-items: center;
+        }
+
+        .input-buttons button {
+            white-space: nowrap;
+            padding: 8px 16px;
         }
 
         .input-hint {
             font-size: 12px;
             color: var(--text-secondary);
-        }
-
-        .loading-indicator {
             text-align: center;
-            padding: 16px;
-            color: var(--text-secondary);
-            font-style: italic;
         }
 
-        .loading-indicator::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        /* Right Side - Info Panel (30%) */
-        .info-panel {
-            flex: 0 0 30%;
+        /* ===================================================================
+           ⭐ NEW: Right Panel - Three Section Layout
+           =================================================================== */
+        .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 0;
+            height: 100%;
+            overflow: hidden;
         }
 
-        .info-card {
+        /* Section 1: Session Info (Fixed at top) */
+        .sidebar-section.session-info {
             background: var(--bg-white);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow);
+            flex-shrink: 0;
         }
 
-        .info-card h3 {
+        /* Section 2: Your Role (Scrollable) */
+        .sidebar-section.role-info {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-top: 12px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Section 3: How to Accept (Fixed at bottom) */
+        .sidebar-section.accept-deal {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section h3 {
             font-size: 16px;
             margin-bottom: 12px;
             color: var(--text-primary);
-            border-bottom: 2px solid var(--primary-blue);
-            padding-bottom: 8px;
-        }
-
-        .info-row {
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-section h4 {
             font-size: 14px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-row .label {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .info-row .value {
-            color: var(--text-primary);
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--primary-blue);
             font-weight: 600;
         }
 
-        .tips-list {
-            list-style: none;
-            padding: 0;
+        .sidebar-section p, .sidebar-section ul {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
         }
 
-        .tips-list li {
-            padding: 8px 0;
-            padding-left: 24px;
-            position: relative;
+        .sidebar-section ul {
+            padding-left: 20px;
+        }
+
+        .sidebar-section li {
+            margin-bottom: 6px;
+        }
+
+        .sidebar-section code {
+            background: var(--bg-gray);
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 13px;
-            line-height: 1.5;
+            font-family: 'Courier New', monospace;
         }
 
-        .tips-list li::before {
-            content: '💡';
-            position: absolute;
-            left: 0;
-        }
-
-        .deal-info {
-            background: var(--deal-bg);
+        .sidebar-section .example-box {
+            background: var(--bg-gray);
             padding: 12px;
             border-radius: 8px;
-            border-left: 3px solid var(--success-green);
+            margin-top: 8px;
             font-size: 13px;
-            line-height: 1.5;
+            border-left: 3px solid var(--primary-blue);
         }
 
-        .deal-info strong {
-            display: block;
-            margin-bottom: 4px;
+        /* ⭐ NEW: Role Info specific styles */
+        .batna-badge {
+            display: inline-block;
+            background: var(--warning-yellow);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .role-content {
+            background: var(--bg-gray);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* ⭐ NEW: Collapsible section for "How to Accept" */
+        .accept-deal summary {
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .accept-deal summary::before {
+            content: '▶';
+            transition: transform 0.2s;
+        }
+
+        .accept-deal details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .success-text {
             color: var(--success-green);
+        }
+
+        .warning-text {
+            color: var(--warning-yellow);
+        }
+
+        .sidebar-actions {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-actions button {
+            width: 100%;
         }
 
         /* ===================================================================
@@ -544,77 +581,72 @@
            =================================================================== */
         @media (max-width: 1200px) {
             #chatScreen {
-                flex-direction: column;
-                height: auto;
-            }
-
-            .chat-area {
-                flex: none;
-                height: 60vh;
-                min-height: 500px;
-            }
-
-            .info-panel {
-                flex: none;
+                grid-template-columns: 1fr 350px;
             }
         }
 
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 10px;
+        @media (max-width: 900px) {
+            #chatScreen {
+                grid-template-columns: 1fr;
+                height: auto;
             }
 
-            #scenarioScreen {
-                padding: 20px;
+            .sidebar {
+                order: -1;
+                margin-bottom: 20px;
             }
 
-            .chat-header-info {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .message-content {
-                max-width: 85%;
-            }
-
-            .input-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .input-actions button {
-                width: 100%;
+            .chat-main {
+                height: 600px;
             }
         }
 
         /* ===================================================================
-           Utility Classes
+           Loading Animation
            =================================================================== */
-        .text-center {
-            text-align: center;
+        .loading-dots {
+            display: inline-block;
         }
 
-        .mb-8 {
-            margin-bottom: 8px;
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
         }
 
-        .mb-16 {
-            margin-bottom: 16px;
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
         }
 
-        .mt-16 {
-            margin-top: 16px;
+        /* ===================================================================
+           Scrollbar Styling
+           =================================================================== */
+        .messages-container::-webkit-scrollbar,
+        .role-content::-webkit-scrollbar,
+        .sidebar-section.role-info::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .success-text {
-            color: var(--success-green);
-            font-weight: 600;
+        .messages-container::-webkit-scrollbar-track,
+        .role-content::-webkit-scrollbar-track,
+        .sidebar-section.role-info::-webkit-scrollbar-track {
+            background: var(--bg-gray);
+            border-radius: 4px;
         }
 
-        .error-text {
-            color: var(--error-red);
-            font-weight: 600;
+        .messages-container::-webkit-scrollbar-thumb,
+        .role-content::-webkit-scrollbar-thumb,
+        .sidebar-section.role-info::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover,
+        .role-content::-webkit-scrollbar-thumb:hover,
+        .sidebar-section.role-info::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
         }
     </style>
 </head>
@@ -623,220 +655,199 @@
         <!-- App Header -->
         <div class="app-header">
             <h1>🤝 Negotiation Practice System</h1>
-            <p>Practice your negotiation skills with AI-powered scenarios</p>
+            <p>Develop your negotiation skills with AI-powered training scenarios</p>
         </div>
 
-        <!-- ===============================================================
-             SCENARIO SELECTION SCREEN
-             =============================================================== -->
+        <!-- ===================================================================
+             Scenario Selection Screen
+             =================================================================== -->
         <div id="scenarioScreen">
             <div class="form-section">
-                <h3>👤 Student Information</h3>
+                <h3>📋 Student Information</h3>
                 
                 <div class="form-group">
-                    <label for="studentId">Student ID *</label>
-                    <input type="text" id="studentId" placeholder="e.g., student123" required>
-                    <div class="form-hint">Enter your unique student identifier</div>
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="Enter your student ID" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="studentName">Full Name *</label>
-                    <input type="text" id="studentName" placeholder="e.g., John Doe" required>
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" placeholder="Enter your full name" required>
                 </div>
             </div>
 
             <div class="form-section">
-                <h3>🎭 Scenario Setup</h3>
+                <h3>🎯 Negotiation Scenario</h3>
                 
                 <div class="form-group">
-                    <label for="scenarioSelect">Choose Scenario *</label>
-                    <select id="scenarioSelect">
-                        <option value="">Loading scenarios...</option>
+                    <label for="scenarioSelect">Select Scenario</label>
+                    <select id="scenarioSelect" required>
+                        <option value="">-- Choose a scenario --</option>
                     </select>
-                    <div id="scenarioDescription" class="scenario-description hidden">
-                        Select a scenario to see its description
-                    </div>
+                    <div class="scenario-description" id="scenarioDescription" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="roleSelect">Your Role *</label>
-                    <select id="roleSelect">
-                        <option value="">Select a scenario first</option>
+                    <label for="roleSelect">Your Role</label>
+                    <select id="roleSelect" required disabled>
+                        <option value="">-- Select scenario first --</option>
                     </select>
-                    <div id="roleInfo" class="role-info hidden">
-                        Role information will appear here
-                    </div>
+                    <div class="role-info" id="roleInfo" style="display: none;"></div>
                 </div>
             </div>
 
             <div class="form-section">
-                <h3>⚙️ Advanced Settings</h3>
-                
+                <h3>🤖 AI Configuration</h3>        
+
                 <div class="form-group">
                     <label for="modelSelect">AI Model</label>
                     <select id="modelSelect">
-                        <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet (Recommended)</option>
-                        <option value="anthropic/claude-3-opus">Claude 3 Opus (Most Powerful)</option>
-                        <option value="openai/gpt-4">GPT-4</option>
-                        <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+                        <option value="anthropic/claude-opus-4.1">Claude Opus 4.1</option>
+                        <option value="openai/gpt-5" selected>GPT-5</option>
+                        <option value="openai/gpt-4.1">GPT-4.1</option>
+                        <option value="x-ai/grok-3">Grok-3 (xAI)</option>
+                        <option value="google/gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="meta-llama/llama-3.2-90b-vision-instruct">Llama 3.2 90B Vision</option>
                     </select>
                     <div class="form-hint">Choose the AI model for negotiation</div>
                 </div>
 
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="randomFirstTurn" checked>
-                        <label for="randomFirstTurn">Randomize who goes first</label>
-                    </div>
-                    <div class="form-hint">If checked, 50% chance AI goes first</div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="randomFirstTurn" checked>
+                    <label for="randomFirstTurn">Randomize who goes first</label>
+                </div>
+                <div class="form-hint">When enabled, the system will randomly decide if you or the AI goes first</div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useMemory" checked>
+                    <label for="useMemory">Enable AI Memory (tracks negotiation state)</label>
                 </div>
 
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="useMemory" checked>
-                        <label for="useMemory">Enable AI Memory (tracks negotiation patterns)</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="usePlan" checked>
-                        <label for="usePlan">Enable AI Planning (strategic thinking)</label>
-                    </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="usePlan" checked>
+                    <label for="usePlan">Enable AI Strategic Planning</label>
                 </div>
             </div>
 
             <button id="startBtn" class="btn-primary">Start Negotiation</button>
             
-            <div id="startError" class="error-message hidden"></div>
-            <div id="loadingMessage" class="loading hidden">Starting negotiation...</div>
+            <div id="loadingMessage" class="loading hidden">
+                <span class="loading-dots">Starting negotiation</span>
+            </div>
+            
+            <div id="errorMessage" class="error-message hidden"></div>
         </div>
 
-        <!-- ===============================================================
-             CHAT SCREEN
-             =============================================================== -->
+        <!-- ===================================================================
+             Chat Screen (Two-Column Layout)
+             =================================================================== -->
         <div id="chatScreen" class="hidden">
-            <!-- Left Side: Chat Area -->
-            <div class="chat-area">
+            <!-- Left Column: Chat Interface -->
+            <div class="chat-main">
+                <!-- Chat Header -->
                 <div class="chat-header">
-                    <div class="chat-header-info">
-                        <div>
-                            <strong>Scenario:</strong> 
-                            <span id="currentScenario">--</span>
+                    <h2>💬 Negotiation Session</h2>
+                    <div class="chat-info">
+                        <div class="chat-info-item">
+                            <span>Round:</span>
+                            <strong id="roundDisplay">1/10</strong>
                         </div>
-                        <div>
-                            <strong>Your Role:</strong> 
-                            <span id="currentRole">--</span>
-                        </div>
-                        <div class="round-badge">
-                            Round <span id="currentRound">1</span> / <span id="totalRoundsDisplay">10</span>
+                        <div class="chat-info-item">
+                            <span>Status:</span>
+                            <span id="statusDisplay" class="status-badge active">Active</span>
                         </div>
                     </div>
-                    <button id="resetBtn" class="btn-secondary">🔄 New Session</button>
                 </div>
 
+                <!-- Messages Container -->
                 <div class="messages-container" id="messagesContainer">
-                    <!-- Messages will be dynamically inserted here -->
+                    <!-- Messages will be added here dynamically -->
                 </div>
 
-                <div id="loadingIndicator" class="loading-indicator hidden">
-                    AI is thinking
-                </div>
-
+                <!-- Input Area -->
                 <div class="input-area">
-                    <div class="input-wrapper">
+                    <div class="input-controls">
                         <textarea 
                             id="messageInput" 
-                            placeholder="Type your message here... (Tip: Press Ctrl/Cmd + Enter to send quickly)"
-                            disabled
+                            placeholder="Type your negotiation message here..."
+                            rows="3"
                         ></textarea>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <button id="sendBtn" class="btn-primary" disabled>Send</button>
-                            <button id="endBtn" class="btn-secondary" disabled>End</button>
+                        <div class="input-buttons">
+                            <button id="sendBtn" class="btn-primary">Send</button>
+                            <button id="endBtn" class="btn-danger">End</button>
                         </div>
                     </div>
-                    <div class="input-actions">
-                        <div class="input-hint">
-                            💡 <strong>Keyboard shortcut:</strong> Ctrl/Cmd + Enter to send
-                        </div>
+                    <div class="input-hint">
+                        Press <strong>Ctrl/Cmd + Enter</strong> to send quickly
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Info Panel -->
-            <div class="info-panel">
-                <!-- Session Info Card -->
-                <div class="info-card">
-                    <h3>📊 Session Info</h3>
-                    <div class="info-row">
-                        <span class="label">Session ID</span>
-                        <span class="value" id="sessionId">--</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Student</span>
-                        <span class="value" id="studentNameDisplay">--</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">AI Model</span>
-                        <span class="value" id="aiModelDisplay">--</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Status</span>
-                        <span class="value" id="statusDisplay">Active</span>
+            <!-- ⭐ NEW: Right Column - Three Section Layout -->
+            <div class="sidebar">
+                <!-- Section 1: Session Info (Fixed) -->
+                <div class="sidebar-section session-info">
+                    <h3>📊 Session Information</h3>
+                    <p><strong>Scenario:</strong> <span id="sidebarScenario">-</span></p>
+                    <p><strong>Your Role:</strong> <span id="sidebarRole">-</span></p>
+                    <p><strong>AI Model:</strong> <span id="sidebarModel">-</span></p>
+                    
+                    <div class="sidebar-actions">
+                        <button id="newSessionBtn" class="btn-secondary">New Session</button>
                     </div>
                 </div>
 
-                <!-- Tips Card -->
-                <div class="info-card">
-                    <h3>💡 Negotiation Tips</h3>
-                    <ul class="tips-list">
-                        <li>Explore all issues before settling</li>
-                        <li>Look for trade-offs that create value</li>
-                        <li>Ask questions to understand priorities</li>
-                        <li>Consider your BATNA (Best Alternative)</li>
-                        <li>Build rapport while being strategic</li>
-                    </ul>
+                <!-- ⭐ Section 2: Your Role (Scrollable) -->
+                <div class="sidebar-section role-info">
+                    <h3>🎭 Your Role <span id="roleLabel" class="batna-badge">Loading...</span></h3>
+                    
+                    <h4>💰 Your BATNA</h4>
+                    <p id="batnaValue">Loading...</p>
+                    
+                    <h4>📋 Rules & Objectives</h4>
+                    <div class="role-content" id="systemPromptContent">Loading...</div>
+                    
+                    <h4>📖 Background & Priorities</h4>
+                    <div class="role-content" id="contextPromptContent">Loading...</div>
                 </div>
 
-                <!-- Deal Instructions Card -->
-                <div class="info-card">
-                    <h3>🤝 How to Accept a Deal</h3>
-                    <div class="deal-info">
-                        <strong>To accept a deal:</strong>
-                        Type <code>$DEAL_REACHED$</code> followed by the exact JSON terms.
-                        <br><br>
-                        <strong>Example:</strong>
-                        <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; margin-top: 8px; font-size: 11px;">$DEAL_REACHED$
-{
-  "issue1": "option_a",
-  "issue2": "option_b"
-}</pre>
-                    </div>
+                <!-- ⭐ Section 3: How to Accept (Fixed, Collapsible) -->
+                <div class="sidebar-section accept-deal">
+                    <details>
+                        <summary><h3>🤝 How to Accept a Deal</h3></summary>
+                        <div style="padding-top: 12px;">
+                            <p>To accept the AI's most recent offer, start your message with:</p>
+                            <div class="example-box">
+                                <code>$DEAL_REACHED$</code>
+                            </div>
+                            <p>Then immediately follow with the deal terms in JSON format (matching the scenario's schema).</p>
+                            
+                            <p style="margin-top: 12px;"><strong>To indicate no deal is possible:</strong></p>
+                            <div class="example-box">
+                                <code>$DEAL_FAILED$</code>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===================================================================
-         JAVASCRIPT
-         =================================================================== -->
     <script>
-        // ===================================================================
-        // Configuration
-        // ===================================================================
-        const API_BASE_URL = 'https://negotiation-backend-ut5t.onrender.com';
-        
         // ===================================================================
         // Global State
         // ===================================================================
+        const API_BASE = 'http://localhost:8000';
+        
+        let scenarios = [];
         let currentSessionId = null;
         let currentScenarioName = null;
         let currentStudentRole = null;
-        let availableScenarios = [];
         let isNegotiationActive = false;
 
         // ===================================================================
-        // DOM Elements
+        // DOM Elements Cache
         // ===================================================================
         const elements = {
             // Scenario Screen
@@ -852,8 +863,8 @@
             useMemory: document.getElementById('useMemory'),
             usePlan: document.getElementById('usePlan'),
             startBtn: document.getElementById('startBtn'),
-            startError: document.getElementById('startError'),
             loadingMessage: document.getElementById('loadingMessage'),
+            errorMessage: document.getElementById('errorMessage'),
             
             // Chat Screen
             chatScreen: document.getElementById('chatScreen'),
@@ -861,82 +872,77 @@
             messageInput: document.getElementById('messageInput'),
             sendBtn: document.getElementById('sendBtn'),
             endBtn: document.getElementById('endBtn'),
-            resetBtn: document.getElementById('resetBtn'),
-            loadingIndicator: document.getElementById('loadingIndicator'),
+            roundDisplay: document.getElementById('roundDisplay'),
+            statusDisplay: document.getElementById('statusDisplay'),
+            newSessionBtn: document.getElementById('newSessionBtn'),
             
-            // Info Display
-            currentScenario: document.getElementById('currentScenario'),
-            currentRole: document.getElementById('currentRole'),
-            currentRound: document.getElementById('currentRound'),
-            totalRoundsDisplay: document.getElementById('totalRoundsDisplay'),
-            sessionId: document.getElementById('sessionId'),
-            studentNameDisplay: document.getElementById('studentNameDisplay'),
-            aiModelDisplay: document.getElementById('aiModelDisplay'),
-            statusDisplay: document.getElementById('statusDisplay')
+            // Sidebar
+            sidebarScenario: document.getElementById('sidebarScenario'),
+            sidebarRole: document.getElementById('sidebarRole'),
+            sidebarModel: document.getElementById('sidebarModel'),
+            
+            // ⭐ NEW: Role Info Elements
+            roleLabel: document.getElementById('roleLabel'),
+            batnaValue: document.getElementById('batnaValue'),
+            systemPromptContent: document.getElementById('systemPromptContent'),
+            contextPromptContent: document.getElementById('contextPromptContent')
         };
 
         // ===================================================================
         // Initialization
         // ===================================================================
         async function init() {
-            console.log('Initializing application...');
             await loadScenarios();
-            setupEventListeners();
+            attachEventListeners();
         }
 
         // ===================================================================
-        // Load Available Scenarios from Backend
+        // Load Available Scenarios
         // ===================================================================
         async function loadScenarios() {
             try {
-                const response = await fetch(`${API_BASE_URL}/scenarios`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
+                const response = await fetch(`${API_BASE}/scenarios`);
                 const data = await response.json();
-                availableScenarios = data.scenarios || [];
+                scenarios = data.scenarios;
                 
-                console.log('Loaded scenarios:', availableScenarios);
-                
-                // Populate scenario dropdown
-                elements.scenarioSelect.innerHTML = '<option value="">-- Select a Scenario --</option>';
-                availableScenarios.forEach(scenario => {
-                    const option = document.createElement('option');
-                    option.value = scenario.id;
-                    option.textContent = scenario.name;
-                    elements.scenarioSelect.appendChild(option);
-                });
-                
+                populateScenarioSelect();
             } catch (error) {
                 console.error('Failed to load scenarios:', error);
-                elements.scenarioSelect.innerHTML = '<option value="">❌ Failed to load scenarios</option>';
-                showError('startError', `Failed to load scenarios: ${error.message}`);
+                showError('errorMessage', 'Failed to load scenarios. Please refresh the page.');
             }
         }
 
         // ===================================================================
-        // Event Listeners Setup
+        // Populate Scenario Dropdown
         // ===================================================================
-        function setupEventListeners() {
+        function populateScenarioSelect() {
+            elements.scenarioSelect.innerHTML = '<option value="">-- Choose a scenario --</option>';
+            
+            scenarios.forEach(scenario => {
+                const option = document.createElement('option');
+                option.value = scenario.id;
+                option.textContent = scenario.name;
+                option.dataset.side1 = scenario.side1_label;
+                option.dataset.side2 = scenario.side2_label;
+                elements.scenarioSelect.appendChild(option);
+            });
+        }
+
+        // ===================================================================
+        // Event Listeners
+        // ===================================================================
+        function attachEventListeners() {
             // Scenario selection
-            elements.scenarioSelect.addEventListener('change', handleScenarioChange);
+            elements.scenarioSelect.addEventListener('change', onScenarioChange);
+            elements.roleSelect.addEventListener('change', onRoleChange);
             
-            // Role selection
-            elements.roleSelect.addEventListener('change', handleRoleChange);
-            
-            // Start button
+            // Start negotiation
             elements.startBtn.addEventListener('click', startNegotiation);
             
-            // Send button
+            // Chat actions
             elements.sendBtn.addEventListener('click', sendMessage);
-            
-            // End button
             elements.endBtn.addEventListener('click', endNegotiation);
-            
-            // Reset button
-            elements.resetBtn.addEventListener('click', resetToScenarioScreen);
+            elements.newSessionBtn.addEventListener('click', resetToScenarioScreen);
             
             // Keyboard shortcuts
             elements.messageInput.addEventListener('keydown', handleKeyboardShortcut);
@@ -945,89 +951,71 @@
         // ===================================================================
         // Handle Scenario Selection Change
         // ===================================================================
-        function handleScenarioChange() {
-            const scenarioId = elements.scenarioSelect.value;
+        function onScenarioChange(e) {
+            const selectedOption = e.target.options[e.target.selectedIndex];
             
-            if (!scenarioId) {
-                elements.scenarioDescription.classList.add('hidden');
-                elements.roleSelect.innerHTML = '<option value="">Select a scenario first</option>';
-                elements.roleInfo.classList.add('hidden');
+            if (!selectedOption.value) {
+                elements.scenarioDescription.style.display = 'none';
+                elements.roleSelect.disabled = true;
+                elements.roleSelect.innerHTML = '<option value="">-- Select scenario first --</option>';
+                elements.roleInfo.style.display = 'none';
                 return;
             }
             
-            const scenario = availableScenarios.find(s => s.id === scenarioId);
+            // Show scenario description
+            elements.scenarioDescription.style.display = 'block';
+            elements.scenarioDescription.textContent = `Scenario: ${selectedOption.textContent}`;
             
-            if (scenario) {
-                // Show description
-                elements.scenarioDescription.textContent = scenario.description || 'No description available';
-                elements.scenarioDescription.classList.remove('hidden');
-                
-                // Populate role dropdown
-                elements.roleSelect.innerHTML = `
-                    <option value="">-- Select Your Role --</option>
-                    <option value="side1">${scenario.side1_label}</option>
-                    <option value="side2">${scenario.side2_label}</option>
-                `;
-            }
+            // Populate role dropdown
+            elements.roleSelect.disabled = false;
+            elements.roleSelect.innerHTML = `
+                <option value="">-- Choose your role --</option>
+                <option value="side1">${selectedOption.dataset.side1}</option>
+                <option value="side2">${selectedOption.dataset.side2}</option>
+            `;
         }
 
         // ===================================================================
         // Handle Role Selection Change
         // ===================================================================
-        function handleRoleChange() {
-            const roleValue = elements.roleSelect.value;
-            const scenarioId = elements.scenarioSelect.value;
+        function onRoleChange(e) {
+            const selectedOption = elements.scenarioSelect.options[elements.scenarioSelect.selectedIndex];
+            const role = e.target.value;
             
-            if (!roleValue || !scenarioId) {
-                elements.roleInfo.classList.add('hidden');
+            if (!role) {
+                elements.roleInfo.style.display = 'none';
                 return;
             }
             
-            const scenario = availableScenarios.find(s => s.id === scenarioId);
+            const roleLabel = role === 'side1' ? selectedOption.dataset.side1 : selectedOption.dataset.side2;
             
-            if (scenario) {
-                const roleLabel = roleValue === 'side1' ? scenario.side1_label : scenario.side2_label;
-                elements.roleInfo.innerHTML = `
-                    <strong>You will play:</strong> ${roleLabel}<br>
-                    <strong>AI will play:</strong> ${roleValue === 'side1' ? scenario.side2_label : scenario.side1_label}
-                `;
-                elements.roleInfo.classList.remove('hidden');
-            }
+            elements.roleInfo.style.display = 'block';
+            elements.roleInfo.innerHTML = `You will play as: <strong>${roleLabel}</strong>`;
         }
 
         // ===================================================================
         // Start Negotiation
         // ===================================================================
         async function startNegotiation() {
+            hideError('errorMessage');
+            
             // Validate inputs
             const studentId = elements.studentId.value.trim();
             const studentName = elements.studentName.value.trim();
-            const scenarioId = elements.scenarioSelect.value;
-            const role = elements.roleSelect.value;
+            const scenarioName = elements.scenarioSelect.value;
+            const studentRole = elements.roleSelect.value;
             
-            if (!studentId || !studentName) {
-                showError('startError', 'Please enter your Student ID and Name');
+            if (!studentId || !studentName || !scenarioName || !studentRole) {
+                showError('errorMessage', 'Please fill in all required fields');
                 return;
             }
-            
-            if (!scenarioId || !role) {
-                showError('startError', 'Please select a scenario and your role');
-                return;
-            }
-            
-            // Get settings
-            const aiModel = elements.modelSelect.value;
-            const randomFirst = elements.randomFirstTurn.checked;
-            const useMemory = elements.useMemory.checked;
-            const usePlan = elements.usePlan.checked;
             
             // Show loading
             elements.startBtn.disabled = true;
             elements.loadingMessage.classList.remove('hidden');
-            hideError('startError');
             
             try {
-                const response = await fetch(`${API_BASE_URL}/negotiation/start`, {
+                const response = await fetch(`${API_BASE}/negotiation/start`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1035,83 +1023,102 @@
                     body: JSON.stringify({
                         student_id: studentId,
                         student_name: studentName,
-                        scenario_name: scenarioId,
-                        student_role: role,
-                        ai_model: aiModel,
-                        randomize_first_turn: randomFirst,
-                        use_memory: useMemory,
-                        use_plan: usePlan
+                        scenario_name: scenarioName,
+                        student_role: studentRole,
+                        ai_model: elements.modelSelect.value,
+                        randomize_first_turn: elements.randomFirstTurn.checked,
+                        use_memory: elements.useMemory.checked,
+                        use_plan: elements.usePlan.checked
                     })
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to start negotiation');
                 }
                 
                 const data = await response.json();
-                console.log('Negotiation started:', data);
                 
-                // Store session info
+                // Save session info
                 currentSessionId = data.session_id;
-                currentScenarioName = scenarioId;
-                currentStudentRole = role;
+                currentScenarioName = scenarioName;
+                currentStudentRole = studentRole;
                 isNegotiationActive = true;
                 
+                // Update sidebar info
+                const selectedScenario = scenarios.find(s => s.id === scenarioName);
+                const roleLabel = studentRole === 'side1' ? selectedScenario.side1_label : selectedScenario.side2_label;
+                
+                elements.sidebarScenario.textContent = selectedScenario.name;
+                elements.sidebarRole.textContent = roleLabel;
+                elements.sidebarModel.textContent = elements.modelSelect.value;
+                
+                // ⭐ NEW: Load role information
+                await loadRoleInfo(currentSessionId);
+                
                 // Switch to chat screen
-                switchToChatScreen(data);
+                elements.scenarioScreen.classList.add('hidden');
+                elements.chatScreen.classList.remove('hidden');
+                
+                // Clear messages
+                elements.messagesContainer.innerHTML = '';
+                
+                // Show initial message
+                if (data.student_goes_first) {
+                    addSystemMessage(`Welcome, ${studentName}! You will go first. Start the negotiation by typing your opening message.`);
+                } else {
+                    addSystemMessage(`Welcome, ${studentName}! The AI will go first.`);
+                    
+                    // Show AI's first message
+                    if (data.ai_first_message) {
+                        addMessage('ai', data.ai_first_message);
+                    }
+                }
+                
+                // Update round display
+                elements.roundDisplay.textContent = `1/${data.total_rounds}`;
+                
+                // Focus on input
+                elements.messageInput.focus();
                 
             } catch (error) {
-                console.error('Failed to start negotiation:', error);
-                showError('startError', `Failed to start: ${error.message}`);
+                console.error('Error starting negotiation:', error);
+                showError('errorMessage', error.message);
                 elements.startBtn.disabled = false;
                 elements.loadingMessage.classList.add('hidden');
             }
         }
 
         // ===================================================================
-        // Switch to Chat Screen
+        // ⭐ NEW: Load Role Information
         // ===================================================================
-        function switchToChatScreen(sessionData) {
-            // Hide scenario screen
-            elements.scenarioScreen.classList.add('hidden');
-            
-            // Show chat screen
-            elements.chatScreen.classList.remove('hidden');
-            
-            // Update info display
-            const scenario = availableScenarios.find(s => s.id === currentScenarioName);
-            const roleLabel = currentStudentRole === 'side1' ? scenario.side1_label : scenario.side2_label;
-            
-            elements.currentScenario.textContent = scenario.name;
-            elements.currentRole.textContent = roleLabel;
-            elements.currentRound.textContent = '1';
-            elements.totalRoundsDisplay.textContent = sessionData.total_rounds || '10';
-            elements.sessionId.textContent = currentSessionId.substring(0, 8) + '...';
-            elements.studentNameDisplay.textContent = elements.studentName.value;
-            elements.aiModelDisplay.textContent = elements.modelSelect.options[elements.modelSelect.selectedIndex].text;
-            elements.statusDisplay.textContent = 'Active';
-            
-            // Clear messages
-            elements.messagesContainer.innerHTML = '';
-            
-            // Show who goes first
-            if (sessionData.student_goes_first) {
-                addSystemMessage('You will go first. Start the negotiation!');
-            } else {
-                addSystemMessage('AI will go first. Please wait...');
+        async function loadRoleInfo(sessionId) {
+            try {
+                const response = await fetch(`${API_BASE}/negotiation/${sessionId}/role_info`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load role information');
+                }
+                
+                const data = await response.json();
+                
+                // Update role label and BATNA
+                elements.roleLabel.textContent = data.role_label;
+                elements.batnaValue.textContent = `Your BATNA (Best Alternative): ${data.batna}`;
+                
+                // Update system prompt (rules & objectives)
+                elements.systemPromptContent.textContent = data.system_prompt;
+                
+                // Update context prompt (background & priorities)
+                elements.contextPromptContent.textContent = data.context_prompt;
+                
+            } catch (error) {
+                console.error('Error loading role info:', error);
+                elements.roleLabel.textContent = 'Error';
+                elements.batnaValue.textContent = 'Failed to load role information';
+                elements.systemPromptContent.textContent = 'Please refresh the page';
+                elements.contextPromptContent.textContent = 'Please refresh the page';
             }
-            
-            // If AI goes first, show AI's first message
-            if (sessionData.ai_first_message) {
-                addMessage('ai', sessionData.ai_first_message);
-            }
-            
-            // Enable input
-            elements.messageInput.disabled = false;
-            elements.sendBtn.disabled = false;
-            elements.endBtn.disabled = false;
-            elements.messageInput.focus();
         }
 
         // ===================================================================
@@ -1124,100 +1131,124 @@
                 return;
             }
             
-            if (!currentSessionId || !isNegotiationActive) {
-                alert('No active negotiation session');
+            if (!isNegotiationActive) {
+                addSystemMessage('⚠️ Negotiation has ended. Please start a new session.');
                 return;
             }
             
-            // Disable input while sending
+            // Disable input while processing
             elements.messageInput.disabled = true;
             elements.sendBtn.disabled = true;
-            elements.endBtn.disabled = true;
             
-            // Show student message
+            // Add student message to chat
             addMessage('student', message);
             
             // Clear input
             elements.messageInput.value = '';
             
-            // Show loading indicator
-            elements.loadingIndicator.classList.remove('hidden');
-            
             try {
-                const response = await fetch(`${API_BASE_URL}/negotiation/${currentSessionId}/message`, {
+                const response = await fetch(`${API_BASE}/negotiation/${currentSessionId}/message`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: message
-                    })
+                    body: JSON.stringify({ message })
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                    throw new Error('Failed to send message');
                 }
                 
                 const data = await response.json();
-                console.log('Message response:', data);
                 
-                // Hide loading indicator
-                elements.loadingIndicator.classList.add('hidden');
-                
-                // Show AI response
-                if (data.ai_message) {
-                    addMessage('ai', data.ai_message);
-                }
-                
-                // Update round number
-                if (data.round) {
-                    elements.currentRound.textContent = data.round + 1;
-                }
-                
-                // Check for deal reached
+                // ⭐ CRITICAL FIX: Check for deal reached/misunderstanding FIRST
                 if (data.deal_reached) {
                     handleDealReached(data);
                     return;
                 }
                 
-                // Check for misunderstanding
                 if (data.misunderstanding) {
-                    addSystemMessage('⚠️ Deal misunderstanding detected. The terms don\'t match. Please continue negotiating.');
+                    // Show AI's explanation of the misunderstanding
+                    addMessage('ai', data.ai_message);
+                    // Re-enable input
+                    elements.messageInput.disabled = false;
+                    elements.sendBtn.disabled = false;
+                    elements.messageInput.focus();
+                    return;
                 }
                 
-                // Check for deal failed
                 if (data.deal_failed) {
                     handleDealFailed();
                     return;
                 }
                 
-                // Check if negotiation ended (max rounds)
                 if (data.negotiation_ended) {
                     handleNegotiationEnded(data.reason);
                     return;
                 }
                 
-                // Check if AI proposed a deal (but not accepted yet)
-                if (data.ai_proposed_deal && data.ai_deal_terms) {
-                    addSystemMessage('💡 The AI has proposed a deal. You can review it above. If you agree, type $DEAL_REACHED$ followed by the same JSON terms.');
+                // ⭐ CRITICAL FIX: Only show AI message if it's NOT a $DEAL_REACHED$ confirmation
+                // Check if this is AI confirming student's deal
+                const isAiConfirmingStudentDeal = data.ai_message && data.ai_message.includes('$DEAL_REACHED$');
+                
+                if (isAiConfirmingStudentDeal) {
+                    // ⭐ Hide AI's technical confirmation message
+                    // Instead show a friendly success message
+                    addSystemMessage('✅ Deal confirmed! The AI has accepted your proposed terms.');
+                    
+                    // Show the deal terms
+                    if (data.deal_terms) {
+                        const termsHtml = `
+                            <strong>Final Deal Terms:</strong>
+                            <pre>${JSON.stringify(data.deal_terms, null, 2)}</pre>
+                        `;
+                        addDealMessage(termsHtml);
+                    }
+                    
+                    endNegotiationSession();
+                    return;
+                }
+                
+                // Normal AI response (not a deal confirmation)
+                if (data.ai_message) {
+                    // Check if AI proposed a deal
+                    if (data.ai_proposed_deal && data.ai_deal_terms) {
+                        addMessage('ai', data.ai_message);
+                        
+                        // Optionally show deal terms in a special format
+                        const termsHtml = `
+                            <strong>AI's Proposed Deal:</strong>
+                            <pre>${JSON.stringify(data.ai_deal_terms, null, 2)}</pre>
+                            <p style="margin-top: 8px; color: var(--text-secondary);">
+                                You can accept this deal by starting your next message with <code>$DEAL_REACHED$</code> 
+                                followed by these terms in JSON format.
+                            </p>
+                        `;
+                        addDealMessage(termsHtml);
+                    } else {
+                        // Regular message
+                        addMessage('ai', data.ai_message);
+                    }
+                }
+                
+                // Update round display
+                if (data.round) {
+                    const totalRounds = parseInt(elements.roundDisplay.textContent.split('/')[1]);
+                    elements.roundDisplay.textContent = `${data.round + 1}/${totalRounds}`;
                 }
                 
                 // Re-enable input
                 elements.messageInput.disabled = false;
                 elements.sendBtn.disabled = false;
-                elements.endBtn.disabled = false;
                 elements.messageInput.focus();
                 
             } catch (error) {
-                console.error('Failed to send message:', error);
-                elements.loadingIndicator.classList.add('hidden');
-                addSystemMessage(`❌ Error: ${error.message}`);
+                console.error('Error sending message:', error);
+                addSystemMessage('❌ Error sending message. Please try again.');
                 
                 // Re-enable input
                 elements.messageInput.disabled = false;
                 elements.sendBtn.disabled = false;
-                elements.endBtn.disabled = false;
             }
         }
 
@@ -1266,10 +1297,51 @@
             elements.messageInput.disabled = true;
             elements.sendBtn.disabled = true;
             elements.statusDisplay.textContent = 'Completed';
+            elements.statusDisplay.classList.remove('active');
             elements.statusDisplay.classList.add('success-text');
             
-            // Keep end button enabled to get feedback
+            // Change end button to feedback button
             elements.endBtn.textContent = 'Get Feedback';
+            elements.endBtn.onclick = getFeedback;
+        }
+
+        // ===================================================================
+        // Get Feedback (NEW)
+        // ===================================================================
+        async function getFeedback() {
+            if (!currentSessionId) {
+                return;
+            }
+            
+            addSystemMessage('Generating feedback...');
+            elements.endBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/negotiation/${currentSessionId}/feedback`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate feedback');
+                }
+                
+                const data = await response.json();
+                
+                // Display feedback
+                const feedbackHtml = `
+                    <strong>📊 Negotiation Feedback</strong>
+                    <div style="margin-top: 12px; white-space: pre-wrap; line-height: 1.8;">
+                        ${escapeHtml(data.feedback)}
+                    </div>
+                `;
+                addDealMessage(feedbackHtml);
+                
+                addSystemMessage('✅ Feedback generated! Scroll up to read your detailed performance analysis.');
+                
+            } catch (error) {
+                console.error('Error getting feedback:', error);
+                addSystemMessage('❌ Error generating feedback. Please try again.');
+            } finally {
+                elements.endBtn.disabled = false;
+            }
         }
 
         // ===================================================================
@@ -1281,19 +1353,28 @@
             }
             
             if (isNegotiationActive) {
-                const confirm = window.confirm('Are you sure you want to end this negotiation?');
+                const confirm = window.confirm('Are you sure you want to end this negotiation early? You can still get feedback.');
                 if (!confirm) {
                     return;
                 }
+                
+                // Mark as manually ended
+                isNegotiationActive = false;
+                elements.messageInput.disabled = true;
+                elements.sendBtn.disabled = true;
+                elements.statusDisplay.textContent = 'Ended Early';
+                elements.statusDisplay.classList.remove('active');
+                elements.statusDisplay.classList.add('warning-text');
+                
+                addSystemMessage('⚠️ Negotiation ended early. Click "Get Feedback" to see your performance analysis.');
+                
+                // Change button to feedback
+                elements.endBtn.textContent = 'Get Feedback';
+                elements.endBtn.onclick = getFeedback;
+            } else {
+                // Already ended, act as feedback button
+                await getFeedback();
             }
-            
-            addSystemMessage('Generating feedback...');
-            
-            // Here you could call a feedback endpoint if available
-            // For now, just reset
-            setTimeout(() => {
-                addSystemMessage('✅ Negotiation session completed. Click "New Session" to start another.');
-            }, 1000);
         }
 
         // ===================================================================
@@ -1320,6 +1401,10 @@
             // Re-enable start button
             elements.startBtn.disabled = false;
             elements.loadingMessage.classList.add('hidden');
+            
+            // Reset end button
+            elements.endBtn.textContent = 'End';
+            elements.endBtn.onclick = endNegotiation;
         }
 
         // ===================================================================
