@@ -747,8 +747,8 @@ class NegotiationSession:
         ai_response = self._generate_ai_response()
         self.transcript.append(f"{ai_label}: {ai_response}")
         
-        # Check if AI proposed deal (must be at the start)
-        if ai_response.strip().startswith("$DEAL_REACHED$"):
+        # Check if AI proposed deal
+        if "$DEAL_REACHED$" in ai_response:
             ai_json = extract_json_from_text(ai_response)
             if ai_json:
                 self.ai_deal_json = ai_json

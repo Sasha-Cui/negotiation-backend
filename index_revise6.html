@@ -464,7 +464,7 @@
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             height: 100%;
             overflow: hidden;
         }
@@ -714,6 +714,7 @@
             <div class="form-section">
                 <h3>🤖 AI Configuration</h3>
                 
+
                 <div class="form-group">
                     <label for="modelSelect">AI Model</label>
                     <select id="modelSelect">
@@ -1292,10 +1293,8 @@
                     return;
                 }
                 
-                // ⭐ CRITICAL: Check if AI proposed a deal
-                // Must be at the START of the message (after trimming)
-                const trimmedAiMessage = data.ai_message.trim();
-                if (trimmedAiMessage.startsWith('$DEAL_REACHED$')) {
+                // ⭐ NEW v2: Check if AI proposed a deal
+                if (data.ai_proposed_deal && data.ai_deal_terms) {
                     aiJustProposedDeal = true; // ⭐ Set flag
                     
                     // Show AI's message
@@ -1347,9 +1346,6 @@
         // ⭐ NEW v2: Show AI Deal Proposal Instruction
         // ===================================================================
         function showAiDealProposalInstruction(aiDealTerms) {
-            // ⭐ 只显示实例，不显示 schema
-            const simpleExample = JSON.stringify(aiDealTerms, null, 2);
-            
             const instructionHtml = `
                 <strong>🤖 AI has proposed a deal with $DEAL_REACHED$</strong>
                 <p style="margin-top: 8px; color: var(--text-secondary);">
@@ -1360,26 +1356,26 @@
                 
                 <div style="background: var(--deal-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
                     <strong>Option 1: Accept (if terms match your most recent offer)</strong>
-                    <ol style="margin-top: 4px; padding-left: 20px; font-size: 13px;">
+                    <ol style="margin-top: 4px; padding-left: 20px;">
                         <li>Type <code>$DEAL_REACHED$</code> on the first line</li>
                         <li>On the next line, paste the terms in JSON format</li>
                     </ol>
-                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+                    <p style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
                         Example:
                     </p>
-                    <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 4px;">$DEAL_REACHED$
-${simpleExample}</pre>
+                    <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px;">$DEAL_REACHED$
+${JSON.stringify(aiDealTerms, null, 2)}</pre>
                 </div>
                 
                 <div style="background: var(--system-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
                     <strong>Option 2: Reject (if terms don't match)</strong>
-                    <p style="margin-top: 4px; font-size: 13px;">Type <code>$DEAL_MISUNDERSTANDING$</code></p>
-                    <p style="margin-top: 4px; font-size: 11px; color: var(--text-secondary);">
+                    <p style="margin-top: 4px;">Type <code>$DEAL_MISUNDERSTANDING$</code></p>
+                    <p style="margin-top: 4px; font-size: 12px; color: var(--text-secondary);">
                         This will end the negotiation immediately.
                     </p>
                 </div>
                 
-                <p style="margin-top: 12px; font-weight: 600; color: var(--error-red); font-size: 12px;">
+                <p style="margin-top: 12px; font-weight: 600; color: var(--error-red);">
                     ⚠️ You cannot continue negotiating after AI proposes a deal. You must choose one of the above options.
                 </p>
             `;
