@@ -591,7 +591,12 @@ class NegotiationSession:
                 last_ai_message = msg
                 break
         
-        ai_just_proposed_deal = last_ai_message and "$DEAL_REACHED$" in last_ai_message
+        # ⭐ Extract the actual message content (after "AI: ")
+        ai_just_proposed_deal = False
+        if last_ai_message:
+            # Remove the "AI: " prefix and check if message starts with $DEAL_REACHED$
+            message_content = last_ai_message.split(":", 1)[1].strip() if ":" in last_ai_message else ""
+            ai_just_proposed_deal = message_content.startswith("$DEAL_REACHED$")
         
         if ai_just_proposed_deal:
             # ⭐ AI just proposed a deal - student MUST accept or reject
@@ -666,8 +671,8 @@ class NegotiationSession:
             
             self.transcript.append(f"{ai_label}: {ai_confirm_response}")
             
-            # Check AI's response
-            if "$DEAL_REACHED$" in ai_confirm_response:
+            # Check AI's response (must start with the token)
+            if ai_confirm_response.strip().startswith("$DEAL_REACHED$"):
                 # AI confirms
                 student_json = extract_json_from_text(message)
                 ai_json = extract_json_from_text(ai_confirm_response)
@@ -710,7 +715,7 @@ class NegotiationSession:
                             "round": self.current_round
                         }
             
-            elif "$DEAL_MISUNDERSTANDING$" in ai_confirm_response:
+            elif ai_confirm_response.strip().startswith("$DEAL_MISUNDERSTANDING$"):
                 # AI rejects - terms don't match
                 self.status = "failed"
                 return {
