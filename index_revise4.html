@@ -239,7 +239,7 @@
            =================================================================== */
         #chatScreen {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 400px;
             gap: 20px;
             height: calc(100vh - 100px);
         }
@@ -256,46 +256,34 @@
             overflow: hidden;
         }
 
-        /* ⭐ NEW v2: Chat Header with Session Info */
         .chat-header {
-            padding: 16px 20px;
+            padding: 20px;
             border-bottom: 1px solid var(--border-color);
             background: var(--bg-white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .chat-header h2 {
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 8px;
         }
 
         .chat-info {
             display: flex;
-            gap: 16px;
-            font-size: 12px;
+            gap: 20px;
+            font-size: 14px;
             color: var(--text-secondary);
-            flex-wrap: wrap;
         }
 
         .chat-info-item {
             display: flex;
             align-items: center;
-            gap: 4px;
-        }
-
-        .chat-info-item code {
-            background: var(--bg-gray);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
+            gap: 6px;
         }
 
         .status-badge {
             padding: 4px 10px;
             border-radius: 12px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
         }
 
@@ -307,11 +295,6 @@
         .status-badge.completed {
             background: var(--student-bg);
             color: var(--primary-blue);
-        }
-
-        .header-right button {
-            padding: 6px 12px;
-            font-size: 12px;
         }
 
         /* ===================================================================
@@ -398,27 +381,6 @@
             margin-top: 8px;
         }
 
-        /* ⭐ NEW v2: Thinking animation */
-        .message.thinking .message-avatar {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .thinking-dots::after {
-            content: '...';
-            animation: blink 1.4s infinite;
-        }
-
-        @keyframes blink {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
         /* ===================================================================
            Input Area
            =================================================================== */
@@ -459,33 +421,44 @@
         }
 
         /* ===================================================================
-           ⭐ NEW v2: Right Panel - Two Section Layout
+           ⭐ NEW: Right Panel - Three Section Layout
            =================================================================== */
         .sidebar {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 0;
             height: 100%;
             overflow: hidden;
         }
 
-        /* Section 1: Your Role (Scrollable, takes most space) */
+        /* Section 1: Session Info (Fixed at top) */
+        .sidebar-section.session-info {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+
+        /* Section 2: Your Role (Scrollable) */
         .sidebar-section.role-info {
             background: var(--bg-white);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow);
+            margin-top: 12px;
             flex: 1;
             overflow-y: auto;
             min-height: 0;
         }
 
-        /* Section 2: How to Accept (Fixed at bottom, collapsible) */
+        /* Section 3: How to Accept (Fixed at bottom) */
         .sidebar-section.accept-deal {
             background: var(--bg-white);
             border-radius: var(--radius);
-            padding: 16px 20px;
+            padding: 20px;
             box-shadow: var(--shadow);
+            margin-top: 12px;
             flex-shrink: 0;
         }
 
@@ -506,19 +479,19 @@
             font-weight: 600;
         }
 
-        .sidebar-section p, .sidebar-section ul, .sidebar-section ol {
+        .sidebar-section p, .sidebar-section ul {
             font-size: 14px;
             color: var(--text-secondary);
             line-height: 1.6;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
-        .sidebar-section ul, .sidebar-section ol {
+        .sidebar-section ul {
             padding-left: 20px;
         }
 
         .sidebar-section li {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .sidebar-section code {
@@ -538,7 +511,7 @@
             border-left: 3px solid var(--primary-blue);
         }
 
-        /* Role Info specific styles */
+        /* ⭐ NEW: Role Info specific styles */
         .batna-badge {
             display: inline-block;
             background: var(--warning-yellow);
@@ -560,15 +533,11 @@
             line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
-        /* Collapsible section for "How to Accept" */
-        .accept-deal details {
-            cursor: pointer;
-        }
-
+        /* ⭐ NEW: Collapsible section for "How to Accept" */
         .accept-deal summary {
             cursor: pointer;
             font-weight: 600;
@@ -577,21 +546,15 @@
             align-items: center;
             gap: 8px;
             user-select: none;
-            font-size: 15px;
         }
 
         .accept-deal summary::before {
             content: '▶';
             transition: transform 0.2s;
-            font-size: 12px;
         }
 
         .accept-deal details[open] summary::before {
             transform: rotate(90deg);
-        }
-
-        .accept-deal-content {
-            padding-top: 12px;
         }
 
         .success-text {
@@ -602,12 +565,23 @@
             color: var(--warning-yellow);
         }
 
+        .sidebar-actions {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-actions button {
+            width: 100%;
+        }
+
         /* ===================================================================
            Responsive Design
            =================================================================== */
         @media (max-width: 1200px) {
             #chatScreen {
-                grid-template-columns: 1fr 320px;
+                grid-template-columns: 1fr 350px;
             }
         }
 
@@ -625,6 +599,25 @@
             .chat-main {
                 height: 600px;
             }
+        }
+
+        /* ===================================================================
+           Loading Animation
+           =================================================================== */
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
         }
 
         /* ===================================================================
@@ -704,17 +697,21 @@
             </div>
 
             <div class="form-section">
-                <h3>🤖 AI Configuration</h3>
-                
+                <h3>🤖 AI Configuration</h3>        
+
                 <div class="form-group">
                     <label for="modelSelect">AI Model</label>
                     <select id="modelSelect">
-                        <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet (Recommended)</option>
-                        <option value="anthropic/claude-3-opus">Claude 3 Opus (Most Capable)</option>
-                        <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fastest)</option>
+                        <option value="anthropic/claude-opus-4.1">Claude Opus 4.1</option>
+                        <option value="openai/gpt-5" selected>GPT-5</option>
+                        <option value="openai/gpt-4.1">GPT-4.1</option>
+                        <option value="x-ai/grok-3">Grok-3 (xAI)</option>
+                        <option value="google/gemini-2.5-flash">Gemini 2.5 Flash</option>
+                        <option value="meta-llama/llama-3.2-90b-vision-instruct">Llama 3.2 90B Vision</option>
                     </select>
-                    <div class="form-hint">Choose the AI model for your negotiation partner</div>
+                    <div class="form-hint">Choose the AI model for negotiation</div>
                 </div>
+
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="randomFirstTurn" checked>
@@ -748,34 +745,18 @@
         <div id="chatScreen" class="hidden">
             <!-- Left Column: Chat Interface -->
             <div class="chat-main">
-                <!-- ⭐ NEW v2: Chat Header with Session Info -->
+                <!-- Chat Header -->
                 <div class="chat-header">
-                    <div class="header-left">
-                        <h2>💬 Negotiation Session</h2>
-                        <div class="chat-info">
-                            <div class="chat-info-item">
-                                <span>Session:</span>
-                                <code id="sessionIdDisplay">-</code>
-                            </div>
-                            <div class="chat-info-item">
-                                <span>Scenario:</span>
-                                <strong id="headerScenario">-</strong>
-                            </div>
-                            <div class="chat-info-item">
-                                <span>Role:</span>
-                                <strong id="headerRole">-</strong>
-                            </div>
-                            <div class="chat-info-item">
-                                <span>Round:</span>
-                                <strong id="roundDisplay">1/10</strong>
-                            </div>
-                            <div class="chat-info-item">
-                                <span id="statusDisplay" class="status-badge active">Active</span>
-                            </div>
+                    <h2>💬 Negotiation Session</h2>
+                    <div class="chat-info">
+                        <div class="chat-info-item">
+                            <span>Round:</span>
+                            <strong id="roundDisplay">1/10</strong>
                         </div>
-                    </div>
-                    <div class="header-right">
-                        <button id="newSessionBtn" class="btn-secondary">New Session</button>
+                        <div class="chat-info-item">
+                            <span>Status:</span>
+                            <span id="statusDisplay" class="status-badge active">Active</span>
+                        </div>
                     </div>
                 </div>
 
@@ -803,9 +784,21 @@
                 </div>
             </div>
 
-            <!-- ⭐ NEW v2: Right Column - Two Section Layout -->
+            <!-- ⭐ NEW: Right Column - Three Section Layout -->
             <div class="sidebar">
-                <!-- Section 1: Your Role (Scrollable) -->
+                <!-- Section 1: Session Info (Fixed) -->
+                <div class="sidebar-section session-info">
+                    <h3>📊 Session Information</h3>
+                    <p><strong>Scenario:</strong> <span id="sidebarScenario">-</span></p>
+                    <p><strong>Your Role:</strong> <span id="sidebarRole">-</span></p>
+                    <p><strong>AI Model:</strong> <span id="sidebarModel">-</span></p>
+                    
+                    <div class="sidebar-actions">
+                        <button id="newSessionBtn" class="btn-secondary">New Session</button>
+                    </div>
+                </div>
+
+                <!-- ⭐ Section 2: Your Role (Scrollable) -->
                 <div class="sidebar-section role-info">
                     <h3>🎭 Your Role <span id="roleLabel" class="batna-badge">Loading...</span></h3>
                     
@@ -819,29 +812,18 @@
                     <div class="role-content" id="contextPromptContent">Loading...</div>
                 </div>
 
-                <!-- Section 2: How to Accept (Fixed, Collapsible) -->
+                <!-- ⭐ Section 3: How to Accept (Fixed, Collapsible) -->
                 <div class="sidebar-section accept-deal">
                     <details>
-                        <summary>🤝 How to Accept a Deal</summary>
-                        <div class="accept-deal-content">
-                            <p><strong>To accept the AI's most recent offer:</strong></p>
-                            
-                            <h4 style="margin-top: 12px;">Step 1: Start with the token</h4>
+                        <summary><h3>🤝 How to Accept a Deal</h3></summary>
+                        <div style="padding-top: 12px;">
+                            <p>To accept the AI's most recent offer, start your message with:</p>
                             <div class="example-box">
                                 <code>$DEAL_REACHED$</code>
                             </div>
+                            <p>Then immediately follow with the deal terms in JSON format (matching the scenario's schema).</p>
                             
-                            <h4>Step 2: Follow with JSON (on next line)</h4>
-                            <div class="example-box">
-                                <pre id="jsonExampleContent" style="margin: 0; padding: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 12px; max-height: 200px; overflow-y: auto;">Loading...</pre>
-                            </div>
-                            
-                            <p style="margin-top: 12px; font-size: 13px; color: var(--error-red);">
-                                <strong>⚠️ Important:</strong> Do NOT include the "total_value" or "total_points" field - 
-                                the system calculates this automatically.
-                            </p>
-                            
-                            <h4 style="margin-top: 16px;">To indicate no deal is possible:</h4>
+                            <p style="margin-top: 12px;"><strong>To indicate no deal is possible:</strong></p>
                             <div class="example-box">
                                 <code>$DEAL_FAILED$</code>
                             </div>
@@ -856,14 +838,13 @@
         // ===================================================================
         // Global State
         // ===================================================================
-        const API_BASE = 'http://localhost:8000';
+        const API_BASE = 'https://negotiation-backend-ut5t.onrender.com';
         
         let scenarios = [];
         let currentSessionId = null;
         let currentScenarioName = null;
         let currentStudentRole = null;
         let isNegotiationActive = false;
-        let aiJustProposedDeal = false; // ⭐ NEW v2: Track if AI just proposed deal
 
         // ===================================================================
         // DOM Elements Cache
@@ -895,17 +876,16 @@
             statusDisplay: document.getElementById('statusDisplay'),
             newSessionBtn: document.getElementById('newSessionBtn'),
             
-            // ⭐ NEW v2: Header info
-            sessionIdDisplay: document.getElementById('sessionIdDisplay'),
-            headerScenario: document.getElementById('headerScenario'),
-            headerRole: document.getElementById('headerRole'),
+            // Sidebar
+            sidebarScenario: document.getElementById('sidebarScenario'),
+            sidebarRole: document.getElementById('sidebarRole'),
+            sidebarModel: document.getElementById('sidebarModel'),
             
-            // Role Info Elements
+            // ⭐ NEW: Role Info Elements
             roleLabel: document.getElementById('roleLabel'),
             batnaValue: document.getElementById('batnaValue'),
             systemPromptContent: document.getElementById('systemPromptContent'),
-            contextPromptContent: document.getElementById('contextPromptContent'),
-            jsonExampleContent: document.getElementById('jsonExampleContent')
+            contextPromptContent: document.getElementById('contextPromptContent')
         };
 
         // ===================================================================
@@ -1065,15 +1045,15 @@
                 currentStudentRole = studentRole;
                 isNegotiationActive = true;
                 
-                // Update header info
+                // Update sidebar info
                 const selectedScenario = scenarios.find(s => s.id === scenarioName);
                 const roleLabel = studentRole === 'side1' ? selectedScenario.side1_label : selectedScenario.side2_label;
                 
-                elements.sessionIdDisplay.textContent = data.session_id.substring(0, 8);
-                elements.headerScenario.textContent = selectedScenario.name;
-                elements.headerRole.textContent = roleLabel;
+                elements.sidebarScenario.textContent = selectedScenario.name;
+                elements.sidebarRole.textContent = roleLabel;
+                elements.sidebarModel.textContent = elements.modelSelect.value;
                 
-                // ⭐ NEW v2: Load role information
+                // ⭐ NEW: Load role information
                 await loadRoleInfo(currentSessionId);
                 
                 // Switch to chat screen
@@ -1110,7 +1090,7 @@
         }
 
         // ===================================================================
-        // ⭐ NEW v2: Load Role Information (with JSON example generation)
+        // ⭐ NEW: Load Role Information
         // ===================================================================
         async function loadRoleInfo(sessionId) {
             try {
@@ -1132,52 +1112,12 @@
                 // Update context prompt (background & priorities)
                 elements.contextPromptContent.textContent = data.context_prompt;
                 
-                // ⭐ NEW v2: Generate JSON example from schema
-                const jsonExample = generateJsonExample(data.json_schema);
-                elements.jsonExampleContent.textContent = jsonExample;
-                
             } catch (error) {
                 console.error('Error loading role info:', error);
                 elements.roleLabel.textContent = 'Error';
                 elements.batnaValue.textContent = 'Failed to load role information';
                 elements.systemPromptContent.textContent = 'Please refresh the page';
                 elements.contextPromptContent.textContent = 'Please refresh the page';
-                elements.jsonExampleContent.textContent = '{}';
-            }
-        }
-
-        // ===================================================================
-        // ⭐ NEW v2: Generate JSON Example from Schema
-        // ===================================================================
-        function generateJsonExample(jsonSchemaString) {
-            try {
-                const schema = JSON.parse(jsonSchemaString);
-                const example = {};
-                
-                for (const [key, value] of Object.entries(schema.properties)) {
-                    // ⭐ Skip value fields (student doesn't need to fill these)
-                    if (key.includes('value_of_deal') || key.includes('total_points') || key.includes('total_value')) {
-                        continue;
-                    }
-                    
-                    // Generate example value based on type
-                    if (value.type === 'number') {
-                        example[key] = value.minimum || 0;
-                    } else if (value.type === 'string' && value.enum) {
-                        example[key] = value.enum[0];
-                    } else if (value.type === 'boolean') {
-                        example[key] = false;
-                    } else if (value.type === 'string') {
-                        example[key] = "...";
-                    } else {
-                        example[key] = null;
-                    }
-                }
-                
-                return JSON.stringify(example, null, 2);
-            } catch (error) {
-                console.error('Error generating JSON example:', error);
-                return '{\n  "error": "Could not generate example"\n}';
             }
         }
 
@@ -1191,7 +1131,7 @@
                 return;
             }
             
-            if (!isNegotiationActive && !aiJustProposedDeal) {
+            if (!isNegotiationActive) {
                 addSystemMessage('⚠️ Negotiation has ended. Please start a new session.');
                 return;
             }
@@ -1206,9 +1146,6 @@
             // Clear input
             elements.messageInput.value = '';
             
-            // ⭐ NEW v2: Show "AI is thinking..." message
-            const thinkingId = addThinkingMessage();
-            
             try {
                 const response = await fetch(`${API_BASE}/negotiation/${currentSessionId}/message`, {
                     method: 'POST',
@@ -1218,77 +1155,21 @@
                     body: JSON.stringify({ message })
                 });
                 
-                // ⭐ Remove thinking message
-                removeThinkingMessage(thinkingId);
-                
                 if (!response.ok) {
                     throw new Error('Failed to send message');
                 }
                 
                 const data = await response.json();
                 
-                // ⭐ NEW v2: Handle system_message if present
-                if (data.system_message) {
-                    addSystemMessage(data.system_message);
-                }
-                
-                // ⭐ CRITICAL: Check for deal reached FIRST
+                // ⭐ CRITICAL FIX: Check for deal reached/misunderstanding FIRST
                 if (data.deal_reached) {
                     handleDealReached(data);
                     return;
                 }
                 
-                // ⭐ NEW v2: Handle terms mismatch
-                if (data.terms_mismatch) {
-                    endNegotiationSession();
-                    return;
-                }
-                
-                // ⭐ NEW v2: Handle misunderstanding
                 if (data.misunderstanding) {
-                    // Show AI's message if present
-                    if (data.ai_message && !data.ai_message.includes('$DEAL_MISUNDERSTANDING$')) {
-                        addMessage('ai', data.ai_message);
-                    }
-                    endNegotiationSession();
-                    return;
-                }
-                
-                // ⭐ NEW v2: Handle invalid response (AI proposed deal, student must accept/reject)
-                if (data.invalid_response) {
-                    // Re-enable input with restricted placeholder
-                    elements.messageInput.disabled = false;
-                    elements.sendBtn.disabled = false;
-                    elements.messageInput.placeholder = "Type $DEAL_REACHED$ + JSON terms, or $DEAL_MISUNDERSTANDING$";
-                    elements.messageInput.focus();
-                    return;
-                }
-                
-                // ⭐ Handle deal failed
-                if (data.deal_failed) {
-                    handleDealFailed(data);
-                    return;
-                }
-                
-                // ⭐ Handle negotiation ended (max rounds)
-                if (data.negotiation_ended) {
-                    handleNegotiationEnded(data.reason, data);
-                    return;
-                }
-                
-                // ⭐ NEW v2: Check if AI proposed a deal
-                if (data.ai_proposed_deal && data.ai_deal_terms) {
-                    aiJustProposedDeal = true; // ⭐ Set flag
-                    
-                    // Show AI's message
+                    // Show AI's explanation of the misunderstanding
                     addMessage('ai', data.ai_message);
-                    
-                    // ⭐ NEW v2: Show detailed instruction
-                    showAiDealProposalInstruction(data.ai_deal_terms);
-                    
-                    // ⭐ Change placeholder to guide student
-                    elements.messageInput.placeholder = "Type $DEAL_REACHED$ + JSON terms, or $DEAL_MISUNDERSTANDING$";
-                    
                     // Re-enable input
                     elements.messageInput.disabled = false;
                     elements.sendBtn.disabled = false;
@@ -1296,10 +1177,58 @@
                     return;
                 }
                 
-                // ⭐ Normal AI response
+                if (data.deal_failed) {
+                    handleDealFailed();
+                    return;
+                }
+                
+                if (data.negotiation_ended) {
+                    handleNegotiationEnded(data.reason);
+                    return;
+                }
+                
+                // ⭐ CRITICAL FIX: Only show AI message if it's NOT a $DEAL_REACHED$ confirmation
+                // Check if this is AI confirming student's deal
+                const isAiConfirmingStudentDeal = data.ai_message && data.ai_message.includes('$DEAL_REACHED$');
+                
+                if (isAiConfirmingStudentDeal) {
+                    // ⭐ Hide AI's technical confirmation message
+                    // Instead show a friendly success message
+                    addSystemMessage('✅ Deal confirmed! The AI has accepted your proposed terms.');
+                    
+                    // Show the deal terms
+                    if (data.deal_terms) {
+                        const termsHtml = `
+                            <strong>Final Deal Terms:</strong>
+                            <pre>${JSON.stringify(data.deal_terms, null, 2)}</pre>
+                        `;
+                        addDealMessage(termsHtml);
+                    }
+                    
+                    endNegotiationSession();
+                    return;
+                }
+                
+                // Normal AI response (not a deal confirmation)
                 if (data.ai_message) {
-                    addMessage('ai', data.ai_message);
-                    aiJustProposedDeal = false; // ⭐ Reset flag
+                    // Check if AI proposed a deal
+                    if (data.ai_proposed_deal && data.ai_deal_terms) {
+                        addMessage('ai', data.ai_message);
+                        
+                        // Optionally show deal terms in a special format
+                        const termsHtml = `
+                            <strong>AI's Proposed Deal:</strong>
+                            <pre>${JSON.stringify(data.ai_deal_terms, null, 2)}</pre>
+                            <p style="margin-top: 8px; color: var(--text-secondary);">
+                                You can accept this deal by starting your next message with <code>$DEAL_REACHED$</code> 
+                                followed by these terms in JSON format.
+                            </p>
+                        `;
+                        addDealMessage(termsHtml);
+                    } else {
+                        // Regular message
+                        addMessage('ai', data.ai_message);
+                    }
                 }
                 
                 // Update round display
@@ -1311,12 +1240,10 @@
                 // Re-enable input
                 elements.messageInput.disabled = false;
                 elements.sendBtn.disabled = false;
-                elements.messageInput.placeholder = "Type your negotiation message here...";
                 elements.messageInput.focus();
                 
             } catch (error) {
                 console.error('Error sending message:', error);
-                removeThinkingMessage(thinkingId);
                 addSystemMessage('❌ Error sending message. Please try again.');
                 
                 // Re-enable input
@@ -1326,104 +1253,14 @@
         }
 
         // ===================================================================
-        // ⭐ NEW v2: Show AI Deal Proposal Instruction
-        // ===================================================================
-        function showAiDealProposalInstruction(aiDealTerms) {
-            const instructionHtml = `
-                <strong>🤖 AI has proposed a deal with $DEAL_REACHED$</strong>
-                <p style="margin-top: 8px; color: var(--text-secondary);">
-                    Review the AI's proposed terms above carefully.
-                </p>
-                
-                <h4 style="margin-top: 12px; color: var(--primary-blue);">📋 Your Options:</h4>
-                
-                <div style="background: var(--deal-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
-                    <strong>Option 1: Accept (if terms match your most recent offer)</strong>
-                    <ol style="margin-top: 4px; padding-left: 20px;">
-                        <li>Type <code>$DEAL_REACHED$</code> on the first line</li>
-                        <li>On the next line, paste the terms in JSON format</li>
-                    </ol>
-                    <p style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
-                        Example:
-                    </p>
-                    <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 4px;">$DEAL_REACHED$
-${JSON.stringify(aiDealTerms, null, 2)}</pre>
-                </div>
-                
-                <div style="background: var(--system-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
-                    <strong>Option 2: Reject (if terms don't match)</strong>
-                    <p style="margin-top: 4px;">Type <code>$DEAL_MISUNDERSTANDING$</code></p>
-                    <p style="margin-top: 4px; font-size: 12px; color: var(--text-secondary);">
-                        This will end the negotiation immediately.
-                    </p>
-                </div>
-                
-                <p style="margin-top: 12px; font-weight: 600; color: var(--error-red);">
-                    ⚠️ You cannot continue negotiating after AI proposes a deal. You must choose one of the above options.
-                </p>
-            `;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message system';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = 'ℹ️';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = instructionHtml;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            
-            elements.messagesContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        // ===================================================================
-        // ⭐ NEW v2: Add Thinking Message
-        // ===================================================================
-        function addThinkingMessage() {
-            const id = 'thinking-' + Date.now();
-            const messageDiv = document.createElement('div');
-            messageDiv.id = id;
-            messageDiv.className = 'message thinking ai';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = '🤖';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = '<div class="message-text">AI is thinking<span class="thinking-dots"></span></div>';
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            
-            elements.messagesContainer.appendChild(messageDiv);
-            scrollToBottom();
-            
-            return id;
-        }
-
-        // ===================================================================
-        // ⭐ NEW v2: Remove Thinking Message
-        // ===================================================================
-        function removeThinkingMessage(id) {
-            const element = document.getElementById(id);
-            if (element) {
-                element.remove();
-            }
-        }
-
-        // ===================================================================
         // Handle Deal Reached
         // ===================================================================
         function handleDealReached(data) {
+            addSystemMessage('🎉 Deal reached! Congratulations on successful negotiation!');
+            
             if (data.deal_terms) {
                 const termsHtml = `
-                    <strong>✅ Final Deal Terms:</strong>
+                    <strong>Final Deal Terms:</strong>
                     <pre>${JSON.stringify(data.deal_terms, null, 2)}</pre>
                 `;
                 addDealMessage(termsHtml);
@@ -1435,19 +1272,19 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
         // ===================================================================
         // Handle Deal Failed
         // ===================================================================
-        function handleDealFailed(data) {
-            if (data.ai_message && !data.ai_message.includes('$DEAL_FAILED$')) {
-                addMessage('ai', data.ai_message);
-            }
+        function handleDealFailed() {
+            addSystemMessage('❌ Negotiation failed. No deal could be reached.');
             endNegotiationSession();
         }
 
         // ===================================================================
         // Handle Negotiation Ended (Max Rounds)
         // ===================================================================
-        function handleNegotiationEnded(reason, data) {
-            if (data.ai_message) {
-                addMessage('ai', data.ai_message);
+        function handleNegotiationEnded(reason) {
+            if (reason === 'max_rounds_reached') {
+                addSystemMessage('⏱️ Maximum rounds reached. Negotiation ended without a deal.');
+            } else {
+                addSystemMessage('Negotiation ended.');
             }
             endNegotiationSession();
         }
@@ -1457,7 +1294,6 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
         // ===================================================================
         function endNegotiationSession() {
             isNegotiationActive = false;
-            aiJustProposedDeal = false;
             elements.messageInput.disabled = true;
             elements.sendBtn.disabled = true;
             elements.statusDisplay.textContent = 'Completed';
@@ -1467,29 +1303,18 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
             // Change end button to feedback button
             elements.endBtn.textContent = 'Get Feedback';
             elements.endBtn.onclick = getFeedback;
-            elements.endBtn.disabled = false; // ⭐ Re-enable for feedback
         }
 
         // ===================================================================
-        // ⭐ NEW v2: Get Feedback (with duplicate prevention)
+        // Get Feedback (NEW)
         // ===================================================================
         async function getFeedback() {
             if (!currentSessionId) {
                 return;
             }
             
-            // ⭐ Check if already generated
-            if (elements.endBtn.dataset.feedbackGenerated === 'true') {
-                addSystemMessage('ℹ️ Feedback has already been generated. Scroll up to view it.');
-                return;
-            }
-            
-            // ⭐ Mark as generating
-            elements.endBtn.dataset.feedbackGenerated = 'true';
-            elements.endBtn.disabled = true;
-            elements.endBtn.textContent = 'Generating...';
-            
             addSystemMessage('Generating feedback...');
+            elements.endBtn.disabled = true;
             
             try {
                 const response = await fetch(`${API_BASE}/negotiation/${currentSessionId}/feedback`);
@@ -1511,18 +1336,11 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
                 
                 addSystemMessage('✅ Feedback generated! Scroll up to read your detailed performance analysis.');
                 
-                // ⭐ Permanently disable button
-                elements.endBtn.textContent = 'Feedback Generated';
-                elements.endBtn.disabled = true;
-                
             } catch (error) {
                 console.error('Error getting feedback:', error);
                 addSystemMessage('❌ Error generating feedback. Please try again.');
-                
-                // ⭐ Allow retry on error
-                elements.endBtn.dataset.feedbackGenerated = 'false';
+            } finally {
                 elements.endBtn.disabled = false;
-                elements.endBtn.textContent = 'Retry Feedback';
             }
         }
 
@@ -1542,7 +1360,6 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
                 
                 // Mark as manually ended
                 isNegotiationActive = false;
-                aiJustProposedDeal = false;
                 elements.messageInput.disabled = true;
                 elements.sendBtn.disabled = true;
                 elements.statusDisplay.textContent = 'Ended Early';
@@ -1554,7 +1371,6 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
                 // Change button to feedback
                 elements.endBtn.textContent = 'Get Feedback';
                 elements.endBtn.onclick = getFeedback;
-                elements.endBtn.disabled = false;
             } else {
                 // Already ended, act as feedback button
                 await getFeedback();
@@ -1577,7 +1393,6 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
             currentScenarioName = null;
             currentStudentRole = null;
             isNegotiationActive = false;
-            aiJustProposedDeal = false;
             
             // Switch screens
             elements.chatScreen.classList.add('hidden');
@@ -1590,7 +1405,6 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
             // Reset end button
             elements.endBtn.textContent = 'End';
             elements.endBtn.onclick = endNegotiation;
-            elements.endBtn.dataset.feedbackGenerated = 'false';
         }
 
         // ===================================================================
@@ -1650,22 +1464,7 @@ ${JSON.stringify(aiDealTerms, null, 2)}</pre>
         // Add System Message
         // ===================================================================
         function addSystemMessage(content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message system';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = 'ℹ️';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = content; // Allow HTML for rich formatting
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            
-            elements.messagesContainer.appendChild(messageDiv);
-            scrollToBottom();
+            addMessage('system', content);
         }
 
         // ===================================================================

@@ -18,7 +18,8 @@ side1:
   label: "Dr. Pottier"
   batna: 20
   system_prompt: |
-    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
+    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. 
+    Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
 
     **YOUR ROLE IN THE Z DEAL NEGOTIATION:**
     You are now playing the role of **Dr. Hector Pottier** in the Z Deal negotiation case. The other side is **Z-lab**.
@@ -63,7 +64,8 @@ side2:
   label: "Z-lab"
   batna: 0
   system_prompt: |
-    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
+    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. 
+    Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
 
     **YOUR ROLE IN THE Z DEAL NEGOTIATION:**
     You are now playing the role of **Z-lab** in the Z Deal negotiation case. The other side is **Dr. Pottier**.

@@ -1,5 +1,5 @@
 """
-Optimized Negotiation Backend - Complete Fixed Version v2
+Optimized Negotiation Backend - Complete Fixed Version
 
 Key Fixes:
 1. ✅ Fixed {{history}} double braces issue causing transcript传递问题
@@ -11,10 +11,6 @@ Key Fixes:
 7. ✅ Added Feedback generation system with relaxed conditions (can generate at any time)
 8. ✅ Added role_info endpoint to display student's complete role information
 9. ✅ Removed redundant "ignore other side's value" instruction (students don't output value)
-10. ✅ **NEW v2**: Relaxed $DEAL_REACHED$ detection (no strict JSON parsing required)
-11. ✅ **NEW v2**: Added are_deals_equivalent() for flexible JSON comparison
-12. ✅ **NEW v2**: Simplified AI confirmation prompt (no explanation required for MISUNDERSTANDING)
-13. ✅ **NEW v2**: Strict handling when AI proposes deal (only accept/reject, no continue)
 """
 
 from fastapi import FastAPI, HTTPException
@@ -164,67 +160,6 @@ def extract_json_from_text(text: str) -> Optional[Dict]:
         pass
     
     return None
-
-def are_deals_equivalent(deal1: Dict, deal2: Dict, exclude_keys: List[str] = None) -> bool:
-    """
-    ⭐ NEW v2: Flexible comparison of two deal JSONs
-    
-    - Excludes AI-only fields (like total_value_of_deal_to_me)
-    - Allows small numeric variations (floating point tolerance)
-    - Case-insensitive string comparison with whitespace trimming
-    
-    Args:
-        deal1: First deal JSON
-        deal2: Second deal JSON
-        exclude_keys: List of keys to ignore in comparison
-    
-    Returns:
-        bool: True if deals are equivalent
-    """
-    if exclude_keys is None:
-        exclude_keys = [
-            'total_value_of_deal_to_me',
-            'expected_value_of_deal_to_me_in_millions',
-            'total_points_of_deal_to_me'
-        ]
-    
-    # Filter out excluded keys
-    filtered_deal1 = {k: v for k, v in deal1.items() if k not in exclude_keys}
-    filtered_deal2 = {k: v for k, v in deal2.items() if k not in exclude_keys}
-    
-    # Check if keys match
-    if set(filtered_deal1.keys()) != set(filtered_deal2.keys()):
-        return False
-    
-    # Compare each value
-    for key in filtered_deal1.keys():
-        val1 = filtered_deal1[key]
-        val2 = filtered_deal2[key]
-        
-        # Numeric comparison (with 0.01% tolerance for floating point issues)
-        if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
-            # Convert both to float for comparison
-            v1, v2 = float(val1), float(val2)
-            tolerance = max(abs(v1), abs(v2)) * 0.0001
-            if abs(v1 - v2) > tolerance:
-                return False
-        
-        # String comparison (case-insensitive, whitespace-trimmed)
-        elif isinstance(val1, str) and isinstance(val2, str):
-            if val1.strip().lower() != val2.strip().lower():
-                return False
-        
-        # Boolean comparison
-        elif isinstance(val1, bool) and isinstance(val2, bool):
-            if val1 != val2:
-                return False
-        
-        # Other types: direct comparison
-        else:
-            if val1 != val2:
-                return False
-    
-    return True
 
 # ============================================================================
 # NegotiationSession Class
@@ -562,142 +497,40 @@ class NegotiationSession:
         self.ai_plan = response["content"]
     
     # ========================================================================
-    # Core Method 5: Process Student Message (⭐ MAJOR REFACTOR v2)
+    # Core Method 5: Process Student Message (Fixed deal confirmation logic)
     # ========================================================================
     def process_student_message(self, message: str) -> Dict[str, Any]:
         """
         Process student message
         
-        ⭐ v2 FIXES:
-        1. Relaxed $DEAL_REACHED$ detection (case-insensitive, no strict JSON required)
-        2. When student proposes deal, AI always enters confirmation mode
-        3. When AI proposed deal last round, student MUST accept or reject (no continue)
-        4. Use are_deals_equivalent() for flexible comparison
+        ⭐ Critical Fix:
+        1. Student can input $DEAL_REACHED$ + JSON (like AI)
+        2. AI needs to confirm if it matches its own offer
+        3. No need for frontend accept/reject dialog
         """
+        # 1. Save student message to transcript
         student_cfg = self.scenario_config[self.student_role]
         student_label = student_cfg.get("label", "Student")
-        ai_cfg = self.scenario_config[self.ai_role]
-        ai_label = ai_cfg.get("label", "AI")
-        
-        # 1. Save student message to transcript
         self.transcript.append(f"{student_label}: {message}")
         
-        # ========================================================================
-        # SECTION A: Check if AI proposed deal in last message
-        # ========================================================================
-        last_ai_message = None
-        for msg in reversed(self.transcript):
-            if msg.startswith(f"{ai_label}:"):
-                last_ai_message = msg
-                break
-        
-        ai_just_proposed_deal = last_ai_message and "$DEAL_REACHED$" in last_ai_message
-        
-        if ai_just_proposed_deal:
-            # ⭐ AI just proposed a deal - student MUST accept or reject
+        # 2. Check if student proposed deal
+        if "$DEAL_REACHED$" in message:
+            student_json = extract_json_from_text(message)
             
-            if "$DEAL_REACHED$" in message.upper():
-                # Student accepts
-                student_json = extract_json_from_text(message)
-                ai_json = extract_json_from_text(last_ai_message)
+            if student_json:
+                self.student_deal_json = student_json
                 
-                if student_json and ai_json:
-                    if are_deals_equivalent(student_json, ai_json):
-                        # ✅ Terms match
-                        self.student_deal_json = student_json
-                        self.ai_deal_json = ai_json
-                        self.deal_reached = True
-                        self.status = "completed"
-                        return {
-                            "ai_message": None,
-                            "deal_reached": True,
-                            "deal_terms": ai_json,
-                            "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
-                            "round": self.current_round
-                        }
-                    else:
-                        # ❌ Both said DEAL_REACHED but terms don't match
-                        self.status = "failed"
-                        return {
-                            "ai_message": None,
-                            "deal_reached": False,
-                            "terms_mismatch": True,
-                            "system_message": "❌ Both parties indicated DEAL_REACHED, but the final terms do not match. Negotiation ended.",
-                            "round": self.current_round
-                        }
-                else:
-                    # JSON parsing failed
-                    return {
-                        "ai_message": None,
-                        "deal_reached": False,
-                        "json_parse_error": True,
-                        "system_message": "❌ Could not parse JSON from your message. Please check the format and try again.",
-                        "round": self.current_round
-                    }
-            
-            elif "$DEAL_MISUNDERSTANDING$" in message.upper():
-                # Student rejects - claims terms don't match
-                self.status = "failed"
-                return {
-                    "ai_message": None,
-                    "deal_reached": False,
-                    "misunderstanding": True,
-                    "system_message": "❌ You indicated that the AI's proposed terms do not match your most recent offer. Negotiation ended.",
-                    "round": self.current_round
-                }
-            
-            else:
-                # ⚠️ Invalid response - student must accept or reject
-                return {
-                    "ai_message": None,
-                    "deal_reached": False,
-                    "invalid_response": True,
-                    "system_message": "⚠️ The AI has proposed a deal. You must either:\n• Accept with '$DEAL_REACHED$' followed by JSON terms\n• Reject with '$DEAL_MISUNDERSTANDING$'\n\nNo other responses are allowed at this point.",
-                    "round": self.current_round
-                }
-        
-        # ========================================================================
-        # SECTION B: Check if student proposes deal
-        # ========================================================================
-        # ⭐ Relaxed detection - case-insensitive
-        if "$DEAL_REACHED$" in message.upper() or "DEAL_REACHED" in message.upper():
-            # Student proposes a deal - let AI confirm
-            ai_confirm_response = self._request_ai_deal_confirmation(message)
-            
-            self.transcript.append(f"{ai_label}: {ai_confirm_response}")
-            
-            # Check AI's response
-            if "$DEAL_REACHED$" in ai_confirm_response:
-                # AI confirms
-                student_json = extract_json_from_text(message)
-                ai_json = extract_json_from_text(ai_confirm_response)
+                # ⭐ Critical: Let AI confirm
+                ai_confirm_response = self._request_ai_deal_confirmation(student_json)
                 
-                if student_json and ai_json:
-                    if are_deals_equivalent(student_json, ai_json):
-                        # ✅ Terms match
-                        self.student_deal_json = student_json
-                        self.ai_deal_json = ai_json
-                        self.deal_reached = True
-                        self.status = "completed"
-                        return {
-                            "ai_message": ai_confirm_response,
-                            "deal_reached": True,
-                            "deal_terms": ai_json,
-                            "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
-                            "round": self.current_round
-                        }
-                    else:
-                        # ❌ Both said DEAL_REACHED but terms don't match
-                        self.status = "failed"
-                        return {
-                            "ai_message": ai_confirm_response,
-                            "deal_reached": False,
-                            "terms_mismatch": True,
-                            "system_message": "❌ Both parties indicated DEAL_REACHED, but the final terms do not match. Negotiation ended.",
-                            "round": self.current_round
-                        }
-                else:
-                    # JSON parsing issue - but AI confirmed, so use AI's JSON
+                ai_cfg = self.scenario_config[self.ai_role]
+                ai_label = ai_cfg.get("label", "AI")
+                self.transcript.append(f"{ai_label}: {ai_confirm_response}")
+                
+                # Check AI's confirmation result
+                if "$DEAL_REACHED$" in ai_confirm_response:
+                    # AI confirms consistency
+                    ai_json = extract_json_from_text(ai_confirm_response)
                     if ai_json:
                         self.ai_deal_json = ai_json
                         self.deal_reached = True
@@ -705,103 +538,93 @@ class NegotiationSession:
                         return {
                             "ai_message": ai_confirm_response,
                             "deal_reached": True,
-                            "deal_terms": ai_json,
-                            "system_message": "✅ Deal confirmed! (Using AI's parsed terms)",
+                            "deal_terms": student_json,
                             "round": self.current_round
                         }
-            
-            elif "$DEAL_MISUNDERSTANDING$" in ai_confirm_response:
-                # AI rejects - terms don't match
-                self.status = "failed"
-                return {
-                    "ai_message": ai_confirm_response,
-                    "deal_reached": False,
-                    "misunderstanding": True,
-                    "system_message": "❌ AI believes the terms you specified do not match its most recent offer. Negotiation ended.",
-                    "round": self.current_round
-                }
+                
+                elif "$DEAL_MISUNDERSTANDING$" in ai_confirm_response:
+                    # AI indicates inconsistency
+                    return {
+                        "ai_message": ai_confirm_response,
+                        "deal_reached": False,
+                        "misunderstanding": True,
+                        "round": self.current_round
+                    }
         
-        # ========================================================================
-        # SECTION C: Check if student declares deal failed
-        # ========================================================================
-        if "$DEAL_FAILED$" in message.upper():
+        # 3. Check if proposed deal failed
+        if "$DEAL_FAILED$" in message:
             self.deal_failed = True
             self.status = "failed"
             return {
                 "ai_message": "You have indicated that no deal is possible. Negotiation ended.",
                 "deal_failed": True,
-                "system_message": "❌ You declared that no deal is possible. Negotiation ended.",
                 "round": self.current_round
             }
         
-        # ========================================================================
-        # SECTION D: Normal negotiation - generate AI response
-        # ========================================================================
-        
-        # Update Memory & Plan (if enabled)
+        # 4. Update Memory & Plan (if enabled)
         if self.current_round > 1 or len(self.transcript) > 1:
             self._update_memory()
             self._generate_plan()
         
-        # Generate AI response
+        # 5. Generate AI response
         ai_response = self._generate_ai_response()
+        
+        ai_cfg = self.scenario_config[self.ai_role]
+        ai_label = ai_cfg.get("label", "AI")
         self.transcript.append(f"{ai_label}: {ai_response}")
         
-        # Check if AI proposed deal
+        # 6. Check if AI proposed deal
         if "$DEAL_REACHED$" in ai_response:
             ai_json = extract_json_from_text(ai_response)
             if ai_json:
                 self.ai_deal_json = ai_json
+                # ⭐ Don't auto-confirm; wait for student response
                 return {
                     "ai_message": ai_response,
                     "ai_proposed_deal": True,
                     "ai_deal_terms": ai_json,
-                    "system_message": "🤖 AI has proposed a deal! You must respond with $DEAL_REACHED$ + terms or $DEAL_MISUNDERSTANDING$",
                     "round": self.current_round
                 }
         
-        # Check if AI declared deal failed
+        # 7. Check if AI proposed deal failed
         if "$DEAL_FAILED$" in ai_response:
             self.deal_failed = True
             self.status = "failed"
             return {
                 "ai_message": ai_response,
                 "deal_failed": True,
-                "system_message": "❌ AI declared that no deal is possible. Negotiation ended.",
                 "round": self.current_round
             }
         
-        # Check if reached last round
+        # 8. Check if reached last round
         if self.current_round >= self.total_rounds:
             self.status = "completed"
             return {
                 "ai_message": ai_response,
                 "negotiation_ended": True,
                 "reason": "max_rounds_reached",
-                "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
                 "round": self.current_round
             }
         
-        # Move to next round
+        # 9. Move to next round
         self.current_round += 1
         
         return {
             "ai_message": ai_response,
             "deal_reached": False,
-            "round": self.current_round - 1
+            "round": self.current_round - 1  # Just completed round
         }
     
     # ========================================================================
-    # Core Method 6: AI Confirm Deal (⭐ SIMPLIFIED v2)
+    # Core Method 6: AI Confirm Deal (ALIGNED WITH runner.py, NO redundant instruction)
     # ========================================================================
-    def _request_ai_deal_confirmation(self, student_message: str) -> str:
+    def _request_ai_deal_confirmation(self, student_deal_json: Dict) -> str:
         """
         Request AI to confirm student's proposed deal
+        Based on runner.py lines 1198-1211
         
-        ⭐ v2 CHANGES:
-        1. Simplified prompt - no explanation required for MISUNDERSTANDING
-        2. AI judges based on complete transcript
-        3. Removed redundant "ignore value" instruction
+        ⭐ FIX: Removed "ignore other side's value" instruction
+        Because students don't output value fields, so nothing to ignore
         """
         ai_cfg = self.scenario_config[self.ai_role]
         context = ai_cfg["context_prompt"]
@@ -814,7 +637,7 @@ class NegotiationSession:
         json_schema_dict = json.loads(json_schema_raw)
         json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
         
-        # Determine scenario-specific value field instruction
+        # Determine scenario-specific prompt
         scenario_lower = self.scenario_name.lower()
         
         if scenario_lower == "top_talent":
@@ -822,37 +645,37 @@ class NegotiationSession:
         elif scenario_lower in ("z_deal", "zlab_split"):
             value_field_instruction = "Fill in 'expected_value_of_deal_to_me_in_millions' by calculating your own value using your private scoring rules described in your given prompts."
         elif scenario_lower in ("twisted_tree", "vb_development"):
+            # No value field
             value_field_instruction = ""
         else:
             value_field_instruction = "Fill in 'total_value_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
         
-        # ⭐ Simplified confirmation prompt
+        # ⭐ Confirmation prompt (ALIGNED with runner.py lines 1198-1211)
         conf_prompt = (
             "DEAL CONFIRMATION:\n"
-            "The other side indicated that they accept a deal with '$DEAL_REACHED$' and specified deal terms. "
-            "Look at the complete negotiation transcript below to determine if the terms they specified "
-            "are consistent with the most recent offer YOU made.\n\n"
+            "The other side indicated that they accept the most recent terms offered by you and specified the deal terms that they are accepting in their most recent message. "
+            "Look at the complete negotiation transcript below to confirm that the terms specified by the other side in their last message are faithful to the latest proposal you made.\n\n"
             "COMPLETE NEGOTIATION TRANSCRIPT:\n"
             "<BEGIN TRANSCRIPT>\n"
             f"{history}\n"
             "<END TRANSCRIPT>\n\n"
-            "OUTPUT INSTRUCTIONS: CHOOSE ONE OF THE FOLLOWING TWO OPTIONS\n\n"
+            "OUTPUT INSTRUCTIONS: CHOOSE ONE OF THE FOLLOWING TWO OPTIONS\n"
         )
         
         if value_field_instruction:
-            conf_prompt += f"OPTION 1: If the terms ARE consistent with your most recent offer:\n"
-            conf_prompt += f"Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format. {value_field_instruction}\n"
+            conf_prompt += f"OPTION 1: IF the terms of the deal specified by the other side are INDEED CORRECT then output the agreed upon deal in the following JSON format. {value_field_instruction}\n"
         else:
-            conf_prompt += "OPTION 1: If the terms ARE consistent with your most recent offer:\n"
-            conf_prompt += "Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format.\n"
+            conf_prompt += "OPTION 1: IF the terms of the deal specified by the other side are INDEED CORRECT then output the agreed upon deal in the following JSON format.\n"
         
         conf_prompt += (
-            f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION 1):\n{_escape_braces(json_schema_text)}\n\n"
-            "OPTION 2: If the terms are NOT consistent with your most recent offer:\n"
-            "Output ONLY the token '$DEAL_MISUNDERSTANDING$' (no explanation needed).\n\n"
-            "DO NOT output anything else besides the token and JSON (for Option 1) or just the token (for Option 2)."
+            f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION 1):\n{json_schema_text}\n"
+            "OPTION 2: IF the terms of the deal specified by the other side are NOT correct then output ONLY the token '$DEAL_MISUNDERSTANDING$'. Do not bother to output any other text or fill in the JSON.\n\n"
         )
         
+        # ⭐ REMOVED: "ignore other side's value" instruction
+        # Because students don't output value fields, this instruction is redundant
+        
+        # ⭐ Critical: Add context prefix
         full_prompt = f"{context}\n\n{conf_prompt}"
         
         messages = [
@@ -864,14 +687,20 @@ class NegotiationSession:
         return response["content"]
     
     # ========================================================================
-    # Core Method 7: Generate Feedback (RELAXED CONDITIONS)
+    # Core Method 7: Generate Feedback (RELAXED CONDITIONS - can generate anytime)
     # ========================================================================
     def generate_feedback(self) -> str:
         """
         Generate negotiation feedback
         
-        ⭐ Can be called at any point (active, completed, failed, ended_early)
+        ⭐ FIX: Removed strict status check
+        Can now be called at any point (active, completed, failed, ended_early)
+        This allows students to get feedback even if they exit early
         """
+        # ⭐ REMOVED: strict status check
+        # Old code: if self.status != "completed" and self.status != "failed": raise ValueError(...)
+        # New: Allow feedback generation at any time
+        
         feedback_agent = OpenAIWrapper(
             model=self.ai_model,
             label="FeedbackCoach"
@@ -1018,7 +847,7 @@ class NegotiationSession:
         }
     
     def save_to_db(self):
-        """Save to database"""
+        """Save to database (explicit columns, 25 placeholders)"""
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
@@ -1026,26 +855,60 @@ class NegotiationSession:
 
         c.execute("""
             INSERT OR REPLACE INTO negotiation_sessions (
-                session_id, student_id, student_name, scenario_name,
-                student_role, ai_role, ai_model, student_goes_first,
-                use_memory, use_plan, current_round, total_rounds,
-                transcript, ai_memory, ai_plan, student_deal_json,
-                ai_deal_json, deal_reached, deal_failed, status,
-                created_at, updated_at, feedback_text, 
-                feedback_generated_at, feedback_model
+                session_id,
+                student_id,
+                student_name,
+                scenario_name,
+                student_role,
+                ai_role,
+                ai_model,
+                student_goes_first,
+                use_memory,
+                use_plan,
+                current_round,
+                total_rounds,
+                transcript,
+                ai_memory,
+                ai_plan,
+                student_deal_json,
+                ai_deal_json,
+                deal_reached,
+                deal_failed,
+                status,
+                created_at,
+                updated_at,
+                feedback_text,
+                feedback_generated_at,
+                feedback_model
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
-            self.session_id, self.student_id, self.student_name, self.scenario_name,
-            self.student_role, self.ai_role, self.ai_model, int(self.student_goes_first),
-            int(self.use_memory), int(self.use_plan), self.current_round, self.total_rounds,
-            json.dumps(self.transcript), self.ai_memory, self.ai_plan,
+            self.session_id,
+            self.student_id,
+            self.student_name,
+            self.scenario_name,
+            self.student_role,
+            self.ai_role,
+            self.ai_model,
+            int(self.student_goes_first),
+            int(self.use_memory),
+            int(self.use_plan),
+            self.current_round,
+            self.total_rounds,
+            json.dumps(self.transcript),
+            self.ai_memory,
+            self.ai_plan,
             json.dumps(self.student_deal_json) if self.student_deal_json else None,
             json.dumps(self.ai_deal_json) if self.ai_deal_json else None,
-            int(self.deal_reached), int(self.deal_failed), self.status,
-            self.created_at, self.updated_at, self.feedback_text,
-            self.feedback_generated_at, self.feedback_model
+            int(self.deal_reached),
+            int(self.deal_failed),
+            self.status,
+            self.created_at,
+            self.updated_at,
+            self.feedback_text,
+            self.feedback_generated_at,
+            self.feedback_model
         ))
 
         conn.commit()
@@ -1055,11 +918,20 @@ class NegotiationSession:
     def load_from_db(session_id: str) -> Optional['NegotiationSession']:
         """Load from database"""
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
+        conn.row_factory = sqlite3.Row  # Enable column access by name
         c = conn.cursor()
 
         c.execute("""
-            SELECT * FROM negotiation_sessions WHERE session_id = ?
+            SELECT
+                session_id, student_id, student_name, scenario_name,
+                student_role, ai_role, ai_model, student_goes_first,
+                use_memory, use_plan, current_round, total_rounds,
+                transcript, ai_memory, ai_plan, student_deal_json,
+                ai_deal_json, deal_reached, deal_failed, status,
+                created_at, updated_at, feedback_text, 
+                feedback_generated_at, feedback_model
+            FROM negotiation_sessions
+            WHERE session_id = ?
         """, (session_id,))
         row = c.fetchone()
         conn.close()
@@ -1067,6 +939,7 @@ class NegotiationSession:
         if not row:
             return None
 
+        # Use column names to get values, avoiding column order differences
         session = NegotiationSession(
             session_id=row["session_id"],
             student_id=row["student_id"],
@@ -1080,19 +953,25 @@ class NegotiationSession:
         )
 
         # Restore state
-        session.ai_role = row["ai_role"]
+        session.ai_role       = row["ai_role"]
         session.current_round = int(row["current_round"])
-        session.total_rounds = int(row["total_rounds"])
-        session.transcript = json.loads(row["transcript"]) if row["transcript"] else []
-        session.ai_memory = row["ai_memory"] or ""
-        session.ai_plan = row["ai_plan"] or ""
-        session.student_deal_json = json.loads(row["student_deal_json"]) if row["student_deal_json"] else None
-        session.ai_deal_json = json.loads(row["ai_deal_json"]) if row["ai_deal_json"] else None
+        session.total_rounds  = int(row["total_rounds"])
+
+        # JSON/text fields
+        session.transcript         = json.loads(row["transcript"]) if row["transcript"] else []
+        session.ai_memory          = row["ai_memory"] or ""
+        session.ai_plan            = row["ai_plan"] or ""
+        session.student_deal_json  = json.loads(row["student_deal_json"]) if row["student_deal_json"] else None
+        session.ai_deal_json       = json.loads(row["ai_deal_json"]) if row["ai_deal_json"] else None
+
+        # Flags/metadata
         session.deal_reached = bool(row["deal_reached"])
-        session.deal_failed = bool(row["deal_failed"])
-        session.status = row["status"]
-        session.created_at = row["created_at"]
-        session.updated_at = row["updated_at"]
+        session.deal_failed  = bool(row["deal_failed"])
+        session.status       = row["status"]
+        session.created_at   = row["created_at"]
+        session.updated_at   = row["updated_at"]
+        
+        # Feedback fields
         session.feedback_text = row["feedback_text"]
         session.feedback_generated_at = row["feedback_generated_at"]
         session.feedback_model = row["feedback_model"]
@@ -1106,9 +985,9 @@ class StartNegotiationRequest(BaseModel):
     student_id: str
     student_name: str
     scenario_name: str
-    student_role: str
-    ai_model: str = "anthropic/claude-3-sonnet"
-    randomize_first_turn: bool = True
+    student_role: str  # "side1" or "side2"
+    ai_model: str = "anthropic/claude-3-sonnet"  # ⭐ New: model selection
+    randomize_first_turn: bool = True  # ⭐ New: random first turn
     use_memory: bool = True
     use_plan: bool = True
 
@@ -1122,7 +1001,7 @@ class SendMessageRequest(BaseModel):
 @app.get("/")
 def read_root():
     """Health check"""
-    return {"status": "ok", "message": "Negotiation Practice API v2"}
+    return {"status": "ok", "message": "Negotiation Practice API"}
 
 @app.get("/scenarios")
 def list_scenarios():
@@ -1149,27 +1028,37 @@ def list_scenarios():
 
 @app.post("/negotiation/start")
 def start_negotiation(request: StartNegotiationRequest):
-    """Start new negotiation session"""
+    """
+    Start new negotiation session
+    
+    ⭐ New features:
+    1. Random first turn (randomize_first_turn=True)
+    2. Model selection (ai_model parameter)
+    """
     try:
+        # Generate session_id
         session_id = str(uuid.uuid4())
         
+        # ⭐ Random first turn (if enabled)
         if request.randomize_first_turn:
             student_goes_first = random.choice([True, False])
         else:
-            student_goes_first = True
+            student_goes_first = True  # Default: student goes first
         
+        # Create session
         session = NegotiationSession(
             session_id=session_id,
             student_id=request.student_id,
             student_name=request.student_name,
             scenario_name=request.scenario_name,
             student_role=request.student_role,
-            ai_model=request.ai_model,
+            ai_model=request.ai_model,  # ⭐ Use user-selected model
             student_goes_first=student_goes_first,
             use_memory=request.use_memory,
             use_plan=request.use_plan,
         )
         
+        # If AI goes first, generate first message
         ai_first_message = None
         if not student_goes_first:
             ai_response = session._generate_ai_response()
@@ -1178,6 +1067,7 @@ def start_negotiation(request: StartNegotiationRequest):
             session.transcript.append(f"{ai_label}: {ai_response}")
             ai_first_message = ai_response
         
+        # Save to database
         session.save_to_db()
         
         return {
@@ -1198,15 +1088,21 @@ def start_negotiation(request: StartNegotiationRequest):
 
 @app.post("/negotiation/{session_id}/message")
 def send_message(session_id: str, request: SendMessageRequest):
-    """Send student message and get AI response"""
+    """
+    Send student message and get AI response
+    """
+    # Load session
     session = NegotiationSession.load_from_db(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    if session.status not in ["active", "completed", "failed"]:
-        raise HTTPException(status_code=400, detail="Session is not in a valid state")
+    if session.status != "active":
+        raise HTTPException(status_code=400, detail="Session is not active")
     
+    # Process message
     result = session.process_student_message(request.message)
+    
+    # Save to database
     session.save_to_db()
     
     return result
@@ -1241,7 +1137,9 @@ def get_transcript(session_id: str):
 def get_role_info(session_id: str):
     """
     Get the student's complete role information for display
-    ⭐ v2: Also return json_schema for frontend to generate examples
+    
+    ⭐ NEW ENDPOINT: Returns both system_prompt and context_prompt
+    so the student can see their complete role, rules, and background
     """
     session = NegotiationSession.load_from_db(session_id)
     if not session:
@@ -1253,20 +1151,25 @@ def get_role_info(session_id: str):
         "session_id": session_id,
         "role_label": student_cfg.get("label", session.student_role),
         "batna": student_cfg.get("batna", 0),
-        "system_prompt": student_cfg["system_prompt"],
-        "context_prompt": student_cfg["context_prompt"],
+        "system_prompt": student_cfg["system_prompt"],  # Rules and objectives
+        "context_prompt": student_cfg["context_prompt"],  # Background and values
         "scenario_name": session.scenario_name,
-        "total_rounds": session.total_rounds,
-        "json_schema": session.scenario_config["json_schema"]  # ⭐ NEW
+        "total_rounds": session.total_rounds
     }
 
 @app.get("/negotiation/{session_id}/feedback")
 def get_feedback(session_id: str):
-    """Get or generate negotiation feedback"""
+    """
+    Get or generate negotiation feedback
+    
+    ⭐ RELAXED: Can be called at any time (active, completed, failed)
+    If negotiation is still active, provides feedback on progress so far
+    """
     session = NegotiationSession.load_from_db(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
+    # Check if feedback already exists
     if session.feedback_text:
         return {
             "session_id": session_id,
@@ -1277,6 +1180,7 @@ def get_feedback(session_id: str):
             "cached": True
         }
     
+    # Generate feedback (works at any status)
     try:
         feedback = session.generate_feedback()
         session.save_to_db()
@@ -1292,9 +1196,14 @@ def get_feedback(session_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate feedback: {str(e)}")
 
+
 @app.post("/negotiation/{session_id}/regenerate_feedback")
 def regenerate_feedback(session_id: str):
-    """Force regenerate feedback"""
+    """
+    Force regenerate feedback
+    
+    ⭐ RELAXED: Can be called at any time to get updated feedback
+    """
     session = NegotiationSession.load_from_db(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -1316,7 +1225,13 @@ def regenerate_feedback(session_id: str):
 
 @app.get("/download_db")
 def download_db(secret: Optional[str] = None):
-    """Download database file"""
+    """
+    Download database file
+    Requires correct secret key (read from environment variable DOWNLOAD_KEY)
+    
+    Usage:
+    GET /download_db?secret=your-secret-key
+    """
     allowed = os.getenv("DOWNLOAD_KEY")
     if allowed and secret != allowed:
         raise HTTPException(status_code=403, detail="unauthorized")
