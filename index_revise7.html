@@ -742,12 +742,6 @@
                     <input type="checkbox" id="usePlan" checked>
                     <label for="usePlan">Enable AI Strategic Planning</label>
                 </div>
-
-                <div class="form-group" style="margin-top: 16px;">
-                    <label for="totalRoundsInput">Number of Rounds</label>
-                    <input type="number" id="totalRoundsInput" min="1" max="20" value="10" required>
-                    <div class="form-hint">Maximum number of negotiation rounds (default: 10)</div>
-                </div>
             </div>
 
             <button id="startBtn" class="btn-primary">Start Negotiation</button>
@@ -903,7 +897,6 @@
             randomFirstTurn: document.getElementById('randomFirstTurn'),
             useMemory: document.getElementById('useMemory'),
             usePlan: document.getElementById('usePlan'),
-            totalRoundsInput: document.getElementById('totalRoundsInput'),  // ⭐ v3: New
             startBtn: document.getElementById('startBtn'),
             loadingMessage: document.getElementById('loadingMessage'),
             errorMessage: document.getElementById('errorMessage'),
@@ -1071,8 +1064,7 @@
                         ai_model: elements.modelSelect.value,
                         randomize_first_turn: elements.randomFirstTurn.checked,
                         use_memory: elements.useMemory.checked,
-                        use_plan: elements.usePlan.checked,
-                        total_rounds: parseInt(elements.totalRoundsInput.value)  // ⭐ v3: New
+                        use_plan: elements.usePlan.checked
                     })
                 });
                 
@@ -1302,19 +1294,15 @@
                 
                 // ⭐ CRITICAL: Check if AI proposed a deal
                 // Must be at the START of the message (after trimming)
-                const trimmedAiMessage = data.ai_message?.trim();
-                if (trimmedAiMessage?.startsWith('$DEAL_REACHED$')) {
+                const trimmedAiMessage = data.ai_message.trim();
+                if (trimmedAiMessage.startsWith('$DEAL_REACHED$')) {
                     aiJustProposedDeal = true; // ⭐ Set flag
                     
                     // Show AI's message
                     addMessage('ai', data.ai_message);
                     
-                    // ⭐ v3: Show different instruction based on overtime status
-                    if (data.allow_overtime) {
-                        showOvertimeDealInstruction(data.ai_deal_terms);
-                    } else {
-                        showAiDealProposalInstruction(data.ai_deal_terms);
-                    }
+                    // ⭐ NEW v2: Show detailed instruction
+                    showAiDealProposalInstruction(data.ai_deal_terms);
                     
                     // ⭐ Change placeholder to guide student
                     elements.messageInput.placeholder = "Type $DEAL_REACHED$ + JSON terms, or $DEAL_MISUNDERSTANDING$";
@@ -1356,24 +1344,16 @@
         }
 
         // ===================================================================
-        // ⭐ v3: Show AI Deal Proposal Instruction (UPDATED)
+        // ⭐ NEW v2: Show AI Deal Proposal Instruction
         // ===================================================================
         function showAiDealProposalInstruction(aiDealTerms) {
-            // ⭐ v3: Filter out private value fields
-            const privateFields = [
-                'total_value_of_deal_to_me',
-                'expected_value_of_deal_to_me_in_millions',
-                'total_points_of_deal_to_me'
-            ];
-            const publicTerms = Object.fromEntries(
-                Object.entries(aiDealTerms).filter(([key]) => !privateFields.includes(key))
-            );
-            const simpleExample = JSON.stringify(publicTerms, null, 2);
+            // ⭐ 只显示实例，不显示 schema
+            const simpleExample = JSON.stringify(aiDealTerms, null, 2);
             
             const instructionHtml = `
-                <strong>🤖 Review AI's Proposed Terms</strong>
+                <strong>🤖 AI has proposed a deal with $DEAL_REACHED$</strong>
                 <p style="margin-top: 8px; color: var(--text-secondary);">
-                    The AI has proposed a deal. Review the terms carefully above.
+                    Review the AI's proposed terms above carefully.
                 </p>
                 
                 <h4 style="margin-top: 12px; color: var(--primary-blue);">📋 Your Options:</h4>
@@ -1399,79 +1379,9 @@ ${simpleExample}</pre>
                     </p>
                 </div>
                 
-                <p style="margin-top: 12px; font-weight: 600; color: var(--warning-yellow); font-size: 12px;">
+                <p style="margin-top: 12px; font-weight: 600; color: var(--error-red); font-size: 12px;">
                     ⚠️ You cannot continue negotiating after AI proposes a deal. You must choose one of the above options.
                 </p>
-            `;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message system';
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = 'ℹ️';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.innerHTML = instructionHtml;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            
-            elements.messagesContainer.appendChild(messageDiv);
-            scrollToBottom();
-        }
-
-        // ===================================================================
-        // ⭐ NEW v3: Show Overtime Deal Instruction (for final round deals)
-        // ===================================================================
-        function showOvertimeDealInstruction(aiDealTerms) {
-            // ⭐ v3: Filter out private value fields
-            const privateFields = [
-                'total_value_of_deal_to_me',
-                'expected_value_of_deal_to_me_in_millions',
-                'total_points_of_deal_to_me'
-            ];
-            const publicTerms = Object.fromEntries(
-                Object.entries(aiDealTerms).filter(([key]) => !privateFields.includes(key))
-            );
-            const simpleExample = JSON.stringify(publicTerms, null, 2);
-            
-            const totalRounds = parseInt(elements.roundDisplay.textContent.split('/')[1]);
-            
-            const instructionHtml = `
-                <strong>🤖 AI has proposed a deal in the final round!</strong>
-                
-                <div style="background: var(--warning-yellow); padding: 12px; border-radius: 8px; margin-top: 12px;">
-                    <strong>⏱️ Overtime Allowed</strong>
-                    <p style="margin-top: 4px; font-size: 13px;">
-                        Although the ${totalRounds} rounds are complete, you have <strong>ONE final chance</strong> 
-                        to accept or reject this deal. No further negotiation is possible.
-                    </p>
-                </div>
-                
-                <h4 style="margin-top: 12px; color: var(--primary-blue);">📋 Your Options:</h4>
-                
-                <div style="background: var(--deal-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
-                    <strong>Option 1: Accept</strong>
-                    <ol style="margin-top: 4px; padding-left: 20px; font-size: 13px;">
-                        <li>Type <code>$DEAL_REACHED$</code> on the first line</li>
-                        <li>On the next line, paste the terms in JSON format</li>
-                    </ol>
-                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
-                        Example:
-                    </p>
-                    <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 4px;">$DEAL_REACHED$
-${simpleExample}</pre>
-                </div>
-                
-                <div style="background: var(--system-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
-                    <strong>Option 2: Reject</strong>
-                    <p style="margin-top: 4px; font-size: 13px;">Type <code>$DEAL_MISUNDERSTANDING$</code></p>
-                    <p style="margin-top: 4px; font-size: 11px; color: var(--text-secondary);">
-                        This will end the negotiation immediately without a deal.
-                    </p>
-                </div>
             `;
             
             const messageDiv = document.createElement('div');
@@ -1582,20 +1492,21 @@ ${simpleExample}</pre>
         }
 
         // ===================================================================
-        // ⭐ v3: Get Feedback (FIXED flag timing)
+        // ⭐ NEW v2: Get Feedback (with duplicate prevention)
         // ===================================================================
         async function getFeedback() {
             if (!currentSessionId) {
                 return;
             }
             
-            // ⭐ v3: Check if already generated (BEFORE starting)
+            // ⭐ Check if already generated
             if (elements.endBtn.dataset.feedbackGenerated === 'true') {
                 addSystemMessage('ℹ️ Feedback has already been generated. Scroll up to view it.');
                 return;
             }
             
-            // ⭐ v3: Disable button but DON'T set flag yet
+            // ⭐ Mark as generating
+            elements.endBtn.dataset.feedbackGenerated = 'true';
             elements.endBtn.disabled = true;
             elements.endBtn.textContent = 'Generating...';
             
@@ -1621,8 +1532,7 @@ ${simpleExample}</pre>
                 
                 addSystemMessage('✅ Feedback generated! Scroll up to read your detailed performance analysis.');
                 
-                // ⭐ v3: Only set flag AFTER successful generation
-                elements.endBtn.dataset.feedbackGenerated = 'true';
+                // ⭐ Permanently disable button
                 elements.endBtn.textContent = 'Feedback Generated';
                 elements.endBtn.disabled = true;
                 
@@ -1630,7 +1540,8 @@ ${simpleExample}</pre>
                 console.error('Error getting feedback:', error);
                 addSystemMessage('❌ Error generating feedback. Please try again.');
                 
-                // ⭐ v3: Don't set flag on error, allow retry
+                // ⭐ Allow retry on error
+                elements.endBtn.dataset.feedbackGenerated = 'false';
                 elements.endBtn.disabled = false;
                 elements.endBtn.textContent = 'Retry Feedback';
             }
