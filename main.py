@@ -366,28 +366,103 @@ class NegotiationSession:
         # 2. Build complete history
         history = "\n\n".join(self.transcript)
         
-        # 3. Get JSON schema
-        json_schema_raw = self.scenario_config["json_schema"]
-        json_schema_dict = json.loads(json_schema_raw)
-        json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
+        # 3. Check if this is Round 1 AND AI goes first
+        is_round_1 = (self.current_round == 1)
+        student_went_first = (len(self.transcript) > 0)
+        ai_goes_first = is_round_1 and not student_went_first
         
-        # 4. Determine if this is Round 1 and AI's first turn
-        is_round_1_first_turn = (self.current_round == 1 and len(self.transcript) == 0)
+        # 4. Determine turn position and action
+        if self.student_goes_first:
+            # Student goes first, AI goes second
+            turn_position = "going second"
+            turn_action = "finish"
+        else:
+            # AI goes first, student goes second
+            turn_position = "going first"
+            turn_action = "start"
         
-        # 5. Choose appropriate prompt
-        if is_round_1_first_turn:
-            # ⭐ Round 1, AI first turn → use initial_offer_prompt
-            base_prompt = ai_cfg.get("initial_offer_prompt", ai_cfg["response_prompt"])
+        # 5. Choose prompt based on situation
+        if ai_goes_first:
+            # ============================================================
+            # Round 1 first turn: use initial_offer_prompt
+            # ============================================================
+            base_prompt = ai_cfg["initial_offer_prompt"]
+            user_prompt = f"{context}\n\n{base_prompt}"
+        
+        else:
+            # ============================================================
+            # Round 1 second turn OR Round 2+: use universal_continuation_prompt
+            # ============================================================
             
-            # Format with json_schema (no history needed)
-            formatted_prompt = base_prompt.format(
-                json_schema=_escape_braces(json_schema_text)
+            # Build JSON schema
+            json_schema_raw = self.scenario_config["json_schema"]
+            json_schema_dict = json.loads(json_schema_raw)
+            json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
+            
+            # Determine scenario-specific prompt components
+            scenario_lower = self.scenario_name.lower()
+            
+            # ⭐ Scenario-specific value field instructions (runner.py lines 736-773)
+            if scenario_lower == "top_talent":
+                value_instruction = "Fill in 'total_points_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
+            elif scenario_lower in ("z_deal", "zlab_split"):
+                value_instruction = "Fill in 'expected_value_of_deal_to_me_in_millions' by calculating your own value using your private scoring rules described in your given prompts."
+            elif scenario_lower == "twisted_tree":
+                value_instruction = ""  # No value field for Twisted Tree
+            elif scenario_lower == "vb_development":
+                # NO-ZOPA scenario - different format
+                value_instruction = ""
+            else:
+                # Default
+                value_instruction = "Fill in 'total_value_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
+            
+            # ⭐ Universal continuation prompt (FULLY ALIGNED with runner.py lines 691-703)
+            universal_continuation_prompt = (
+                "CURRENT ROUND INFORMATION:\n"
+                f"It is now round {self.current_round}/{self.total_rounds}. You are {turn_position} this round, so it is your turn to {turn_action} the round. "
+                f"You have {self.total_rounds - self.current_round} rounds remaining after this one.\n\n"
+                "<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{{history}}\n\n"
+                "<END NEGOTIATION TRANSCRIPT>\n\n"
+                "OUTPUT INSTRUCTIONS:\n"
+                "1. Reminder: you can either continue the negotiation or accept the most recent terms offered by the other side by outputting the token '$DEAL_REACHED$' at the beginning of your output. If you do not reach a deal by the end of the last round, you get your BATNA.\n\n"
+                "2. OUTPUT OPTIONS (YOU MUST CHOOSE ONE):\n"
             )
             
-            user_prompt = f"{context}\n\n{formatted_prompt}"
-        else:
-            # ⭐ All other cases → use response_prompt
-            base_prompt = ai_cfg["response_prompt"]
+            # Option A: Continue negotiation
+            option_a = (
+                "OPTION A: Continue Negotiation\n"
+                "Respond with your negotiation message. Be strategic, clear, and professional.\n\n"
+            )
+            
+            # Option B: Accept deal
+            option_b_intro = "OPTION B: Accept Deal\n"
+            if value_instruction:
+                option_b_body = (
+                    f"If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
+                    f"then output the agreed terms in JSON format on subsequent lines. {value_instruction}\n"
+                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{{json_schema}}\n\n"
+                )
+            else:
+                option_b_body = (
+                    "If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
+                    "then output the agreed terms in JSON format on subsequent lines.\n"
+                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{{json_schema}}\n\n"
+                )
+            
+            # Option C: Declare no deal possible
+            option_c = (
+                "OPTION C: No Deal Possible\n"
+                "If you believe no mutually beneficial deal is achievable, output the token '$DEAL_FAILED$'.\n\n"
+            )
+            
+            # Combine all options
+            base_prompt = (
+                universal_continuation_prompt +
+                option_a +
+                option_b_intro + option_b_body +
+                option_c +
+                "Choose one option and respond accordingly. DO NOT output multiple options."
+            )
             
             # Format with history and json_schema
             # ⭐ CRITICAL: Use .format() to insert history and json_schema
