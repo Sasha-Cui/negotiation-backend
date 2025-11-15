@@ -937,7 +937,7 @@ class NegotiationSession:
         rules_objective = student_cfg["system_prompt"]
         
         current_round = self.get_current_round()
-        
+
         feedback_system = (
             "You are a negotiation coach providing concise, high-quality feedback to MBA students.\n\n"
             
@@ -951,22 +951,31 @@ class NegotiationSession:
             "- Proposing staged/phased deals unless those are scored options\n"
             "- Inventing creative workarounds that aren't actually available\n\n"
             
-            "FEEDBACK STRUCTURE:\n\n"
+            "FEEDBACK STRUCTURE (500-600 words):\n\n"
             
             "## 1. Performance Summary\n"
-            "- Final outcome (deal with X value, or BATNA)\n"
-            "- 2-3 sentences on overall performance\n\n"
+            "- Final outcome: total points/value achieved (or BATNA if no deal)\n"
+            "- Overall assessment in 2-3 sentences\n\n"
             
-            "## 2. Key Strengths & Missed Opportunities\n"
-            "- What worked well (cite specific moments)\n"
-            "- Where most value was left (calculate exact points/dollars)\n"
-            "- Which available option would have captured that value\n\n"
+            "## 2. Strategic Analysis\n"
+            "For each major issue, analyze BOTH value and tactics:\n"
+            "- What you got vs. what was possible (specific points/dollars)\n"
+            "- WHY you got this result (your negotiation moves)\n"
+            "- What different tactics could have captured more value\n\n"
+            "Focus on:\n"
+            "- **Anchoring**: Did you open strong on high-value issues?\n"
+            "- **Information**: Did you discover opponent's priorities before conceding?\n"
+            "- **Trade-offs**: Did you trade low-value items for high-value gains?\n"
+            "- **Timing**: Did you concede too early or hold out effectively?\n"
+            "- **Pattern**: Did opponent exploit your concession patterns?\n\n"
             
-            "## 3. Actionable Takeaway\n"
-            "- One concrete improvement for next negotiation\n"
-            "- Ground this in actual scenario options\n"
+            "## 3. Key Improvement\n"
+            "One concrete tactical change that would have gained the most points:\n"
+            "- Specific negotiation move (e.g., 'anchor at X instead of Y')\n"
+            "- Which issue to apply it to\n"
+            "- Expected point gain from this tactic\n"
         )
-        
+
         feedback_user = (
             f"SCENARIO: {self.scenario_name}\n"
             f"STUDENT: {student_cfg.get('label', self.student_role)}\n"
@@ -977,8 +986,9 @@ class NegotiationSession:
             f"CONTEXT & VALUE MODEL:\n{context}\n\n"
             f"TRANSCRIPT:\n{complete_transcript}\n\n"
             
-            "Generate feedback following the 3-section structure. "
-            "Reference ONLY options from the context. Be direct and actionable."
+            "Analyze both VALUE (points) and TACTICS (how negotiation moves affected points). "
+            "Show the connection: which tactical choices led to value gains/losses. "
+            "Be specific with transcript examples and point calculations."
         )
         
         messages = [
@@ -993,7 +1003,7 @@ class NegotiationSession:
         self.feedback_model = self.ai_model
         
         return self.feedback_text
-    
+        
     # ========================================================================
     # Database Methods
     # ========================================================================
