@@ -49,19 +49,28 @@ side1:
    YOUR SOLE OBJECTIVE: MAXIMIZE YOUR TOTAL NEGOTIATION POINTS
    
    NEGOTIATION RULES:
-   - Your ONLY goal is to get the highest possible point total across seven contract issues. While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Your ONLY goal is to get the highest possible point total across seven contract issues. 
+     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points
    - CRITICAL CONSTRAINT: Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
-   - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
-   - IMPORTANT:If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 POINTS (your BATNA). You should never propose or agree to a deal that goes below your BATNA of 0 points.
+   - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+     Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+   - IMPORTANT:If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 POINTS (your BATNA). 
+     You should never propose or agree to a deal that goes below your BATNA of 0 points.
    - You have {total_rounds} rounds total - each party goes once per round. 
 
 
 
   context_prompt: |
-    This hiring cycle, you have identified a candidate who appears ideally suited for a new role: Director of Online Marketing. The candidate worked in marketing in New York City for five years prior, and has an undergraduate degree in Biochemistry. Beyond an impressive academic background and experience, the candidate seems diligent and personable. After advancing through multiple interview rounds, the hiring team has unanimously agreed that this is the ideal person for the position. It is your job to secure this top talent and maximize value for the company.
+    This hiring cycle, you have identified a candidate who appears ideally suited for a new role: Director of Online Marketing. 
+    The candidate worked in marketing in New York City for five years prior, and has an undergraduate degree in Biochemistry. 
+    Beyond an impressive academic background and experience, the candidate seems diligent and personable. 
+    After advancing through multiple interview rounds, the hiring team has unanimously agreed that this is the ideal person for the position. 
+    It is your job to secure this top talent and maximize value for the company.
 
-    There are seven key issues to negotiate, each with a specified value function identified by number of points. Your value functions are entirely private to you and cannot be seen by the other side. Your total points will be the sum of points across all issues.
+    There are seven key issues to negotiate, each with a specified value function identified by number of points. 
+    Your value functions are entirely private to you and cannot be seen by the other side. 
+    Your total points will be the sum of points across all issues.
 
     1. Start Date:
        - You prefer July 5th to have the candidate present for the CEO's internal online conference
@@ -154,19 +163,26 @@ side2:
    YOUR SOLE OBJECTIVE: MAXIMIZE YOUR TOTAL NEGOTIATION POINTS
    
    NEGOTIATION RULES:
-   - Your ONLY goal is to get the highest possible point total across seven contract issues. While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Your ONLY goal is to get the highest possible point total across seven contract issues. 
+     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points
    - CRITICAL CONSTRAINT: Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
-   - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
-   - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 points (your BATNA). You should never propose or agree to a deal that goes below your BATNA of 0 points.
+   - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+     Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+   - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 points (your BATNA). 
+     You should never propose or agree to a deal that goes below your BATNA of 0 points.
    - You have {total_rounds} rounds total - each party goes once per round.
 
   context_prompt: |
-    You have an undergraduate degree in Biochemistry followed by five years of progressive marketing experience in New York City. Your professional drive is balanced by a range of interests outside of work, including making an annual appearance at the World Series of Poker Tournament.
+    You have an undergraduate degree in Biochemistry followed by five years of progressive marketing experience in New York City. 
+    Your professional drive is balanced by a range of interests outside of work, including making an annual appearance at the World Series of Poker Tournament.
 
-    After successfully advancing through multiple rounds of interviews at C&C BioMedicals, you received word that the hiring manager will present you with an official job offer for the Director of Online Marketing position. It's time to negotiate the job contract!
+    After successfully advancing through multiple rounds of interviews at C&C BioMedicals, you received word that the hiring manager will present you with an official job offer for the Director of Online Marketing position.
+    It's time to negotiate the job contract!
 
-    There are seven key issues to negotiate, each with a specified value function identified by number of points. Your value functions are entirely private to you and cannot be seen by the other side. Your total points will be the sum of points across all issues.
+    There are seven key issues to negotiate, each with a specified value function identified by number of points. 
+    Your value functions are entirely private to you and cannot be seen by the other side. 
+    Your total points will be the sum of points across all issues.
 
     1. Work Location:
        - The firm has three office locations and you can work at any one: New Haven, CT; Seoul, South Korea; Philadelphia, PA.
@@ -230,7 +246,8 @@ side2:
        - $0: 0 points
 
     7. Vacation Time:
-       - You heard the company culture values work-life balance which is great. You hope to translate this spirit into a generous vacation policy: 4 weeks would be ideal. You must choose one of the following options (no in-between ie 3.75 weeks).
+       - You heard the company culture values work-life balance which is great. You hope to translate this spirit into a generous vacation policy: 4 weeks would be ideal. 
+         You must choose one of the following options (no in-between ie 3.75 weeks).
 
        POINT VALUES:
        - 4 weeks: 8,000 points

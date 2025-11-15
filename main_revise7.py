@@ -1,15 +1,7 @@
 """
-Optimized Negotiation Backend - Complete Fixed Version v4
+Optimized Negotiation Backend - Complete Fixed Version v3
 
-Key Fixes in v4 (Round Management):
-1. ✅ Added messages_in_current_round field to track messages per round
-2. ✅ Clear round definition: 1 round = exactly 2 messages (Student + AI)
-3. ✅ Fixed overtime logic: allow overtime only when AI proposes deal at final round's 2nd message
-4. ✅ AI's synchronous confirmation (when Student proposes deal) does NOT count toward round messages
-5. ✅ current_round semantics: represents the current ongoing round, not "next round"
-6. ✅ Round increments only after both parties have sent 1 message each (2 messages total)
-
-Previous fixes from v3:
+Key Fixes in v3:
 1. ✅ Filter private value fields (total_value_of_deal_to_me, etc.) from deal_terms
 2. ✅ Fixed maximum rounds logic - allows overtime only when AI proposes deal at round 10
 3. ✅ Removed redundant system_message when AI proposes deal (frontend handles UI)
@@ -102,7 +94,6 @@ def init_db():
             use_plan BOOLEAN NOT NULL,
             current_round INTEGER NOT NULL,
             total_rounds INTEGER NOT NULL,
-            messages_in_current_round INTEGER NOT NULL DEFAULT 0,
             transcript TEXT NOT NULL,
             ai_memory TEXT,
             ai_plan TEXT,
@@ -266,13 +257,6 @@ class NegotiationSession:
     Negotiation Session Class
     Logic identical to runner.py with all prompts aligned
     
-    v4 updates (Round Management):
-    - Added messages_in_current_round field to track messages per round
-    - Clear round definition: 1 round = 2 messages (Student + AI)
-    - AI's synchronous confirmation does NOT count toward messages
-    - current_round represents the current ongoing round
-    - Round increments only after 2 messages are complete
-    
     v3 updates:
     - Added total_rounds parameter (customizable)
     - Fixed maximum rounds logic
@@ -290,7 +274,7 @@ class NegotiationSession:
         student_goes_first: bool,
         use_memory: bool,
         use_plan: bool,
-        total_rounds: int = 10,
+        total_rounds: int = 10,  # ⭐ NEW v3: Customizable total rounds
     ):
         self.session_id = session_id
         self.student_id = student_id
@@ -324,8 +308,7 @@ class NegotiationSession:
         
         # Session state
         self.current_round = 1
-        self.total_rounds = total_rounds
-        self.messages_in_current_round = 0  # ⭐ NEW v4: Track messages per round
+        self.total_rounds = total_rounds  # ⭐ NEW v3: Use parameter instead of YAML
         self.transcript = []
         self.ai_memory = ""
         self.ai_plan = ""
@@ -366,28 +349,103 @@ class NegotiationSession:
         # 2. Build complete history
         history = "\n\n".join(self.transcript)
         
-        # 3. Get JSON schema
-        json_schema_raw = self.scenario_config["json_schema"]
-        json_schema_dict = json.loads(json_schema_raw)
-        json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
+        # 3. Check if this is Round 1 AND AI goes first
+        is_round_1 = (self.current_round == 1)
+        student_went_first = (len(self.transcript) > 0)
+        ai_goes_first = is_round_1 and not student_went_first
         
-        # 4. Determine if this is Round 1 and AI's first turn
-        is_round_1_first_turn = (self.current_round == 1 and len(self.transcript) == 0)
+        # 4. Determine turn position and action
+        if self.student_goes_first:
+            # Student goes first, AI goes second
+            turn_position = "going second"
+            turn_action = "finish"
+        else:
+            # AI goes first, student goes second
+            turn_position = "going first"
+            turn_action = "start"
         
-        # 5. Choose appropriate prompt
-        if is_round_1_first_turn:
-            # ⭐ Round 1, AI first turn → use initial_offer_prompt
-            base_prompt = ai_cfg.get("initial_offer_prompt", ai_cfg["response_prompt"])
+        # 5. Choose prompt based on situation
+        if ai_goes_first:
+            # ============================================================
+            # Round 1 first turn: use initial_offer_prompt
+            # ============================================================
+            base_prompt = ai_cfg["initial_offer_prompt"]
+            user_prompt = f"{context}\n\n{base_prompt}"
+        
+        else:
+            # ============================================================
+            # Round 1 second turn OR Round 2+: use universal_continuation_prompt
+            # ============================================================
             
-            # Format with json_schema (no history needed)
-            formatted_prompt = base_prompt.format(
-                json_schema=_escape_braces(json_schema_text)
+            # Build JSON schema
+            json_schema_raw = self.scenario_config["json_schema"]
+            json_schema_dict = json.loads(json_schema_raw)
+            json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
+            
+            # Determine scenario-specific prompt components
+            scenario_lower = self.scenario_name.lower()
+            
+            # ⭐ Scenario-specific value field instructions (runner.py lines 736-773)
+            if scenario_lower == "top_talent":
+                value_instruction = "Fill in 'total_points_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
+            elif scenario_lower in ("z_deal", "zlab_split"):
+                value_instruction = "Fill in 'expected_value_of_deal_to_me_in_millions' by calculating your own value using your private scoring rules described in your given prompts."
+            elif scenario_lower == "twisted_tree":
+                value_instruction = ""  # No value field for Twisted Tree
+            elif scenario_lower == "vb_development":
+                # NO-ZOPA scenario - different format
+                value_instruction = ""
+            else:
+                # Default
+                value_instruction = "Fill in 'total_value_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
+            
+            # ⭐ Universal continuation prompt (FULLY ALIGNED with runner.py lines 691-703)
+            universal_continuation_prompt = (
+                "CURRENT ROUND INFORMATION:\n"
+                f"It is now round {self.current_round}/{self.total_rounds}. You are {turn_position} this round, so it is your turn to {turn_action} the round. "
+                f"You have {self.total_rounds - self.current_round} rounds remaining after this one.\n\n"
+                "<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{{history}}\n\n"
+                "<END NEGOTIATION TRANSCRIPT>\n\n"
+                "OUTPUT INSTRUCTIONS:\n"
+                "1. Reminder: you can either continue the negotiation or accept the most recent terms offered by the other side by outputting the token '$DEAL_REACHED$' at the beginning of your output. If you do not reach a deal by the end of the last round, you get your BATNA.\n\n"
+                "2. OUTPUT OPTIONS (YOU MUST CHOOSE ONE):\n"
             )
             
-            user_prompt = f"{context}\n\n{formatted_prompt}"
-        else:
-            # ⭐ All other cases → use response_prompt
-            base_prompt = ai_cfg["response_prompt"]
+            # Option A: Continue negotiation
+            option_a = (
+                "OPTION A: Continue Negotiation\n"
+                "Respond with your negotiation message. Be strategic, clear, and professional.\n\n"
+            )
+            
+            # Option B: Accept deal
+            option_b_intro = "OPTION B: Accept Deal\n"
+            if value_instruction:
+                option_b_body = (
+                    f"If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
+                    f"then output the agreed terms in JSON format on subsequent lines. {value_instruction}\n"
+                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{{json_schema}}\n\n"
+                )
+            else:
+                option_b_body = (
+                    "If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
+                    "then output the agreed terms in JSON format on subsequent lines.\n"
+                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{{json_schema}}\n\n"
+                )
+            
+            # Option C: Declare no deal possible
+            option_c = (
+                "OPTION C: No Deal Possible\n"
+                "If you believe no mutually beneficial deal is achievable, output the token '$DEAL_FAILED$'.\n\n"
+            )
+            
+            # Combine all options
+            base_prompt = (
+                universal_continuation_prompt +
+                option_a +
+                option_b_intro + option_b_body +
+                option_c +
+                "Choose one option and respond accordingly. DO NOT output multiple options."
+            )
             
             # Format with history and json_schema
             # ⭐ CRITICAL: Use .format() to insert history and json_schema
@@ -543,19 +601,11 @@ class NegotiationSession:
         self.ai_plan = response["content"]
     
     # ========================================================================
-    # Core Method 4: Process Student Message (⭐ MAJOR REFACTOR v4)
+    # Core Method 4: Process Student Message (⭐ MAJOR REFACTOR v3)
     # ========================================================================
     def process_student_message(self, message: str) -> Dict[str, Any]:
         """
         Process student message
-        
-        ⭐ v4 MAJOR FIXES (Round Management):
-        1. Added messages_in_current_round tracking
-        2. Clear round semantics: 1 round = 2 messages
-        3. AI's synchronous confirmation does NOT count toward messages
-        4. Fixed overtime logic: only when AI sends $DEAL_REACHED$ at final round's 2nd message
-        5. current_round represents current ongoing round
-        6. Round increments only after 2 messages complete
         
         ⭐ v3 MAJOR FIXES:
         1. Fixed maximum rounds logic - check BEFORE generating AI response
@@ -564,13 +614,13 @@ class NegotiationSession:
         4. Removed redundant system_message when AI proposes deal
         5. Proper handling of all final round scenarios
         
-        Scenarios at round 6:
-        - 6.1 AI normal → 6.2 Student normal → Timeout (no 7.1)
-        - 6.1 Student normal → 6.2 AI normal → Timeout (no 7.1)
-        - 6.1 AI normal → 6.2 Student send $DEAL_REACHED$ → AI sync confirm → Done at 6.2
-        - 6.1 Student normal → 6.2 AI send $DEAL_REACHED$ → Allow 7.1 Student confirm (overtime)
-        - 6.1 AI send $DEAL_REACHED$ → 6.2 Student confirm → Done at 6.2
-        - 6.1 Student send $DEAL_REACHED$ → 6.2 AI sync confirm → Done at 6.2
+        Scenarios at round 10:
+        - 10.1 AI normal → 10.2 Student normal → Timeout (no 11.1)
+        - 10.1 Student normal → 10.2 AI normal → Timeout (no 11.1)
+        - 10.1 AI normal → 10.2 Student propose → AI sync confirm → Done at 10.2
+        - 10.1 Student normal → 10.2 AI propose → Allow 11.1 Student confirm (overtime)
+        - 10.1 AI propose → 10.2 Student confirm → Done at 10.2
+        - 10.1 Student propose → 10.2 AI sync confirm → Done at 10.2
         """
         student_cfg = self.scenario_config[self.student_role]
         student_label = student_cfg.get("label", "Student")
@@ -579,7 +629,6 @@ class NegotiationSession:
         
         # Save student message to transcript
         self.transcript.append(f"{student_label}: {message}")
-        self.messages_in_current_round += 1  # ⭐ NEW v4: Count student message
         
         # ========================================================================
         # SECTION A: Check if AI proposed deal in last message (HIGHEST PRIORITY)
@@ -598,7 +647,6 @@ class NegotiationSession:
         if ai_just_proposed_deal:
             # ⭐ AI proposed deal - Student MUST respond (even if overtime)
             # This is the ONLY scenario where we allow going beyond total_rounds
-            # ⭐ IMPORTANT: Student's confirmation does NOT count toward messages_in_current_round
             
             if "$DEAL_REACHED$" in message.upper():
                 # Student accepts
@@ -615,7 +663,7 @@ class NegotiationSession:
                         return {
                             "ai_message": None,
                             "deal_reached": True,
-                            "deal_terms": filter_private_fields(ai_json),
+                            "deal_terms": filter_private_fields(ai_json),  # ⭐ v3: Filter private fields
                             "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
                             "round": self.current_round
                         }
@@ -665,11 +713,9 @@ class NegotiationSession:
         # ========================================================================
         if "$DEAL_REACHED$" in message.upper():
             # Student proposes a deal - let AI confirm synchronously
-            # ⭐ IMPORTANT: AI's synchronous confirmation does NOT count toward messages_in_current_round
             ai_confirm_response = self._request_ai_deal_confirmation(message)
             
             self.transcript.append(f"{ai_label}: {ai_confirm_response}")
-            # ❌ Do NOT increment messages_in_current_round - AI's confirmation is synchronous
             
             # Check AI's response (must start with the token)
             if ai_confirm_response.strip().startswith("$DEAL_REACHED$"):
@@ -687,7 +733,7 @@ class NegotiationSession:
                         return {
                             "ai_message": ai_confirm_response,
                             "deal_reached": True,
-                            "deal_terms": filter_private_fields(ai_json),
+                            "deal_terms": filter_private_fields(ai_json),  # ⭐ v3: Filter private fields
                             "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
                             "round": self.current_round
                         }
@@ -710,7 +756,7 @@ class NegotiationSession:
                         return {
                             "ai_message": ai_confirm_response,
                             "deal_reached": True,
-                            "deal_terms": filter_private_fields(ai_json),
+                            "deal_terms": filter_private_fields(ai_json),  # ⭐ v3: Filter private fields
                             "system_message": "✅ Deal confirmed! (Using AI's parsed terms)",
                             "round": self.current_round
                         }
@@ -751,7 +797,6 @@ class NegotiationSession:
         # Generate AI response
         ai_response = self._generate_ai_response()
         self.transcript.append(f"{ai_label}: {ai_response}")
-        self.messages_in_current_round += 1  # ⭐ NEW v4: Count AI message
         
         # ⭐ Check if AI proposed deal
         if ai_response.strip().startswith("$DEAL_REACHED$"):
@@ -759,20 +804,16 @@ class NegotiationSession:
             if ai_json:
                 self.ai_deal_json = ai_json
                 
-                # ⭐ v4 FIXED: Overtime logic
-                # Allow overtime only if:
-                # 1. This round is complete (2 messages)
-                # 2. This is the final round
-                round_complete = (self.messages_in_current_round >= 2)
-                is_final_round = (self.current_round >= self.total_rounds)
-                allow_overtime = (round_complete and is_final_round)
+                # Determine if this is the final round
+                is_final_round = (self.current_round == self.total_rounds)
                 
                 return {
                     "ai_message": ai_response,
                     "ai_proposed_deal": True,
-                    "ai_deal_terms": filter_private_fields(ai_json),
+                    "ai_deal_terms": filter_private_fields(ai_json),  # ⭐ v3: Filter private fields
+                    # ⭐ v3: Removed redundant system_message (frontend handles UI)
                     "round": self.current_round,
-                    "allow_overtime": allow_overtime  # ⭐ v4: Signal overtime allowed
+                    "allow_overtime": is_final_round  # ⭐ v3: Signal overtime allowed
                 }
         
         # Check if AI declared deal failed
@@ -786,31 +827,25 @@ class NegotiationSession:
                 "round": self.current_round
             }
         
-        # ⭐ v4 NEW: Check if current round is complete (2 messages)
-        if self.messages_in_current_round >= 2:
-            # Round complete
-            round_just_completed = self.current_round
-            
-            # Check if reached last round
-            if round_just_completed >= self.total_rounds:
-                # Last round finished
-                self.status = "completed"
-                return {
-                    "ai_message": ai_response,
-                    "negotiation_ended": True,
-                    "reason": "max_rounds_reached",
-                    "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
-                    "round": round_just_completed
-                }
-            
-            # Move to next round
-            self.current_round += 1
-            self.messages_in_current_round = 0  # ⭐ v4: Reset counter
+        # ⭐ v3 KEY FIX: Check if reached last round AFTER generating response
+        # Only end if AI gave normal response (not deal proposal)
+        if self.current_round >= self.total_rounds:
+            self.status = "completed"
+            return {
+                "ai_message": ai_response,
+                "negotiation_ended": True,
+                "reason": "max_rounds_reached",
+                "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
+                "round": self.current_round
+            }
+        
+        # Move to next round
+        self.current_round += 1
         
         return {
             "ai_message": ai_response,
             "deal_reached": False,
-            "round": self.current_round
+            "round": self.current_round - 1
         }
     
     # ========================================================================
@@ -983,7 +1018,6 @@ class NegotiationSession:
                 use_plan,
                 current_round,
                 total_rounds,
-                messages_in_current_round,
                 transcript,
                 ai_memory,
                 ai_plan,
@@ -998,7 +1032,7 @@ class NegotiationSession:
                 feedback_generated_at,
                 feedback_model
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             self.session_id,
@@ -1013,7 +1047,6 @@ class NegotiationSession:
             int(self.use_plan),
             self.current_round,
             self.total_rounds,
-            self.messages_in_current_round,  # ⭐ NEW v4
             json.dumps(self.transcript),
             self.ai_memory,
             self.ai_plan,
@@ -1059,26 +1092,25 @@ class NegotiationSession:
             student_goes_first=bool(row[7]),
             use_memory=bool(row[8]),
             use_plan=bool(row[9]),
-            total_rounds=row[11]
+            total_rounds=row[11]  # ⭐ v3: Load total_rounds from DB
         )
         
         # Restore state
         session.ai_role = row[5]
         session.current_round = row[10]
-        session.messages_in_current_round = row[12]  # ⭐ NEW v4
-        session.transcript = json.loads(row[13])
-        session.ai_memory = row[14] or ""
-        session.ai_plan = row[15] or ""
-        session.student_deal_json = json.loads(row[16]) if row[16] else None
-        session.ai_deal_json = json.loads(row[17]) if row[17] else None
-        session.deal_reached = bool(row[18])
-        session.deal_failed = bool(row[19])
-        session.status = row[20]
-        session.created_at = row[21]
-        session.updated_at = row[22]
-        session.feedback_text = row[23]
-        session.feedback_generated_at = row[24]
-        session.feedback_model = row[25]
+        session.transcript = json.loads(row[12])
+        session.ai_memory = row[13] or ""
+        session.ai_plan = row[14] or ""
+        session.student_deal_json = json.loads(row[15]) if row[15] else None
+        session.ai_deal_json = json.loads(row[16]) if row[16] else None
+        session.deal_reached = bool(row[17])
+        session.deal_failed = bool(row[18])
+        session.status = row[19]
+        session.created_at = row[20]
+        session.updated_at = row[21]
+        session.feedback_text = row[22]
+        session.feedback_generated_at = row[23]
+        session.feedback_model = row[24]
         
         return session
     
@@ -1117,7 +1149,7 @@ class StartNegotiationRequest(BaseModel):
     randomize_first_turn: bool = True
     use_memory: bool = True
     use_plan: bool = True
-    total_rounds: int = 10
+    total_rounds: int = 10  # ⭐ NEW v3: Allow customizable total rounds
 
 class SendMessageRequest(BaseModel):
     message: str
@@ -1128,15 +1160,17 @@ class SendMessageRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    """Root endpoint"""
-    return {"message": "Negotiation Practice API", "version": "v4"}
+    """Health check"""
+    return {"status": "ok", "message": "Negotiation Practice API v3"}
 
 @app.get("/scenarios")
 def list_scenarios():
-    """List available negotiation scenarios"""
+    """List all available scenarios"""
     scenarios_path = Path(SCENARIOS_DIR)
-    scenarios = []
+    if not scenarios_path.exists():
+        return {"scenarios": []}
     
+    scenarios = []
     for yaml_file in scenarios_path.glob("*.yaml"):
         try:
             with open(yaml_file, 'r', encoding='utf-8') as f:
@@ -1173,7 +1207,7 @@ def start_negotiation(request: StartNegotiationRequest):
             student_goes_first=student_goes_first,
             use_memory=request.use_memory,
             use_plan=request.use_plan,
-            total_rounds=request.total_rounds
+            total_rounds=request.total_rounds  # ⭐ v3: Pass custom total_rounds
         )
         
         ai_first_message = None
@@ -1182,7 +1216,6 @@ def start_negotiation(request: StartNegotiationRequest):
             ai_cfg = session.scenario_config[session.ai_role]
             ai_label = ai_cfg.get("label", "AI")
             session.transcript.append(f"{ai_label}: {ai_response}")
-            session.messages_in_current_round = 1  # ⭐ NEW v4: Count AI's first message
             ai_first_message = ai_response
         
         session.save_to_db()
