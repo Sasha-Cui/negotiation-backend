@@ -1,32 +1,29 @@
 """
-Optimized Negotiation Backend - Complete Fixed Version v5 FINAL
+Optimized Negotiation Backend - Complete Fixed Version v4
 
-Key Fixes in v5 (Simplified Round Management):
-1. ✅ Removed messages_in_current_round - use len(transcript) directly
-2. ✅ Removed complex current_round tracking - calculate from transcript
-3. ✅ Added round information to transcript: "Round X.Y - Label: message"
-4. ✅ Fixed all special token detection to use .strip().startswith()
-5. ✅ Check round completion BEFORE generating AI response (avoid wasted API calls)
-6. ✅ Clear overtime policy: only when AI/Student propose at final round
-
-Previous fixes from v4:
-1. ✅ Clear round definition: 1 round = exactly 2 messages (Student + AI)
-2. ✅ Fixed overtime logic: allow overtime only when deal proposed at final round
-3. ✅ AI's synchronous confirmation does NOT add new message to round count
+Key Fixes in v4 (Round Management):
+1. ✅ Added messages_in_current_round field to track messages per round
+2. ✅ Clear round definition: 1 round = exactly 2 messages (Student + AI)
+3. ✅ Fixed overtime logic: allow overtime only when AI proposes deal at final round's 2nd message
+4. ✅ AI's synchronous confirmation (when Student proposes deal) does NOT count toward round messages
+5. ✅ current_round semantics: represents the current ongoing round, not "next round"
+6. ✅ Round increments only after both parties have sent 1 message each (2 messages total)
 
 Previous fixes from v3:
-1. ✅ Filter private value fields from deal_terms
-2. ✅ Fixed maximum rounds logic
-3. ✅ Removed redundant system_message when AI proposes deal
-4. ✅ Added total_rounds parameter
-5. ✅ Consistent deal confirmation logic
+1. ✅ Filter private value fields (total_value_of_deal_to_me, etc.) from deal_terms
+2. ✅ Fixed maximum rounds logic - allows overtime only when AI proposes deal at round 10
+3. ✅ Removed redundant system_message when AI proposes deal (frontend handles UI)
+4. ✅ Added total_rounds parameter to allow custom round limits
+5. ✅ Consistent deal confirmation logic for all scenarios
+6. ✅ Proper handling of final round scenarios
 
 Previous fixes from v2:
-1. ✅ Fixed {{history}} double braces issue
-2. ✅ Added transcript in deal confirmation
-3. ✅ Relaxed $DEAL_REACHED$ detection
-4. ✅ Added are_deals_equivalent()
-5. ✅ Simplified AI confirmation prompt
+- ✅ Fixed {{history}} double braces issue
+- ✅ Added transcript in deal confirmation
+- ✅ Relaxed $DEAL_REACHED$ detection
+- ✅ Added are_deals_equivalent() for flexible JSON comparison
+- ✅ Simplified AI confirmation prompt
+- ✅ Strict handling when AI proposes deal
 """
 
 from fastapi import FastAPI, HTTPException
@@ -86,12 +83,11 @@ app.add_middleware(
 # Database Initialization
 # ============================================================================
 def init_db():
-    """Initialize database - removed messages_in_current_round field"""
+    """Initialize database with feedback fields"""
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
-    # Create table without messages_in_current_round
     c.execute("""
         CREATE TABLE IF NOT EXISTS negotiation_sessions (
             session_id TEXT PRIMARY KEY,
@@ -104,7 +100,9 @@ def init_db():
             student_goes_first BOOLEAN NOT NULL,
             use_memory BOOLEAN NOT NULL,
             use_plan BOOLEAN NOT NULL,
+            current_round INTEGER NOT NULL,
             total_rounds INTEGER NOT NULL,
+            messages_in_current_round INTEGER NOT NULL DEFAULT 0,
             transcript TEXT NOT NULL,
             ai_memory TEXT,
             ai_plan TEXT,
@@ -140,42 +138,28 @@ def _unescape_braces(s: str) -> str:
     return s.replace("{{", "{").replace("}}", "}")
 
 def filter_private_fields(deal_json: Dict) -> Dict:
-    """Remove AI's private value calculations from deal terms"""
-    return {k: v for k, v in deal_json.items() if k not in PRIVATE_VALUE_FIELDS}
-
-def calculate_round_info(transcript_length: int, student_goes_first: bool) -> tuple:
     """
-    Calculate round number and message position from transcript length
+    ⭐ NEW v3: Remove AI's private value calculations from deal terms
+    
+    This ensures that when displaying deal terms to users, we don't expose
+    the AI's internal value calculations, which should remain private.
     
     Args:
-        transcript_length: Current length of transcript
-        student_goes_first: Whether student goes first
+        deal_json: Complete deal JSON (may include private fields)
     
     Returns:
-        (round_number, message_in_round, is_round_complete)
+        Dict: Deal JSON with private fields removed
     """
-    if student_goes_first:
-        # Student first: message 1,3,5,... = Student; 2,4,6,... = AI
-        # Round 1 = messages 1-2, Round 2 = messages 3-4, etc.
-        round_number = (transcript_length + 1) // 2
-        is_student_turn = (transcript_length % 2 == 0)  # Even = Student's turn
-        is_round_complete = (transcript_length % 2 == 1)  # Odd = AI just spoke, round complete
-    else:
-        # AI first: message 1,3,5,... = AI; 2,4,6,... = Student
-        # Round 1 = messages 1-2, Round 2 = messages 3-4, etc.
-        round_number = (transcript_length + 1) // 2
-        is_student_turn = (transcript_length % 2 == 1)  # Odd = Student's turn
-        is_round_complete = (transcript_length % 2 == 0)  # Even = Student just spoke, round complete
-    
-    return round_number, is_round_complete
+    return {k: v for k, v in deal_json.items() if k not in PRIVATE_VALUE_FIELDS}
 
 def last_round_window(transcript: List[str], k_rounds: int = 2) -> str:
     """
     Extract last k rounds of conversation
-    k_rounds=2 means last 2 complete rounds (4 messages total)
+    
+    k_rounds=2 means last 2 complete rounds (4 messages total: user, ai, user, ai)
+    Identical to runner.py
     """
-    # Updated pattern to handle "Round X.Y - Label: message" format
-    pat = re.compile(r"^Round \d+\.\d+ - (.+?):\s", re.MULTILINE)
+    pat = re.compile(r"^(.+?):\s", re.MULTILINE)
     
     speaker_changes = []
     for i, msg in enumerate(transcript):
@@ -191,7 +175,10 @@ def last_round_window(transcript: List[str], k_rounds: int = 2) -> str:
     return "\n\n".join(transcript[start_idx:])
 
 def extract_json_from_text(text: str) -> Optional[Dict]:
-    """Extract JSON from text"""
+    """
+    Extract JSON from text
+    Identical to runner.py
+    """
     # Try to find JSON block
     json_pattern = r'```json\s*([\s\S]*?)\s*```'
     match = re.search(json_pattern, text)
@@ -203,6 +190,7 @@ def extract_json_from_text(text: str) -> Optional[Dict]:
     
     # Try direct parsing
     try:
+        # Find { ... }
         start = text.find('{')
         end = text.rfind('}')
         if start != -1 and end != -1:
@@ -215,35 +203,55 @@ def extract_json_from_text(text: str) -> Optional[Dict]:
 
 def are_deals_equivalent(deal1: Dict, deal2: Dict, exclude_keys: List[str] = None) -> bool:
     """
-    Flexible comparison of two deal JSONs
-    - Excludes AI-only fields
-    - Allows small numeric variations
-    - Case-insensitive string comparison
+    v2: Flexible comparison of two deal JSONs
+    
+    - Excludes AI-only fields (like total_value_of_deal_to_me)
+    - Allows small numeric variations (floating point tolerance)
+    - Case-insensitive string comparison with whitespace trimming
+    
+    Args:
+        deal1: First deal JSON
+        deal2: Second deal JSON
+        exclude_keys: List of keys to ignore in comparison
+    
+    Returns:
+        bool: True if deals are equivalent
     """
     if exclude_keys is None:
         exclude_keys = PRIVATE_VALUE_FIELDS.copy()
     
+    # Filter out excluded keys
     filtered_deal1 = {k: v for k, v in deal1.items() if k not in exclude_keys}
     filtered_deal2 = {k: v for k, v in deal2.items() if k not in exclude_keys}
     
+    # Check if keys match
     if set(filtered_deal1.keys()) != set(filtered_deal2.keys()):
         return False
     
+    # Compare each value
     for key in filtered_deal1.keys():
         val1 = filtered_deal1[key]
         val2 = filtered_deal2[key]
         
+        # Numeric comparison (with 0.01% tolerance for floating point issues)
         if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
+            # Convert both to float for comparison
             v1, v2 = float(val1), float(val2)
             tolerance = max(abs(v1), abs(v2)) * 0.0001
             if abs(v1 - v2) > tolerance:
                 return False
+        
+        # String comparison (case-insensitive, whitespace-trimmed)
         elif isinstance(val1, str) and isinstance(val2, str):
             if val1.strip().lower() != val2.strip().lower():
                 return False
+        
+        # Boolean comparison
         elif isinstance(val1, bool) and isinstance(val2, bool):
             if val1 != val2:
                 return False
+        
+        # Other types: direct comparison
         else:
             if val1 != val2:
                 return False
@@ -256,13 +264,19 @@ def are_deals_equivalent(deal1: Dict, deal2: Dict, exclude_keys: List[str] = Non
 class NegotiationSession:
     """
     Negotiation Session Class
+    Logic identical to runner.py with all prompts aligned
     
-    v5 FINAL updates:
-    - Removed messages_in_current_round field
-    - Removed complex current_round tracking
-    - Use len(transcript) to calculate everything
-    - Added round info to transcript format
-    - Fixed all special token detection
+    v4 updates (Round Management):
+    - Added messages_in_current_round field to track messages per round
+    - Clear round definition: 1 round = 2 messages (Student + AI)
+    - AI's synchronous confirmation does NOT count toward messages
+    - current_round represents the current ongoing round
+    - Round increments only after 2 messages are complete
+    
+    v3 updates:
+    - Added total_rounds parameter (customizable)
+    - Fixed maximum rounds logic
+    - Filter private fields from deal_terms
     """
     
     def __init__(
@@ -287,7 +301,6 @@ class NegotiationSession:
         self.student_goes_first = student_goes_first
         self.use_memory = use_memory
         self.use_plan = use_plan
-        self.total_rounds = total_rounds
         
         # Load scenario config
         scenario_path = Path(SCENARIOS_DIR) / f"{scenario_name}.yaml"
@@ -310,6 +323,9 @@ class NegotiationSession:
             self.plan_agent = OpenAIWrapper(model=ai_model, label="Plan")
         
         # Session state
+        self.current_round = 1
+        self.total_rounds = total_rounds
+        self.messages_in_current_round = 0  # ⭐ NEW v4: Track messages per round
         self.transcript = []
         self.ai_memory = ""
         self.ai_plan = ""
@@ -328,71 +344,83 @@ class NegotiationSession:
         self.created_at = datetime.utcnow().isoformat()
         self.updated_at = self.created_at
     
-    def get_current_round(self) -> int:
-        """Calculate current round from transcript length"""
-        round_num, _ = calculate_round_info(len(self.transcript), self.student_goes_first)
-        return round_num
-    
     # ========================================================================
-    # Core Method 1: Generate AI Response
+    # Core Method 1: Generate AI Response (FULLY ALIGNED WITH runner.py)
     # ========================================================================
     def _generate_ai_response(self) -> str:
-        """Generate AI's negotiation response"""
+        """
+        Generate AI's negotiation response
+        
+        Critical Fix:
+        1. Always include context_prompt
+        2. Distinguish Round 1 first turn (use initial_offer_prompt)
+        3. Prompt text FULLY ALIGNED with runner.py
+        4. Added turn_position and turn_action variables
+        5. Added scenario-specific prompts
+        """
         ai_cfg = self.scenario_config[self.ai_role]
+        
+        # 1. Get context_prompt (⭐ Critical: needed every time)
         context = ai_cfg["context_prompt"]
         
-        # Build complete history (strip round info for AI)
-        history_lines = []
-        for msg in self.transcript:
-            # Extract message content after "Round X.Y - Label: "
-            if " - " in msg:
-                parts = msg.split(" - ", 1)
-                if len(parts) == 2:
-                    history_lines.append(parts[1])
-                else:
-                    history_lines.append(msg)
-            else:
-                history_lines.append(msg)
-        history = "\n\n".join(history_lines)
+        # 2. Build complete history
+        history = "\n\n".join(self.transcript)
         
-        # Check if this is Round 1 AND AI goes first
-        is_round_1 = (len(self.transcript) == 0)
-        ai_goes_first = is_round_1 and not self.student_goes_first
+        # 3. Check if this is Round 1 AND AI goes first
+        is_round_1 = (self.current_round == 1)
+        student_went_first = (len(self.transcript) > 0)
+        ai_goes_first = is_round_1 and not student_went_first
         
-        # Determine turn position and action
+        # 4. Determine turn position and action
         if self.student_goes_first:
+            # Student goes first, AI goes second
             turn_position = "going second"
             turn_action = "finish"
         else:
+            # AI goes first, student goes second
             turn_position = "going first"
             turn_action = "start"
         
-        # Choose prompt based on situation
+        # 5. Choose prompt based on situation
         if ai_goes_first:
+            # ============================================================
+            # Round 1 first turn: use initial_offer_prompt
+            # ============================================================
             base_prompt = ai_cfg["initial_offer_prompt"]
             user_prompt = f"{context}\n\n{base_prompt}"
+        
         else:
-            current_round = self.get_current_round()
+            # ============================================================
+            # Round 1 second turn OR Round 2+: use universal_continuation_prompt
+            # ============================================================
             
+            # Build JSON schema
             json_schema_raw = self.scenario_config["json_schema"]
             json_schema_dict = json.loads(json_schema_raw)
             json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
             
+            # Determine scenario-specific prompt components
             scenario_lower = self.scenario_name.lower()
             
+            # ⭐ Scenario-specific value field instructions (runner.py lines 736-773)
             if scenario_lower == "top_talent":
                 value_instruction = "Fill in 'total_points_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
             elif scenario_lower in ("z_deal", "zlab_split"):
                 value_instruction = "Fill in 'expected_value_of_deal_to_me_in_millions' by calculating your own value using your private scoring rules described in your given prompts."
-            elif scenario_lower in ("twisted_tree", "vb_development"):
+            elif scenario_lower == "twisted_tree":
+                value_instruction = ""  # No value field for Twisted Tree
+            elif scenario_lower == "vb_development":
+                # NO-ZOPA scenario - different format
                 value_instruction = ""
             else:
+                # Default
                 value_instruction = "Fill in 'total_value_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
             
+            # ⭐ Universal continuation prompt (FULLY ALIGNED with runner.py lines 691-703)
             universal_continuation_prompt = (
                 "CURRENT ROUND INFORMATION:\n"
-                f"It is now round {current_round}/{self.total_rounds}. You are {turn_position} this round, so it is your turn to {turn_action} the round. "
-                f"You have {self.total_rounds - current_round} rounds remaining after this one.\n\n"
+                f"It is now round {self.current_round}/{self.total_rounds}. You are {turn_position} this round, so it is your turn to {turn_action} the round. "
+                f"You have {self.total_rounds - self.current_round} rounds remaining after this one.\n\n"
                 "<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{{history}}\n\n"
                 "<END NEGOTIATION TRANSCRIPT>\n\n"
                 "OUTPUT INSTRUCTIONS:\n"
@@ -400,11 +428,13 @@ class NegotiationSession:
                 "2. OUTPUT OPTIONS (YOU MUST CHOOSE ONE):\n"
             )
             
+            # Option A: Continue negotiation
             option_a = (
                 "OPTION A: Continue Negotiation\n"
                 "Respond with your negotiation message. Be strategic, clear, and professional.\n\n"
             )
             
+            # Option B: Accept deal
             option_b_intro = "OPTION B: Accept Deal\n"
             if value_instruction:
                 option_b_body = (
@@ -419,11 +449,13 @@ class NegotiationSession:
                     f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{{json_schema}}\n\n"
                 )
             
+            # Option C: Declare no deal possible
             option_c = (
                 "OPTION C: No Deal Possible\n"
                 "If you believe no mutually beneficial deal is achievable, output the token '$DEAL_FAILED$'.\n\n"
             )
             
+            # Combine all options
             base_prompt = (
                 universal_continuation_prompt +
                 option_a +
@@ -432,6 +464,9 @@ class NegotiationSession:
                 "Choose one option and respond accordingly. DO NOT output multiple options."
             )
             
+            # Format with history and json_schema
+            # ⭐ CRITICAL: Use .format() to insert history and json_schema
+            # json_schema needs escaping because it contains braces
             formatted_prompt = base_prompt.format(
                 history=history,
                 json_schema=_escape_braces(json_schema_text)
@@ -439,12 +474,14 @@ class NegotiationSession:
             
             user_prompt = f"{context}\n\n{formatted_prompt}"
         
+        # 6. Add Memory & Plan context (if enabled)
         if self.use_memory and self.ai_memory:
             user_prompt = f"=== Current State ===\n{self.ai_memory}\n\n{user_prompt}"
         
         if self.use_plan and self.ai_plan:
             user_prompt = f"=== Current Strategy ===\n{self.ai_plan}\n\n{user_prompt}"
         
+        # 7. Make API call
         messages = [
             {"role": "system", "content": ai_cfg["system_prompt"]},
             {"role": "user", "content": user_prompt}
@@ -454,13 +491,17 @@ class NegotiationSession:
         return response["content"]
     
     # ========================================================================
-    # Core Method 2: Update Memory
+    # Core Method 2: Update Memory (FULLY ALIGNED WITH runner.py)
     # ========================================================================
     def _update_memory(self):
-        """Update memory state"""
+        """
+        Update memory state
+        FULLY ALIGNED with runner.py lines 413-463
+        """
         if not self.use_memory:
             return
         
+        # Extract last 2 rounds of conversation
         recent_transcript = last_round_window(self.transcript, k_rounds=2)
         
         ai_cfg = self.scenario_config[self.ai_role]
@@ -469,11 +510,11 @@ class NegotiationSession:
         ai_label = ai_cfg.get("label", self.ai_role)
         student_label = student_cfg.get("label", self.student_role)
         
+        # Get Rules & Objective and Facts & Value Model
         rules_objective = ai_cfg["system_prompt"]
         context = ai_cfg["context_prompt"]
         
-        current_round = self.get_current_round()
-        
+        # ⭐ Memory system prompt (FULLY ALIGNED with runner.py lines 413-448)
         memory_system = (
             "You are a state tracking module for an AI negotiator. "
             "Produce a CONCISE, ACTIONABLE negotiation state that survives limited transcript windows.\n\n"
@@ -497,10 +538,11 @@ class NegotiationSession:
             "Keep each section to 1-2 lines max. Focus on critical information only."
         )
         
+        # ⭐ Memory user prompt (FULLY ALIGNED with runner.py lines 453-463)
         memory_user = (
             f"=== Identity ===\n"
             f"Role: State tracker of {ai_label}\n"
-            f"Round: {current_round}/{self.total_rounds}\n\n"
+            f"Round: {self.current_round}/{self.total_rounds}\n\n"
             f"=== Scenario Objective & Rules ===\n{rules_objective}\n\n"
             f"=== Scenario Facts & Value model ===\n{context}\n\n"
             f"=== Previous State ===\n{self.ai_memory or '(empty)'}\n\n"
@@ -518,20 +560,23 @@ class NegotiationSession:
         self.ai_memory = response["content"]
     
     # ========================================================================
-    # Core Method 3: Generate Plan
+    # Core Method 3: Generate Plan (FULLY ALIGNED WITH runner.py)
     # ========================================================================
     def _generate_plan(self):
-        """Generate plan for this round"""
+        """
+        Generate plan for this round
+        FULLY ALIGNED with runner.py lines 492-585
+        """
         if not self.use_plan:
             return
         
         ai_cfg = self.scenario_config[self.ai_role]
         context = ai_cfg["context_prompt"]
         rules_objective = ai_cfg["system_prompt"]
+        
         ai_label = ai_cfg.get("label", self.ai_role)
         
-        current_round = self.get_current_round()
-        
+        # ⭐ Plan system prompt (FULLY ALIGNED with runner.py lines 502-551)
         plan_system = (
             "You are a strategic planning module for an AI negotiator. "
             "Generate a SMART and ASSERTIVE plan for THIS round based on current state and context.\n\n"
@@ -552,10 +597,11 @@ class NegotiationSession:
             "- RISK & RESPONSES: <if-then counterplans; if accepting, '(not applicable)'>\n"
         )
         
+        # ⭐ Plan user prompt (FULLY ALIGNED with runner.py lines 554-563)
         plan_user = (
             f"=== Identity ===\n"
             f"Role: Strategy module of {ai_label}\n"
-            f"Round: {current_round}/{self.total_rounds}\n\n"
+            f"Round: {self.current_round}/{self.total_rounds}\n\n"
             f"=== Scenario Rules & Objective ===\n{rules_objective}\n\n"
             f"=== Scenario Facts & Value model ===\n{context}\n\n"
             f"=== Current State ===\n{self.ai_memory or '(empty)'}\n\n"
@@ -572,59 +618,71 @@ class NegotiationSession:
         self.ai_plan = response["content"]
     
     # ========================================================================
-    # Core Method 4: Process Student Message (⭐ v5 FINAL)
+    # Core Method 4: Process Student Message (⭐ MAJOR REFACTOR v4)
     # ========================================================================
     def process_student_message(self, message: str) -> Dict[str, Any]:
         """
         Process student message
         
-        v5 FINAL - Simplified round management:
-        - Use len(transcript) to calculate everything
-        - No more messages_in_current_round or current_round tracking
-        - Check round completion BEFORE generating AI response
+        ⭐ v4 MAJOR FIXES (Round Management):
+        1. Added messages_in_current_round tracking
+        2. Clear round semantics: 1 round = 2 messages
+        3. AI's synchronous confirmation does NOT count toward messages
+        4. Fixed overtime logic: only when AI sends $DEAL_REACHED$ at final round's 2nd message
+        5. current_round represents current ongoing round
+        6. Round increments only after 2 messages complete
+        
+        ⭐ v3 MAJOR FIXES:
+        1. Fixed maximum rounds logic - check BEFORE generating AI response
+        2. Allow overtime only when AI proposes deal at final round
+        3. Filter private fields from all deal_terms outputs
+        4. Removed redundant system_message when AI proposes deal
+        5. Proper handling of all final round scenarios
+        
+        Scenarios at round 6:
+        - 6.1 AI normal → 6.2 Student normal → Timeout (no 7.1)
+        - 6.1 Student normal → 6.2 AI normal → Timeout (no 7.1)
+        - 6.1 AI normal → 6.2 Student send $DEAL_REACHED$ → AI sync confirm → Done at 6.2
+        - 6.1 Student normal → 6.2 AI send $DEAL_REACHED$ → Allow 7.1 Student confirm (overtime)
+        - 6.1 AI send $DEAL_REACHED$ → 6.2 Student confirm → Done at 6.2
+        - 6.1 Student send $DEAL_REACHED$ → 6.2 AI sync confirm → Done at 6.2
         """
         student_cfg = self.scenario_config[self.student_role]
         student_label = student_cfg.get("label", "Student")
         ai_cfg = self.scenario_config[self.ai_role]
         ai_label = ai_cfg.get("label", "AI")
         
-        # Calculate round info for student's message
-        transcript_len = len(self.transcript)
-        next_message_num = transcript_len + 1
-        
-        if self.student_goes_first:
-            # Student first: odd = Student (1,3,5...), even = AI (2,4,6...)
-            round_num = (next_message_num + 1) // 2
-            message_in_round = 1 if next_message_num % 2 == 1 else 2
-        else:
-            # AI first: odd = AI (1,3,5...), even = Student (2,4,6...)
-            round_num = (next_message_num + 1) // 2
-            message_in_round = 1 if next_message_num % 2 == 0 else 2
-        
-        # Save student message with round info
-        self.transcript.append(f"Round {round_num}.{message_in_round} - {student_label}: {message}")
+        # Save student message to transcript
+        self.transcript.append(f"{student_label}: {message}")
+        self.messages_in_current_round += 1  # ⭐ NEW v4: Count student message
         
         # ========================================================================
-        # SECTION A: Check if AI proposed deal in last message
+        # SECTION A: Check if AI proposed deal in last message (HIGHEST PRIORITY)
         # ========================================================================
         last_ai_message = None
-        for msg in reversed(self.transcript[:-1]):
-            if f"- {ai_label}:" in msg:
+        for msg in reversed(self.transcript[:-1]):  # Exclude the message we just added
+            if msg.startswith(f"{ai_label}:"):
                 last_ai_message = msg
                 break
         
         ai_just_proposed_deal = False
-        if last_ai_message and f"- {ai_label}:" in last_ai_message:
-            message_content = last_ai_message.split(f"- {ai_label}:", 1)[1].strip()
+        if last_ai_message:
+            message_content = last_ai_message.split(":", 1)[1].strip() if ":" in last_ai_message else ""
             ai_just_proposed_deal = message_content.startswith("$DEAL_REACHED$")
         
         if ai_just_proposed_deal:
-            if message.strip().upper().startswith("$DEAL_REACHED$"):
+            # ⭐ AI proposed deal - Student MUST respond (even if overtime)
+            # This is the ONLY scenario where we allow going beyond total_rounds
+            # ⭐ IMPORTANT: Student's confirmation does NOT count toward messages_in_current_round
+            
+            if "$DEAL_REACHED$" in message.upper():
+                # Student accepts
                 student_json = extract_json_from_text(message)
                 ai_json = extract_json_from_text(last_ai_message)
                 
                 if student_json and ai_json:
                     if are_deals_equivalent(student_json, ai_json):
+                        # ✅ Terms match
                         self.student_deal_json = student_json
                         self.ai_deal_json = ai_json
                         self.deal_reached = True
@@ -634,60 +692,69 @@ class NegotiationSession:
                             "deal_reached": True,
                             "deal_terms": filter_private_fields(ai_json),
                             "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
-                            "round": round_num
+                            "round": self.current_round
                         }
                     else:
+                        # ❌ Both said DEAL_REACHED but terms don't match
                         self.status = "failed"
                         return {
                             "ai_message": None,
                             "deal_reached": False,
                             "terms_mismatch": True,
                             "system_message": "❌ Both parties indicated DEAL_REACHED, but the final terms do not match. Negotiation ended.",
-                            "round": round_num
+                            "round": self.current_round
                         }
                 else:
+                    # JSON parsing failed
                     return {
                         "ai_message": None,
                         "deal_reached": False,
                         "json_parse_error": True,
                         "system_message": "❌ Could not parse JSON from your message. Please check the format and try again.",
-                        "round": round_num
+                        "round": self.current_round
                     }
             
-            elif message.strip().upper().startswith("$DEAL_MISUNDERSTANDING$"):
+            elif "$DEAL_MISUNDERSTANDING$" in message.upper():
+                # Student rejects - claims terms don't match
                 self.status = "failed"
                 return {
                     "ai_message": None,
                     "deal_reached": False,
                     "misunderstanding": True,
                     "system_message": "❌ You indicated that the AI's proposed terms do not match your most recent offer. Negotiation ended.",
-                    "round": round_num
+                    "round": self.current_round
                 }
             
             else:
+                # ⚠️ Invalid response - student must accept or reject
                 return {
                     "ai_message": None,
                     "deal_reached": False,
                     "invalid_response": True,
                     "system_message": "⚠️ The AI has proposed a deal. You must either:\n• Accept with '$DEAL_REACHED$' followed by JSON terms\n• Reject with '$DEAL_MISUNDERSTANDING$'\n\nNo other responses are allowed at this point.",
-                    "round": round_num
+                    "round": self.current_round
                 }
         
         # ========================================================================
         # SECTION B: Check if student proposes deal
         # ========================================================================
-        if message.strip().upper().startswith("$DEAL_REACHED$"):
+        if "$DEAL_REACHED$" in message.upper():
+            # Student proposes a deal - let AI confirm synchronously
+            # ⭐ IMPORTANT: AI's synchronous confirmation does NOT count toward messages_in_current_round
             ai_confirm_response = self._request_ai_deal_confirmation(message)
             
-            # Add AI confirmation with same round number (synchronous)
-            self.transcript.append(f"Round {round_num}.{message_in_round} - {ai_label}: {ai_confirm_response}")
+            self.transcript.append(f"{ai_label}: {ai_confirm_response}")
+            # ❌ Do NOT increment messages_in_current_round - AI's confirmation is synchronous
             
+            # Check AI's response (must start with the token)
             if ai_confirm_response.strip().startswith("$DEAL_REACHED$"):
+                # AI confirms
                 student_json = extract_json_from_text(message)
                 ai_json = extract_json_from_text(ai_confirm_response)
                 
                 if student_json and ai_json:
                     if are_deals_equivalent(student_json, ai_json):
+                        # ✅ Terms match
                         self.student_deal_json = student_json
                         self.ai_deal_json = ai_json
                         self.deal_reached = True
@@ -697,18 +764,20 @@ class NegotiationSession:
                             "deal_reached": True,
                             "deal_terms": filter_private_fields(ai_json),
                             "system_message": "✅ Deal confirmed! Both parties agree on the terms.",
-                            "round": round_num
+                            "round": self.current_round
                         }
                     else:
+                        # ❌ Both said DEAL_REACHED but terms don't match
                         self.status = "failed"
                         return {
                             "ai_message": ai_confirm_response,
                             "deal_reached": False,
                             "terms_mismatch": True,
                             "system_message": "❌ Both parties indicated DEAL_REACHED, but the final terms do not match. Negotiation ended.",
-                            "round": round_num
+                            "round": self.current_round
                         }
                 else:
+                    # JSON parsing issue - but AI confirmed, so use AI's JSON
                     if ai_json:
                         self.ai_deal_json = ai_json
                         self.deal_reached = True
@@ -718,142 +787,131 @@ class NegotiationSession:
                             "deal_reached": True,
                             "deal_terms": filter_private_fields(ai_json),
                             "system_message": "✅ Deal confirmed! (Using AI's parsed terms)",
-                            "round": round_num
+                            "round": self.current_round
                         }
             
             elif ai_confirm_response.strip().startswith("$DEAL_MISUNDERSTANDING$"):
+                # AI rejects - terms don't match
                 self.status = "failed"
                 return {
                     "ai_message": ai_confirm_response,
                     "deal_reached": False,
                     "misunderstanding": True,
                     "system_message": "❌ AI believes the terms you specified do not match its most recent offer. Negotiation ended.",
-                    "round": round_num
+                    "round": self.current_round
                 }
         
         # ========================================================================
         # SECTION C: Check if student declares deal failed
         # ========================================================================
-        if message.strip().upper().startswith("$DEAL_FAILED$"):
+        if "$DEAL_FAILED$" in message.upper():
             self.deal_failed = True
             self.status = "failed"
             return {
                 "ai_message": "You have indicated that no deal is possible. Negotiation ended.",
                 "deal_failed": True,
                 "system_message": "❌ You declared that no deal is possible. Negotiation ended.",
-                "round": round_num
+                "round": self.current_round
             }
         
         # ========================================================================
         # SECTION D: Normal negotiation - generate AI response
         # ========================================================================
         
-        # Check if round is complete BEFORE generating AI response
-        current_transcript_len = len(self.transcript)
-        round_number, is_round_complete = calculate_round_info(current_transcript_len, self.student_goes_first)
-        
-        if is_round_complete and round_number >= self.total_rounds:
-            self.status = "completed"
-            return {
-                "ai_message": None,
-                "negotiation_ended": True,
-                "reason": "max_rounds_reached",
-                "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
-                "round": round_number
-            }
-        
-        # Update Memory & Plan
-        if len(self.transcript) > 1:
+        # Update Memory & Plan (if enabled)
+        if self.current_round > 1 or len(self.transcript) > 1:
             self._update_memory()
             self._generate_plan()
         
         # Generate AI response
         ai_response = self._generate_ai_response()
+        self.transcript.append(f"{ai_label}: {ai_response}")
+        self.messages_in_current_round += 1  # ⭐ NEW v4: Count AI message
         
-        # Calculate AI's round info
-        ai_next_message_num = len(self.transcript) + 1
-        
-        if self.student_goes_first:
-            ai_round_num = (ai_next_message_num + 1) // 2
-            ai_message_in_round = 1 if ai_next_message_num % 2 == 1 else 2
-        else:
-            ai_round_num = (ai_next_message_num + 1) // 2
-            ai_message_in_round = 1 if ai_next_message_num % 2 == 1 else 2
-        
-        self.transcript.append(f"Round {ai_round_num}.{ai_message_in_round} - {ai_label}: {ai_response}")
-        
-        # Check round status after AI response
-        new_transcript_len = len(self.transcript)
-        round_after, is_complete_after = calculate_round_info(new_transcript_len, self.student_goes_first)
-        
-        # Check if AI proposed deal
+        # ⭐ Check if AI proposed deal
         if ai_response.strip().startswith("$DEAL_REACHED$"):
             ai_json = extract_json_from_text(ai_response)
             if ai_json:
                 self.ai_deal_json = ai_json
-                allow_overtime = (is_complete_after and round_after >= self.total_rounds)
+                
+                # ⭐ v4 FIXED: Overtime logic
+                # Allow overtime only if:
+                # 1. This round is complete (2 messages)
+                # 2. This is the final round
+                round_complete = (self.messages_in_current_round >= 2)
+                is_final_round = (self.current_round >= self.total_rounds)
+                allow_overtime = (round_complete and is_final_round)
                 
                 return {
                     "ai_message": ai_response,
                     "ai_proposed_deal": True,
                     "ai_deal_terms": filter_private_fields(ai_json),
-                    "round": round_after,
-                    "allow_overtime": allow_overtime
+                    "round": self.current_round,
+                    "allow_overtime": allow_overtime  # ⭐ v4: Signal overtime allowed
                 }
         
         # Check if AI declared deal failed
-        if ai_response.strip().startswith("$DEAL_FAILED$"):
+        if "$DEAL_FAILED$" in ai_response:
             self.deal_failed = True
             self.status = "failed"
             return {
                 "ai_message": ai_response,
                 "deal_failed": True,
                 "system_message": "❌ AI declared that no deal is possible. Negotiation ended.",
-                "round": round_after
+                "round": self.current_round
             }
         
-        # Check if round completed after AI's normal response
-        if is_complete_after and round_after >= self.total_rounds:
-            self.status = "completed"
-            return {
-                "ai_message": ai_response,
-                "negotiation_ended": True,
-                "reason": "max_rounds_reached",
-                "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
-                "round": round_after
-            }
+        # ⭐ v4 NEW: Check if current round is complete (2 messages)
+        if self.messages_in_current_round >= 2:
+            # Round complete
+            round_just_completed = self.current_round
+            
+            # Check if reached last round
+            if round_just_completed >= self.total_rounds:
+                # Last round finished
+                self.status = "completed"
+                return {
+                    "ai_message": ai_response,
+                    "negotiation_ended": True,
+                    "reason": "max_rounds_reached",
+                    "system_message": "⏱️ Maximum rounds reached. Negotiation ended without a deal.",
+                    "round": round_just_completed
+                }
+            
+            # Move to next round
+            self.current_round += 1
+            self.messages_in_current_round = 0  # ⭐ v4: Reset counter
         
         return {
             "ai_message": ai_response,
             "deal_reached": False,
-            "round": round_after
+            "round": self.current_round
         }
     
     # ========================================================================
-    # Core Method 5: AI Confirm Deal
+    # Core Method 5: AI Confirm Deal (SIMPLIFIED v2)
     # ========================================================================
     def _request_ai_deal_confirmation(self, student_message: str) -> str:
-        """Request AI to confirm student's proposed deal"""
+        """
+        Request AI to confirm student's proposed deal
+        
+        v2 CHANGES:
+        1. Simplified prompt - no explanation required for MISUNDERSTANDING
+        2. AI judges based on complete transcript
+        3. Removed redundant "ignore value" instruction
+        """
         ai_cfg = self.scenario_config[self.ai_role]
         context = ai_cfg["context_prompt"]
         
-        # Build complete history (strip round info)
-        history_lines = []
-        for msg in self.transcript:
-            if " - " in msg:
-                parts = msg.split(" - ", 1)
-                if len(parts) == 2:
-                    history_lines.append(parts[1])
-                else:
-                    history_lines.append(msg)
-            else:
-                history_lines.append(msg)
-        history = "\n\n".join(history_lines)
+        # Build complete history
+        history = "\n\n".join(self.transcript)
         
+        # Get JSON schema
         json_schema_raw = self.scenario_config["json_schema"]
         json_schema_dict = json.loads(json_schema_raw)
         json_schema_text = "\n" + json.dumps(json_schema_dict, indent=2)
         
+        # Determine scenario-specific value field instruction
         scenario_lower = self.scenario_name.lower()
         
         if scenario_lower == "top_talent":
@@ -865,6 +923,7 @@ class NegotiationSession:
         else:
             value_field_instruction = "Fill in 'total_value_of_deal_to_me' by calculating your own value using your private scoring rules described in your given prompts."
         
+        # ⭐ Simplified confirmation prompt
         conf_prompt = (
             "DEAL CONFIRMATION:\n"
             "The other side indicated that they accept a deal with '$DEAL_REACHED$' and specified deal terms. "
@@ -902,83 +961,63 @@ class NegotiationSession:
         return response["content"]
     
     # ========================================================================
-    # Core Method 6: Generate Feedback (⭐ IMPROVED v5.1)
+    # Core Method 6: Generate Feedback (RELAXED CONDITIONS)
     # ========================================================================
     def generate_feedback(self) -> str:
         """
         Generate negotiation feedback
         
-        v7 - Simplified & High Quality:
-        - Use context_prompt directly (like plan/memory do)
-        - Remove outcome determination (it's in transcript)
-        - 3 focused sections instead of 5
-        - Concise, high-signal feedback (400-500 words)
+        Can be called at any point (active, completed, failed, ended_early)
         """
-        feedback_agent = OpenAIWrapper(model=self.ai_model, label="FeedbackCoach")
-        
-        # Build complete transcript (strip round info)
-        transcript_lines = []
-        for msg in self.transcript:
-            if " - " in msg:
-                parts = msg.split(" - ", 1)
-                if len(parts) == 2:
-                    transcript_lines.append(parts[1])
-                else:
-                    transcript_lines.append(msg)
-            else:
-                transcript_lines.append(msg)
-        complete_transcript = "\n\n".join(transcript_lines)
-        
-        student_cfg = self.scenario_config[self.student_role]
-        ai_cfg = self.scenario_config[self.ai_role]
-        
-        # Use context_prompt directly (like plan and memory do)
-        context = student_cfg["context_prompt"]
-        rules_objective = student_cfg["system_prompt"]
-        
-        current_round = self.get_current_round()
-        
-        feedback_system = (
-            "You are a negotiation coach providing concise, high-quality feedback to MBA students.\n\n"
-            
-            "CORE PRINCIPLE:\n"
-            "The student's score comes ONLY from options explicitly defined in their context. "
-            "Never suggest strategies, terms, or compromises that don't have explicit point/monetary values in the scenario.\n\n"
-            
-            "FORBIDDEN:\n"
-            "- Creating new issues or terms not in the scenario\n"
-            "- Suggesting organizational processes not mentioned\n"
-            "- Proposing staged/phased deals unless those are scored options\n"
-            "- Inventing creative workarounds that aren't actually available\n\n"
-            
-            "FEEDBACK STRUCTURE:\n\n"
-            
-            "## 1. Performance Summary\n"
-            "- Final outcome (deal with X value, or BATNA)\n"
-            "- 2-3 sentences on overall performance\n\n"
-            
-            "## 2. Key Strengths & Missed Opportunities\n"
-            "- What worked well (cite specific moments)\n"
-            "- Where most value was left (calculate exact points/dollars)\n"
-            "- Which available option would have captured that value\n\n"
-            
-            "## 3. Actionable Takeaway\n"
-            "- One concrete improvement for next negotiation\n"
-            "- Ground this in actual scenario options\n"
+        feedback_agent = OpenAIWrapper(
+            model=self.ai_model,
+            label="FeedbackCoach"
         )
         
+        # Build complete transcript
+        complete_transcript = "\n\n".join(self.transcript)
+        
+        # Get scenario information
+        student_cfg = self.scenario_config[self.student_role]
+        ai_cfg = self.scenario_config[self.ai_role]
+        scenario_context = student_cfg["context_prompt"]
+        
+        # Feedback system prompt
+        feedback_system = (
+            "You are an expert negotiation coach providing feedback to MBA students. "
+            "Your feedback should be constructive, specific, and actionable. "
+            "Focus on strategic insights, communication skills, value creation, and specific recommendations for improvement. "
+            "If the negotiation is incomplete, provide feedback based on the progress so far and suggest how to proceed."
+        )
+        
+        # Determine outcome status
+        if self.deal_reached:
+            outcome_status = "Deal reached successfully"
+        elif self.deal_failed:
+            outcome_status = "Deal explicitly failed (one party declared no deal possible)"
+        elif self.status == "completed":
+            outcome_status = "Maximum rounds reached without a deal"
+        else:
+            outcome_status = "Negotiation in progress or ended early"
+        
+        # Feedback user prompt
         feedback_user = (
-            f"SCENARIO: {self.scenario_name}\n"
-            f"STUDENT: {student_cfg.get('label', self.student_role)}\n"
-            f"OPPONENT: {ai_cfg.get('label', self.ai_role)}\n"
-            f"ROUNDS: {current_round}/{self.total_rounds}\n\n"
-            
-            f"OBJECTIVES & RULES:\n{rules_objective}\n\n"
-            f"CONTEXT & VALUE MODEL:\n{context}\n\n"
-            f"TRANSCRIPT:\n{complete_transcript}\n\n"
-            
-            "Generate feedback following the 3-section structure. "
-            "Reference ONLY options from the context. Be direct and actionable."
+            f"=== Negotiation Session ===\n"
+            f"Scenario: {self.scenario_name}\n"
+            f"Student Role: {student_cfg.get('label', self.student_role)}\n"
+            f"AI Role: {ai_cfg.get('label', self.ai_role)}\n"
+            f"Rounds Completed: {self.current_round}/{self.total_rounds}\n"
+            f"Outcome: {outcome_status}\n\n"
+            f"=== Student's Role Context ===\n{scenario_context}\n\n"
+            f"=== Complete Negotiation Transcript ===\n{complete_transcript}\n\n"
+            f"=== Feedback Request ===\n"
+            "Provide comprehensive feedback on the student's negotiation performance. Structure your feedback as follows:\n\n"
+            "1. **Overall Assessment**: Brief summary of the student's performance and outcome\n"
+            "2. **Strengths**: What the student did well (be specific with examples from the transcript)\n"
+            "3. **Areas for Improvement**: What could have been done better (with specific suggestions)\n"
+            "4. **Strategic Insights**: Analysis of negotiation strategy, value creation opportunities, and tactical choices\n"
+            "5. **Actionable Recommendations**: 3-5 concrete steps the student can take to improve in future negotiations\n\n"
+            "Be encouraging but honest. Focus on helping the student learn and improve."
         )
         
         messages = [
@@ -988,6 +1027,7 @@ class NegotiationSession:
         
         response = feedback_agent.chat(messages)
         
+        # Store feedback
         self.feedback_text = response["content"]
         self.feedback_generated_at = datetime.utcnow().isoformat()
         self.feedback_model = self.ai_model
@@ -1016,7 +1056,9 @@ class NegotiationSession:
                 student_goes_first,
                 use_memory,
                 use_plan,
+                current_round,
                 total_rounds,
+                messages_in_current_round,
                 transcript,
                 ai_memory,
                 ai_plan,
@@ -1031,7 +1073,7 @@ class NegotiationSession:
                 feedback_generated_at,
                 feedback_model
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             self.session_id,
@@ -1044,7 +1086,9 @@ class NegotiationSession:
             int(self.student_goes_first),
             int(self.use_memory),
             int(self.use_plan),
+            self.current_round,
             self.total_rounds,
+            self.messages_in_current_round,  # ⭐ NEW v4
             json.dumps(self.transcript),
             self.ai_memory,
             self.ai_plan,
@@ -1079,6 +1123,7 @@ class NegotiationSession:
         if not row:
             return None
         
+        # Create session object
         session = NegotiationSession(
             session_id=row[0],
             student_id=row[1],
@@ -1089,23 +1134,26 @@ class NegotiationSession:
             student_goes_first=bool(row[7]),
             use_memory=bool(row[8]),
             use_plan=bool(row[9]),
-            total_rounds=row[10]
+            total_rounds=row[11]
         )
         
+        # Restore state
         session.ai_role = row[5]
-        session.transcript = json.loads(row[11])
-        session.ai_memory = row[12] or ""
-        session.ai_plan = row[13] or ""
-        session.student_deal_json = json.loads(row[14]) if row[14] else None
-        session.ai_deal_json = json.loads(row[15]) if row[15] else None
-        session.deal_reached = bool(row[16])
-        session.deal_failed = bool(row[17])
-        session.status = row[18]
-        session.created_at = row[19]
-        session.updated_at = row[20]
-        session.feedback_text = row[21]
-        session.feedback_generated_at = row[22]
-        session.feedback_model = row[23]
+        session.current_round = row[10]
+        session.messages_in_current_round = row[12]  # ⭐ NEW v4
+        session.transcript = json.loads(row[13])
+        session.ai_memory = row[14] or ""
+        session.ai_plan = row[15] or ""
+        session.student_deal_json = json.loads(row[16]) if row[16] else None
+        session.ai_deal_json = json.loads(row[17]) if row[17] else None
+        session.deal_reached = bool(row[18])
+        session.deal_failed = bool(row[19])
+        session.status = row[20]
+        session.created_at = row[21]
+        session.updated_at = row[22]
+        session.feedback_text = row[23]
+        session.feedback_generated_at = row[24]
+        session.feedback_model = row[25]
         
         return session
     
@@ -1122,7 +1170,7 @@ class NegotiationSession:
             "student_goes_first": self.student_goes_first,
             "use_memory": self.use_memory,
             "use_plan": self.use_plan,
-            "current_round": self.get_current_round(),
+            "current_round": self.current_round,
             "total_rounds": self.total_rounds,
             "transcript": self.transcript,
             "deal_reached": self.deal_reached,
@@ -1156,7 +1204,7 @@ class SendMessageRequest(BaseModel):
 @app.get("/")
 def read_root():
     """Root endpoint"""
-    return {"message": "Negotiation Practice API", "version": "v5-final"}
+    return {"message": "Negotiation Practice API", "version": "v4"}
 
 @app.get("/scenarios")
 def list_scenarios():
@@ -1208,7 +1256,8 @@ def start_negotiation(request: StartNegotiationRequest):
             ai_response = session._generate_ai_response()
             ai_cfg = session.scenario_config[session.ai_role]
             ai_label = ai_cfg.get("label", "AI")
-            session.transcript.append(f"Round 1.1 - {ai_label}: {ai_response}")
+            session.transcript.append(f"{ai_label}: {ai_response}")
+            session.messages_in_current_round = 1  # ⭐ NEW v4: Count AI's first message
             ai_first_message = ai_response
         
         session.save_to_db()
@@ -1263,7 +1312,7 @@ def get_transcript(session_id: str):
     return {
         "session_id": session_id,
         "transcript": session.transcript,
-        "current_round": session.get_current_round(),
+        "current_round": session.current_round,
         "total_rounds": session.total_rounds,
         "deal_reached": session.deal_reached,
         "deal_failed": session.deal_failed,
@@ -1272,7 +1321,10 @@ def get_transcript(session_id: str):
 
 @app.get("/negotiation/{session_id}/role_info")
 def get_role_info(session_id: str):
-    """Get the student's complete role information for display"""
+    """
+    Get the student's complete role information for display
+    v2: Also return json_schema for frontend to generate examples
+    """
     session = NegotiationSession.load_from_db(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")

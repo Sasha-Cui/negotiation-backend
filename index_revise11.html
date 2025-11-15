@@ -1246,7 +1246,6 @@
             try {
                 const schema = JSON.parse(jsonSchemaString);
                 const example = {};
-                const comments = {}; // Store comments for each field
                 
                 for (const [key, value] of Object.entries(schema.properties)) {
                     // ⭐ Skip value fields (student doesn't need to fill these)
@@ -1254,61 +1253,21 @@
                         continue;
                     }
                     
-                    // Generate example value and comment based on type
+                    // Generate example value based on type
                     if (value.type === 'number') {
                         example[key] = value.minimum || 0;
-                        
-                        // Add helpful comment for numbers
-                        if (value.minimum !== undefined && value.maximum !== undefined) {
-                            comments[key] = `Number - Range: ${value.minimum} to ${value.maximum}`;
-                        } else {
-                            comments[key] = 'Number - No $ or commas';
-                        }
                     } else if (value.type === 'string' && value.enum) {
                         example[key] = value.enum[0];
-                        
-                        // Add comment showing all options (keep it concise)
-                        const optionsList = value.enum.map(opt => `"${opt}"`).join(', ');
-                        comments[key] = `String - Options: ${optionsList}`;
                     } else if (value.type === 'boolean') {
                         example[key] = false;
-                        comments[key] = 'Boolean - true or false';
                     } else if (value.type === 'string') {
                         example[key] = "...";
-                        comments[key] = 'String';
                     } else {
                         example[key] = null;
-                        comments[key] = 'Value';
                     }
                 }
                 
-                // Build JSON string with comments
-                let jsonLines = [];
-                jsonLines.push('{');
-                
-                const keys = Object.keys(example);
-                keys.forEach((key, index) => {
-                    const value = example[key];
-                    const comment = comments[key];
-                    const isLast = index === keys.length - 1;
-                    
-                    // Add comment line
-                    jsonLines.push(`  // ${comment}`);
-                    
-                    // Add key-value line
-                    const jsonValue = JSON.stringify(value);
-                    const comma = isLast ? '' : ',';
-                    jsonLines.push(`  "${key}": ${jsonValue}${comma}`);
-                    
-                    // Add blank line between fields (except last)
-                    if (!isLast) {
-                        jsonLines.push('');
-                    }
-                });
-                
-                jsonLines.push('}');
-                
-                return jsonLines.join('\n');
+                return JSON.stringify(example, null, 2);
             } catch (error) {
                 console.error('Error generating JSON example:', error);
                 return '{\n  "error": "Could not generate example"\n}';
