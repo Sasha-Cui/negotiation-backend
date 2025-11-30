@@ -2359,10 +2359,42 @@ ${simpleExample}</pre>
                     <h3>🎯 Before You Start</h3>
                     
                     <div class="instruction-item">
-                        <strong>1. Choose Your Scenario</strong>
-                        <p>Select the scenario and role assigned to you in class. The default is 6 rounds.</p>
+                        <strong>1. Choose Your Scenario & Model Mode</strong>
+                        <p>Select the scenario, role, and model mode assigned to you in class. The negotiation has fixed 6 total rounds.</p>
+
+                        <p style="margin-top: 8px;">This platform supports three model modes:</p>
+                        <ul style="margin-left: 20px; line-height: 1.6;">
+                            
+                            <li>
+                                <strong>Base Mode:</strong>
+                                Leave both checkboxes <em>off</em>:
+                                “Enable AI Memory” and “Enable AI Strategic Planning.”
+                                
+                                <span style="color:#666; font-size: 14px;">Fastest (~1 minute per response).</span>
+                            </li>
+
+                            <li>
+                                <strong>Memory Mode (Base + State Tracking):</strong>
+                                Turn on <em>only</em> “Enable AI Memory.”
+                                
+                                <span style="color:#666; font-size: 14px;">Stronger consistency; moderate speed(~2 minute per response).</span>
+                            </li>
+
+                            <li>
+                                <strong>Memory + Plan Mode (Base + State Tracking + Strategy Planning):</strong>
+                                Turn on <em>both</em> checkboxes:
+                                “Enable AI Memory” and “Enable AI Strategic Planning.”
+                                
+                                <span style="color:#666; font-size: 14px;">Deepest reasoning; slowest (~3–4 minutes per response).</span>
+                            </li>
+
+                        </ul>
+
+                        <p style="margin-top: 12px;">
+                            <strong>Checkbox——Randomize who goes first</strong> should remain on for all modes.
+                        </p>
                     </div>
-                    
+                                        
                     <div class="instruction-item">
                         <strong>2. Work Independently</strong>
                         <p>Do not use AI tools (like ChatGPT) to help you negotiate. Apply the negotiation strategies you learned in class.</p>
@@ -2417,13 +2449,27 @@ ${simpleExample}</pre>
 
                     <div class="instruction-item">
                         <strong>2. Be Patient with AI Responses</strong>
-                        <p>The system uses State Tracking + Strategy Planning + Base model architecture (3 AI calls per response).</p>
-                        <p style="margin-top: 12px;"><strong>Expected response times under normal load:</strong></p>
+                        <p>
+                            Depending on the model mode you selected, response times may vary:
+                        </p>
+
                         <ul style="margin: 8px 0 12px 20px; line-height: 1.6;">
-                            <li>Grok-3: 30-60 seconds</li>
-                            <li>GPT-5: 2-4 minutes</li>
+                            <li><strong>Base Mode:</strong> about 1 minute per response</li>
+                            <li><strong>Memory Mode (Base + State Tracking):</strong> usually around 2 minutes per response</li>
+                            <li><strong>Memory + Plan Mode (Base + State Tracking + Strategy Planning):</strong> typically 3–4 minutes per response</li>
                         </ul>
-                        <p>Please wait patiently and do not refresh the page.</p>
+
+                        <p>
+                            Please wait patiently while the AI is generating its message. 
+                            Do not refresh the page during this time.
+                        </p>
+
+                        <p style="margin-top: 10px;">
+                            If you encounter an error due to long processing time, record your messages,
+                            reload the page, and try again. 
+                            If the issue persists, please contact your instructor — you may retry later or switch to Base Mode.
+                            (Don’t worry — based on testing, this situation is very rare.)
+                        </p>
                     </div>
                     
                     <div class="instruction-item important">
