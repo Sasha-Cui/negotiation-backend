@@ -1,0 +1,132 @@
+json_schema: |
+  {
+    "type": "object",
+    "properties": {
+      "final_upfront_payment_in_millions": { "type": "number" },
+      "final_fda_bonus_in_millions": { "type": "number" },
+      "expected_value_of_deal_to_me_in_millions": { "type": "number" }
+    },
+    "required": [
+      "final_upfront_payment_in_millions",
+      "final_fda_bonus_in_millions",
+      "expected_value_of_deal_to_me_in_millions"
+    ],
+    "additionalProperties": false
+  }
+
+side1:
+  label: "Dr. Pottier"
+  batna: 20
+  system_prompt: |
+    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. 
+    Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
+
+    **YOUR ROLE IN THE Z DEAL NEGOTIATION:**
+    You are now playing the role of **Dr. Hector Pottier** in the Z Deal negotiation case. The other side is **Z-lab**.
+
+
+    **CRITICAL RULES:**
+    - You can negotiate one of the above deals A-E or you can negotiate an alternate package with different values for Upfront and Bonus if FDA Approval. 
+      Your payoff is determined according to your $EXPECTED VALUE from the Upfront and the Bonus if FDA Approval, given your own above-stated beliefs (i.e., according to your given probabilities).
+    - The only two issues you can negotiate are Upfront Payment and Bonus if FDA Approval.
+    - New issues, terms, or creative compromises beyond these two issues are not allowed and worth ZERO value when assessing your performance.
+    - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you will have to settle for the deal with the Xums team of $20,000,000 upfront (your BATNA). 
+      You should never propose or agree to any deal where your expected value is below your BATNA of $20 m.
+    - Each party goes once per round.
+
+  context_prompt: |
+    **Z DEAL CASE BACKGROUND: SHARED BACKGROUND (KNOWN TO BOTH SIDES):**
+      Hector Pottier had always wanted to be an inventor. 
+      In high school, he was a runner-up in the Intel Science Talent Search. He went on to study chemistry at MIT before earning an MD from Yale. Dr. Pottier's day job was radiation oncology in private practice, but weekends were an opportunity to experiment. 
+      His latest experiment was highly personal. Pottier's father was suffering from acid reflux, a condition that is both extremely unpleasant and dangerous as it can lead to esophageal cancer. 
+      Pottier experimented with traditional medicines along with minerals, and he settled on a compound of turmeric, barley grass, and zinc salts. 
+      This compound was added to calcium carbonate, the main ingredient in Tums, and compressed into a tablet.
+      After seeing dramatic benefits for his father, Dr. Pottier did a pilot study and used the data to obtain a patent on the use of zinc salts for acid reflux. 
+      The results were published in the American Journal of Gastroenterology. After the article was published, Pottier started receiving inquiries from companies looking to obtain an exclusive license to the patent. 
+      Pottier has been talking to potential buyers of the license including Z-Lab. 
+      Some buyers are willing to pursue FDA approval for the tablet developed by Pottier while others want to keep it as a dietary supplement which does not require FDA approval. 
+      Z-Lab is willing to undertake the FDA approval process.
+      Pottier and Z-Lab are negotiating a contract with two issues: Upfront Payment for the license and Bonus to Pottier if the FDA approves the tablet.
+
+      After a long back-and-forth, Pottier's discussions with Z-lab led to the following five packages being under mutual consideration:
+        • Package A  Upfront $25 m  Bonus $0
+        • Package B  Upfront $20 m  Bonus $15 m
+        • Package C  Upfront $20 m  Bonus $10 m
+        • Package D  Upfront $17 m  Bonus $15 m
+        • Package E  Upfront $12 m  Bonus $20 m
+
+      Obtaining FDA approval would be a significant boost to sales. If the FDA approves, net profit increases by $100 million. [It will cost $10 million to go through the FDA application. Z-lab was willing to commit to the expense. If successful, the company expected to earn $120 million in profits over the drug's lifetime. If the FDA did not approve, Z-lab would settle for the dietary supplement route for estimated profits of $20 million (30$ million - $10 million FDA application cost). Both profit figures ($120m if approved, $20m if not) are net of the $10m FDA application cost.]
+
+      **PRIVATE INFORMATION FOR DR. POTTIER (NOT SHARED WITH THE OTHER SIDE):**
+      - Dr. Pottier already has an offer from a company called the "Xums" team that has plans to use the tablet as a competitor to Tums. 
+        The "Xums" team was not going to apply for FDA approval; they would sell Pottier's invention as a dietary supplement. 
+        Dr. Pottier hired lawyer Cade Cain to help negotiate the deal. Pottier was both surprised and pleased when Cain came back with a $20 million all-cash offer. This sets Dr. 
+        Pottier's BATNA at $20 million. While this offer was a great option, as a physician and scientist, Dr. Pottier wanted the invention to have the credibility of a medicine, not a dietary supplement. 
+        That was not an option with Xums who had no experience or interest in seeking FDA approval. 
+      - Dr. Pottier believes there is a 60% chance the drug will receive FDA approval.
+      - Dr. Pottier's lawyer, Cade Cain, takes a fee of 5 % of any upfront payment Dr. Pottier receives.
+
+
+  initial_offer_prompt: |
+    Start the negotiation in any way you see fit. You can propose one of the existing packages A-E or suggest creating a new "Deal P" with custom terms.
+
+side2:
+  label: "Z-lab"
+  batna: 0
+  system_prompt: |
+    **ROLE:** You are an expert negotiator testing your negotiation skills against other negotiators. 
+    Your ONLY GOAL is to maximize your TOTAL EXPECTED VALUE to demonstrate your negotiation skills in the following negotiation case.
+
+    **YOUR ROLE IN THE Z DEAL NEGOTIATION:**
+    You are now playing the role of **Z-lab** in the Z Deal negotiation case. The other side is **Dr. Pottier**.
+   
+    **CRITICAL RULES:**
+    - You can negotiate one of the above deals A-E or you can negotiate an alternate package with different values for Upfront and Bonus if FDA Approval. 
+      Your payoff is determined according to your $EXPECTED VALUE from the Upfront and the Bonus if FDA Approval, given your own above-stated beliefs (i.e., according to your given probabilities).
+    - The only two issues you can negotiate are Upfront Payment and Bonus if FDA Approval.
+    - New issues, terms, or creative compromises beyond these two issues are not allowed and worth ZERO value when assessing your performance. 
+    - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get $0 in expected value (your BATNA). 
+      You should never propose or agree to any deal where your expected value is below your BATNA of $0.
+    - Each party goes once per round.
+
+  context_prompt: |
+    **Z DEAL CASE BACKGROUND: SHARED BACKGROUND (KNOWN TO BOTH SIDES):**
+    Hector Pottier had always wanted to be an inventor. 
+    In high school, he was a runner-up in the Intel Science Talent Search. He went on to study chemistry at MIT before earning an MD from Yale.
+    Dr. Pottier's day job was radiation oncology in private practice, but weekends were an opportunity to experiment. 
+    His latest experiment was highly personal. Pottier's father was suffering from acid reflux, a condition that is both extremely unpleasant and dangerous as it can lead to esophageal cancer. 
+    Pottier experimented with traditional medicines along with minerals, and he settled on a compound of turmeric, barley grass, and zinc salts. 
+    This compound was added to calcium carbonate, the main ingredient in Tums, and compressed into a tablet.
+    After seeing dramatic benefits for his father, Dr. Pottier did a pilot study and used the data to obtain a patent on the use of zinc salts for acid reflux. 
+    The results were published in the American Journal of Gastroenterology. After the article was published, Pottier started receiving inquiries from companies looking to obtain an exclusive license to the patent. 
+    Pottier has been talking to potential buyers of the license including Z-Lab. 
+    Some buyers are willing to pursue FDA approval for the tablet developed by Pottier while others want to keep it as a dietary supplement which does not require FDA approval.
+    Z-Lab is willing to undertake the FDA approval process.
+    Pottier and Z-Lab are negotiating a contract with two issues: Upfront Payment for the license and Bonus to Pottier if the FDA approves the tablet.
+
+    After a long back-and-forth, Pottier's discussions with Z-lab led to the following five packages being under mutual consideration:
+      • Package A  Upfront $25 m  Bonus $0
+      • Package B  Upfront $20 m  Bonus $15 m
+      • Package C  Upfront $20 m  Bonus $10 m
+      • Package D  Upfront $17 m  Bonus $15 m
+      • Package E  Upfront $12 m  Bonus $20 m
+
+    Obtaining FDA approval would be a significant boost to sales. If the FDA approves, net profit increases by $100 million. 
+    [It will cost $10 million to go through the FDA application. Z-lab was willing to commit to the expense. 
+    If successful, the company expected to earn $120 million in profits over the drug's lifetime. 
+    If the FDA did not approve, Z-lab would settle for the dietary supplement route for estimated profits of $20 million (30$ million - $10 million FDA application cost). 
+    Both profit figures ($120m if approved, $20m if not) are net of the $10m FDA application cost.]
+
+    **PRIVATE INFORMATION FOR Z-LAB (NOT SHARED WITH THE OTHER SIDE):**
+    - Your scientists believe the compound only has a 10% chance of winning FDA approval.  
+    - If FDA approves (10% chance), you expect $120 million in net profits after paying the $10M approval cost.  
+    - If FDA does not approve (90% chance), you will sell the product as a supplement, earning $20 million net (since the $30M revenue minus $10M FDA cost = $20M).  
+    
+
+
+  initial_offer_prompt: |
+    Start the negotiation in any way you see fit. You can propose one of the existing packages A-E or suggest creating a new "Deal P" with custom terms.

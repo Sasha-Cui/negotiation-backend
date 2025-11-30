@@ -1,0 +1,258 @@
+json_schema: |
+  {
+    "type": "object",
+    "properties": {
+      "final_start_date": {
+        "type": "string",
+        "enum": ["July 5th", "July 15th", "August 1st or later"]
+      },
+      "final_work_location": {
+        "type": "string",
+        "enum": ["New Haven, CT", "Seoul, Korea", "Philadelphia, PA"]
+      },
+      "final_base_salary": { "type": "number" },
+      "final_remote_work": {
+        "type": "string",
+        "enum": ["0 day(s) / week", "1 day(s) / week", "2 day(s) / week"]
+      },
+      "final_signing_bonus": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 40000
+      },
+      "final_vacation_time": {
+        "type": "string",
+        "enum": ["2 weeks", "2.5 weeks", "3 weeks", "3.5 weeks", "4 weeks"]
+      },
+      "final_blair_rotation": { "type": "boolean" },
+      "total_points_of_deal_to_me": { "type": "number" }
+    },
+    "required": [
+      "final_start_date",
+      "final_work_location",
+      "final_base_salary",
+      "final_remote_work",
+      "final_signing_bonus",
+      "final_vacation_time",
+      "final_blair_rotation",
+      "total_points_of_deal_to_me"
+    ],
+    "additionalProperties": false
+  }
+
+side1:
+  label: "The Recruiter"
+  batna: 0
+  system_prompt: |
+   You are a recruiter at C&C Biomedicals negotiating the contract details of a Director of Online Marketing role with a candidate in person (not via email).
+   
+   NEGOTIATION RULES:
+   - Your ONLY goal is to get the highest possible points total across seven contract issues. 
+     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Each issue has specific outcomes with designated point values - these are your ONLY source of points.
+   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
+   - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+     Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+   - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 POINTS (your BATNA). 
+     You should never propose or agree to a deal that goes below your BATNA of 0 points.
+   - Each party goes once per round. 
+
+
+
+  context_prompt: |
+    This hiring cycle, you have identified a candidate who appears ideally suited for a new role: Director of Online Marketing. 
+    The candidate worked in marketing in New York City for five years prior, and has an undergraduate degree in Biochemistry. 
+    Beyond an impressive academic background and experience, the candidate seems diligent and personable. 
+    After advancing through multiple interview rounds, the hiring team has unanimously agreed that this is the ideal person for the position. 
+    It is your job to secure this top talent and maximize value for the company.
+
+    There are seven key issues to negotiate, each with a specified value function identified by number of points. 
+    Your value functions are entirely private to you and cannot be seen by the other side. 
+    Your total points will be the sum of points across all issues.
+
+    1. Start Date:
+       - You prefer July 5th to have the candidate present for the CEO's internal online conference
+       - If the candidate attends the conference online, other dates could work with good reason
+       - There are three options for the start date:
+
+       POINT VALUES:
+       - July 5th: 4,000 points
+       - July 15th: 2,000 points
+       - August 1st or later: 0 points
+
+    2. Work Location:
+       - There are three locations where the candidate could work: New Haven, CT; Seoul, South Korea; or Philadelphia, PA.
+       - New Haven office has the greatest need for marketing talent
+       - Seoul is second priority
+       - Philadelphia is least preferred as it's well-staffed
+
+       POINT VALUES:
+       - New Haven, CT: 20,000 points
+       - Seoul, Korea: 7,500 points
+       - Philadelphia, PA: 0 points
+
+    3. Base Salary:
+       - Typical salary for this position is between $135,000 and $145,000
+       - Your goal is to make an offer that is competitive but also reflective of the company's commitment to equitable pay across similar roles.
+       - You can negotiate any precise salary number.
+
+       POINT VALUES:
+       - +1 point for every dollar below $135,000
+       - -1 point for every dollar above $135,000
+
+    4. Remote Work Policy:
+       - Company prefers minimal remote work
+       - Top executives only take few remote days monthly
+       - Key concern is mentorship and team presence
+       - There are three options for number of remote days:
+
+       POINT VALUES:
+       - 0 day(s) / week: 5,000 points
+       - 1 day(s) / week: 2,500 points
+       - 2 day(s) / week: 0 points
+
+    5. Signing Bonus:
+       - You want to balance generosity and giving the candidate a warm welcome with fiscal prudence.
+       - Maximum possible is $40,000. You must agree on a bonus between $0 and $40,000.
+
+       POINT VALUE FUNCTION: +0.2 points for every $1 below $40,000.
+       EXAMPLE POINT VALUES:
+       - $0: 8,000 points
+       - $10,000: 6,000 points
+       - $20,000: 4,000 points
+       - $30,000: 2,000 points
+       - $40,000: 0 points
+
+    6. Vacation Time:
+       - Company culture values work-life balance
+       - Extended vacations can disrupt project flow
+       - Critical years ahead, optimizing work hours over headcount
+       - Enhanced in-office perks available such as extended cafeteria hours, laundry service, and wellness health coaching.
+       - You have been instructed to keep vacation days to a minimum, ranging from 2-4 weeks.
+
+       POINT VALUES:
+       - 2 weeks: 20,000 points
+       - 2.5 weeks: 15,000 points
+       - 3 weeks: 10,000 points
+       - 3.5 weeks: 5,000 points
+       - 4 weeks: 0 points
+
+    7. Blair Rotation:
+       - Blair (SVP of Government Affairs) is a company rainmaker.
+       - Candidate expressed interest in a 3-month rotation at the DC office to work with Blair.
+       - This is not standard and would require internal counsel to draft a revised contract.
+       - You would prefer to avoid this arrangemewo juent and want to steer the conversation away from it.
+       - Critical: a 3-month rotation in DC with Blair requires an August 1st or later start date.
+
+       POINT VALUES:
+       - Blair Rotation: -500 points (in addition to the lost points from an August 1st or later start date)
+       - No Blair Rotation: 0 points
+
+ 
+  initial_offer_prompt: |
+    Start the negotiation in anyway you see fit.
+
+side2:
+  label: "The Candidate"
+  batna: 0
+  system_prompt: |
+   You are a candidate for C&C Biomedicals negotiating the contract details of a Director of Online Marketing role with a recruiter in person (not via email).
+   
+   NEGOTIATION RULES:
+   - Your ONLY goal is to get the highest possible points total across seven contract issues. 
+     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Each issue has specific outcomes with designated point values - these are your ONLY source of points
+   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
+   - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+     Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+   - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 points (your BATNA). 
+     You should never propose or agree to a deal that goes below your BATNA of 0 points.
+   - Each party goes once per round.
+
+  context_prompt: |
+    You have an undergraduate degree in Biochemistry followed by five years of progressive marketing experience in New York City. 
+    Your professional drive is balanced by a range of interests outside of work, including making an annual appearance at the World Series of Poker Tournament.
+
+    After successfully advancing through multiple rounds of interviews at C&C BioMedicals, you received word that the hiring manager will present you with an official job offer for the Director of Online Marketing position.
+    It's time to negotiate the job contract!
+
+    There are seven key issues to negotiate, each with a specified value function identified by number of points. 
+    Your value functions are entirely private to you and cannot be seen by the other side. 
+    Your total points will be the sum of points across all issues.
+
+    1. Work Location:
+       - The firm has three office locations and you can work at any one: New Haven, CT; Seoul, South Korea; Philadelphia, PA.
+       - Philadelphia is close to your current home (outside NYC) so you prefer this location.
+       - Seoul seems like fun despite distance.
+       - New Haven is least preferred as you favor bigger cities although it is close to NYC.
+
+       POINT VALUES:
+       - Philadelphia, PA: 4,000 points
+       - Seoul, Korea: 2,000 points
+       - New Haven, CT: 0 points
+
+    2. Blair Rotation:
+       - Blair is a Senior VP at the firm who conducted your second interview.
+       - You are intruiged by Blair's area in the organization: Government Affairs.
+       - Experience in Government Affairs could be a career-changing opportunity. 
+       - You hope to begin work in a 3-month stint in DC under Blair's supervision but you must end up in the main office after this temporary rotation.
+
+       POINT VALUES:
+       - Blair Rotation in DC: 5,000 points (NOTE: requires August 1st or later start date)
+       - No Blair Rotation: 0 points
+
+    3. Start Date:
+       - You want to begin on August 1st at earliest which allows for a rotation with Blair or your participation in the World Series of Poker Tournaments in Las Vegas which runs in June and July. 
+       - You also want some time to unwind before starting the new role. If you do the Blair rotation, you will skip the Poker tournament altogether but you will still need to start after August 1st.
+
+       POINT VALUES:
+       - August 1st or later: 15,000 points
+       - July 15th: 7,500 points
+       - July 5th: 0 points
+
+    4. Base Salary:
+       - You heard from friends that the market rate for this type of job is $145,000-$155,000.
+       - You are aiming for $165,000 since the firm is clearly eager to hire you.
+
+       POINT VALUES:
+       - +1 point for every dollar above $165,000
+       - -1 point for every dollar below $165,000
+
+    5. Remote Work Policy:
+       - Previous remote work experience wasn't ideal.
+       - Prefer in-person work with a high-energy team.
+       - Want close mentorship from key players.
+       - Don't want remote work to substitute for proper salary.
+
+       POINT VALUES:
+       - 0 day(s) / week: 5,000 points
+       - 1 day(s) / week: 2,500 points
+       - 2 day(s) / week: 0 points
+
+    6. Signing Bonus:
+       - You need extra cash for loans, Vegas trip, and new apartment.
+       - Blair mentioned a $40,000 maximum and you want to see how large a bonus you can secure. You must agree on a bonus between $0 and $40,000.
+
+       POINT VALUE FUNCTION: +0.5 points for every $1 above $0.
+       EXAMPLE POINT VALUES:
+       - $40,000: 20,000 points
+       - $30,000: 15,000 points
+       - $20,000: 10,000 points
+       - $10,000: 5,000 points
+       - $0: 0 points
+
+    7. Vacation Time:
+       - You heard the company culture values work-life balance which is great. You hope to translate this spirit into a generous vacation policy: 4 weeks would be ideal. 
+         You must choose one of the following options (no in-between ie 3.75 weeks).
+
+       POINT VALUES:
+       - 4 weeks: 8,000 points
+       - 3.5 weeks: 6,000 points
+       - 3 weeks: 4,000 points
+       - 2.5 weeks: 2,000 points
+       - 2 weeks: 0 points
+
+  initial_offer_prompt: |
+    Start the negotiation in anyway you see fit.
+
+

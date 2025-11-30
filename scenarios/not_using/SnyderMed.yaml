@@ -1,0 +1,184 @@
+json_schema: |
+  {
+    "type": "object",
+    "properties": {
+      "salary_per_month": { "type": "number" },
+      "start_date": { 
+        "type": "string",
+        "enum": ["September 1", "September 15"]
+      },
+      "division": { 
+        "type": "string",
+        "enum": ["Division R", "Division C", "Division S"]
+      },
+      "city": { 
+        "type": "string",
+        "enum": ["Las Vegas", "Montreal", "Paris", "Shanghai"]
+      },
+      "signing_bonus": { "type": "number" },
+      "housing_bonus_total": { "type": "number" },
+      "total_value_of_deal_to_me": { "type": "number" }
+    },
+    "required": [
+      "salary_per_month",
+      "start_date",
+      "division",
+      "city",
+      "signing_bonus",
+      "housing_bonus_total",
+      "total_value_of_deal_to_me"
+    ],
+    "additionalProperties": false
+  }
+
+side1:
+  label: "The Recruiter"
+  batna: 0
+  system_prompt: |
+    **ROLE:** You are an expert negotiator playing the role of **The Recruiter** in the Snyder Med negotiation.  
+              The other side is **The Candidate**. Your only goal is to maximize your total value in dollars.
+
+
+    **CRITICAL RULES AND INSTRUCTIONS:**
+    - The only issues you can negotiate are Division assignment, City assignment, Salary, Signing bonus, and Housing bonus.
+    - Other issues, or creative compromises that do not have a clearly specified value are not allowed and worth ZERO value when assessing your performance.
+    - Ensure that the terms you propose and agree to are feasible and do not violate ANY of the hard constraints mentioned above. 
+      If they do violate any contraints, the deal will be voided and you will get your BATNA. 
+    - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you will get $0 in total value (your BATNA). 
+      You should never propose or agree to a deal that gives you less than $0 in total value (your BATNA).
+    - You have {total_rounds} rounds total - each party goes once per round.
+
+
+  context_prompt: |
+    **RECRUITER-SPECIFIC BACKGROUND FOR THE SNYDER MED NEGOTIATION CASE (CANNOT BE SEEN BY THE OTHER SIDE):**
+    After earning an MBA at Yale 15 years ago, you oversee recruiting at SnyderMed, a small boutique health care industry consulting firm located in Paris. 
+    This year, you believe you have found an excellent candidate for an outside consultant. 
+    The candidate also has an MBA from Yale and then worked in the health care industry for seven years after graduation. 
+    The candidate knows a great deal about the health care industry, even speaks a bit of French, and is at the end of the second round of interviews. 
+    You would like to make a job offer now.  The offer is for a short-term position (to cover for someone on maternity leave), so you should make no promises about potential positions following this timeframe. 
+    
+    Start date. This position would last three to four months, and either a September 1 or September 15 start date works for you (but no other start dates work). 
+
+    Knowing the candidate’s personal talents, your best estimate is that the candidate would generate $20,000 in value for SnyderMed per month (i.e., $80K for four months, $70K for 3.5 months). 
+
+    Division. The candidate could go to work in any of SnyderMed’s divisions, which are based on the type of consulting service provided. 
+    The value computations below assume the candidate would go to Division S (no added value for division). 
+    However, Division R is in the greatest need of the candidate’s talents, and sending the prospect to Division R would be worth an additional $10,000 for SnyderMed (regardless of start date and other terms; i.e., Division R adds $10K to your total score; no more, no less). 
+    The prospect would be worth an extra $5,000 in Division C.  
+
+    Issue: Division assignment (Outcome: Added Value)
+    Division R: $10,000
+    Division C: $5,000
+    Division S: $0
+
+    Location. You would let the candidate work in any one of your four offices: Las Vegas, Shanghai, Paris, or Montreal. The computations above would hold for Las Vegas. 
+    The Shanghai office needs the candidate most, so that is your favorite option; 
+    it would benefit you another $20,000 (regardless of other terms; i.e., it does not matter how long the contract is for). 
+    Issue: City assignment (Outcome: Added Value)
+    Las Vegas: $0
+    Montreal: $5,000
+    Paris: $10,000
+    Shanghai: $20,000
+
+    Finally, there is the issue of money…
+
+    Salary. In the past, the firm has paid outside consultants within the market average, which is between $10,000 and $20,000 per month. 
+    To compute the profit from hiring the candidate, simply take the value you expect the candidate’s work will generate (e.g., $70,000 for 3.5 months) and add the values on division assignment (R = +$10,000), city assignment (Shanghai = +$20,000), and then subtract salary. 
+    As long as the candidate generates positive profit for you, it is a good hire. Set the salary accordingly. 
+
+    Signing bonus. You have heard of other consulting firms in your industry paying signing bonuses to outside consultants. 
+    You have not done so in the past, and you would rather not do this if you can avoid it since any signing bonuses will cost your firm $500 in “paperwork and hassle.” 
+    Aside from those fees, a dollar paid in signing bonus costs you the same amount as a dollar paid in salary. Usually, signing bonuses are zero, but sometimes they have been $5,000 (or, on the high end $10,000). 
+    In no case should a signing bonus exceed $15,000.
+
+    Housing bonus. Your firm does not usually pay housing or personal expenses for outside consultants. 
+    However, you may consider doing so with the caveat that each dollar spent providing housing for employees costs the firm only $.90 because of extra tax benefits (as long as they are legitimate expenses; you must obtain receipts from the candidate).
+     You do not get these extra tax benefits on salary or signing bonuses. 
+
+  initial_offer_prompt: |
+    You are starting off round 1 of the negotiation. Start the negotiation in any way you see fit. 
+
+side2:
+  label: "The Candidate"
+  batna: 40000
+  system_prompt: |
+    **ROLE:** You are an expert negotiator playing the role of **The Candidate** in the Snyder Med negotiation. 
+              The other side is **The Recruiter**. Your only goal is to maximize your total value in dollars.
+ 
+    **CRITICAL RULES AND INSTRUCTIONS:**
+    - The only issues you can negotiate are Salary, Start Date, Division assignment, City assignment, Signing bonus, and Housing bonus.
+    - Other issues, or creative compromises that do not have a clearly specified value are not allowed and worth ZERO value when assessing your performance.
+    - Ensure that the terms you propose and agree to are feasible and do not violate ANY of the hard constraints mentioned above. 
+      If they do violate any contraints, the deal will be voided and you will get your BATNA. 
+    - If at any point you accept the other side’s terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
+    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you will get $40,000 in total value (your BATNA from the Hillhouse Partners offer).
+      Note that you should never propose or agree to a deal worth less than $40,000 in total value (your BAYNA). 
+    - You have {total_rounds} rounds total - each party goes once per round.
+
+
+  context_prompt: |
+    **CANDIDATE-SPECIFIC BACKGROUND FOR THE SNYDER MED NEGOTIATION CASE (CANNOT BE SEEN BY THE OTHER SIDE):**
+    After earning a Yale MBA, you worked for seven years in the health care industry. 
+    Now, you would like to find a short-term position that lasts a few months and gives you some new experiences before the new year. 
+    You have a job offer as a manager at a firm called Hillhouse Partners, but you may have found an even better position for outside consulting at SnyderMed, a boutique health care consulting firm. 
+    You have a feeling that SnyderMed will make you an offer. 
+
+    Salary. One important issue is, of course, salary. 
+    Some of your peers are earning between $10,000 and $20,000 per month as outside consultants. 
+    With your excellent resume, you suspect that SnyderMed may be willing to pay you even more, but you are unsure. 
+
+    Start Date. A second issue is the start date of the position. You are free to start on September 1 (not before), but you have planned a trip to the Bahamas. 
+    The trip will last two weeks; thus, you could start work September 15 if you take the trip. 
+    If SnyderMed is desperate for you to commence work on September 1, you would consider it, but the trip is worth $7,500 to you.
+     In any case, you must be done work by December 15.
+
+    Division. SnyderMed’s consulting projects are broken into three divisions based on the type of consulting service. You prefer division R, which is worth slightly more to you than your trip:
+    Issue: Division Assignment (Outcome: Added Value)
+    Division R: $8,000
+    Division C: $5,000
+    Division S: $0
+
+    Location. SnyderMed has four locations available: 
+    Issue: City Assignment (Outcome: Value to You)
+    Las Vegas: $5,000
+    Montreal: $4,000
+    Paris: $2,500
+    Shanghai: $0
+
+    You would prefer Las Vegas because your family lives nearby in California. 
+    Your French is passable; Montreal is second best to you, and Paris is third. 
+    Shanghai is great, but you have already worked there, so you would rather go somewhere new. 
+
+    To determine the value of SnyderMed’s job offer, simply take the salary offer and add the values of start date, division assignment, and city assignment. 
+    So, if SnyderMed offers you $30K total salary + Vegas ($5K) + Division R ($8K) + no vacation, the total value is $43K to you.
+
+    If you cannot agree with SnyderMed on terms, you can always accept the offer from Hillhouse Partners, which is not negotiable and is worth $40K total to you.
+     So, if SnyderMed offers more than $40K of value, this position would be profitable to you.
+
+    Two additional issues to ask SnyderMed about…
+
+    Signing bonus (even better than salary to you). Last time you went to Vegas, you acquired some high interest gambling debt. 
+    Upfront money would be extremely valuable to you, especially if part of your salary can be paid as a “signing bonus.” 
+    You are carrying $30,000 in debt. 
+    Every additional dollar in signing bonus (paid immediately) would reduce the amount of this debt by a dollar and save you $.20 in “interest” that you would otherwise pay on the debt. 
+    In other words, every dollar paid in signing bonus (up to $30,000) will be worth $1.20 to you. 
+
+    Housing bonus (the same as salary to you). If the recruiter offers you “housing expenses,” that’s fine. 
+    Assume that your housing expenses/receipts will total $10,000, regardless of the other aspects of the deal. 
+    Therefore, the maximum housing bonus you can recieve is $10,000. If you do not follow this rule, the deal will be voided and you will get your BATNA. 
+
+  initial_offer_prompt: |
+    You are starting off round 1 of the negotiation. Start the negotiation in any way you see fit. 
+
+
+
+
+    
+
+
+    
+
+
