@@ -95,8 +95,7 @@ def init_db():
 
     c = conn.cursor()
     
-    # Create table 
-
+    # Create table without messages_in_current_round
     c.execute("""
         CREATE TABLE IF NOT EXISTS negotiation_sessions (
             session_id TEXT PRIMARY KEY,
@@ -113,8 +112,6 @@ def init_db():
             transcript TEXT NOT NULL,
             ai_memory TEXT,
             ai_plan TEXT,
-            ai_memory_history TEXT,
-            ai_plan_history TEXT,
             student_deal_json TEXT,
             ai_deal_json TEXT,
             deal_reached BOOLEAN NOT NULL,
@@ -127,7 +124,7 @@ def init_db():
             feedback_model TEXT
         )
     """)
-
+    
     conn.commit()
     conn.close()
 
@@ -316,8 +313,6 @@ class NegotiationSession:
         self.transcript = []
         self.ai_memory = ""
         self.ai_plan = ""
-        self.ai_memory_history = []  
-        self.ai_plan_history = []    
         self.student_deal_json = None
         self.ai_deal_json = None
         self.deal_reached = False
@@ -489,7 +484,7 @@ class NegotiationSession:
             "You are a state tracking module for an AI negotiator. "
             "Produce a CONCISE, ACTIONABLE negotiation state that survives limited transcript windows.\n\n"
             "REQUIRED SECTIONS:\n"
-            "OFFERS: [Us: <our latest position on each issue>; Them: <their latest position on each issue>; Them-best-for-us: <track complete offer they've proposed historically that has highest value to us>] (Format for Us/Them excluding Them-best-for-us: 'issue: old→new [updated]' if value changed this round; 'issue: value [unchanged]' if value unchanged from earlier rounds; 'issue: not yet' if never discussed by this party; If multiple offer packages proposed, state primary + note alternatives exist with their key trade-offs)\n"
+            "OFFERS: [Us: <our latest position on each issue, retain terms from earlier rounds unless updated this round>; Them: <their latest position on each issue, retain terms from earlier rounds unless updated this round>; Them-best-for-us: <track complete offer they've proposed historically that has highest value to us>] (Format for Us/Them excluding Them-best-for-us: 'issue: old→new [updated]' if value changed this round; 'issue: value [unchanged]' if value unchanged from earlier rounds; 'issue: not yet' if never discussed by this party; If multiple offer packages proposed, state primary + note alternatives exist with their key trade-offs)\n"
             "OPPONENT PATTERNS: [Concession/firmness behaviors on issues; any acceptance of our proposals (specify full package or partial issues); strong commitments they stated; questions/requests they raised]\n"
             "OPPONENT PRIORITIES: [What matters to them across issues: mark EXPLICIT if they stated directly; mark Hypothesis if inferred from resistance/concession patterns]\n"
             "OPPONENT CONSTRAINTS: [Opponent's stated boundaries, red lines, or requirements]\n\n"
@@ -524,11 +519,6 @@ class NegotiationSession:
         
         response = self.memory_agent.chat(messages)
         self.ai_memory = response["content"]
-        # Append to history
-        self.ai_memory_history.append({
-            "round": f"{ai_round}.{ai_position}",
-            "content": response["content"]
-        })
     
     # ========================================================================
     # Core Method 3: Generate Plan
@@ -551,15 +541,15 @@ class NegotiationSession:
             "You are a strategic planning module for an AI negotiator. "
             "Generate a SMART and ASSERTIVE plan for THIS round based on current state and context.\n\n"
             "OUTPUT SKELETON (≤8 lines, bullet format):\n"
-            "- ROUND GOAL: <concrete objective for this round; if accepting, write 'consider accepting current offer'>\n"
+            "- ROUND GOAL: <concrete objective for this round, or 'consider accepting current offer'>\n"
             "- KEY LEVERS: <issues where we have flexibility to trade or push; if accepting, write 'N/A'>\n"
             "- TACTICS: <concrete moves this round; if accepting, write 'consider accepting current offer'>\n"
             "- OFFER SCAFFOLD: <our package to propose for this round; if accepting, refer to opponent's current offer>\n"
             "PLANNING RULES:\n"
             "- READ STATE – Use OFFERS, PATTERNS, PRIORITIES, and CONSTRAINTS from the State exactly as the source of truth.\n"
-            "- VALUE MAXIMIZATION – Focus on securing high-value outcomes, and look for opportunities to trade lower-value items for larger gains.\n"
-            "- STRATEGIC SIGNALING – When advantageous, consider signaling relative priorities (without exact value scoring rules) to enable favorable trades. Be strategic about what you reveal and when.\n"
-            "- ADAPT & NON-REPETITION – If last round's strategy didn't move the opponent, consider adapting tactics.\n"
+            "- VALUE MAXIMIZATION – Your primary goal is to maximize your own value. Focus on securing high-value outcomes, and look for opportunities to trade lower-value items for larger gains.\n"
+            "- STRATEGIC SIGNALING – When advantageous, consider signaling relative priorities (without exact value scoring rules) to enable favorable trades. Structure proposals to maximize your value while maintaining deal feasibility.\n"
+            "- ADAPT & NON-REPETITION – If last round's strategy didn't move the opponent, change tactics.\n"
             "- CLOSING DECISION – If you judge that now is the right time to close, consider accepting current offer.\n"
             "- HONOR ACCEPTANCES - If STATE indicates the opponent has fully and accurately accepted one of your proposed offers/packages, plan to reach the deal with those exact terms. Do not attempt to extract additional value.\n"
             "- WALKBACK RESISTANCE – If opponent proposes worse offer than their Them-best-for-us, resist by anchoring to that better historical offer.\n"
@@ -584,11 +574,6 @@ class NegotiationSession:
         
         response = self.plan_agent.chat(messages)
         self.ai_plan = response["content"]
-        # Append to history
-        self.ai_plan_history.append({
-            "round": f"{ai_round}.{ai_position}",
-            "content": response["content"]
-        })
     
     # ========================================================================
     # Core Method 4: Process Student Message (⭐ v5 FINAL)
@@ -1045,8 +1030,6 @@ class NegotiationSession:
                 transcript,
                 ai_memory,
                 ai_plan,
-                ai_memory_history,
-                ai_plan_history,
                 student_deal_json,
                 ai_deal_json,
                 deal_reached,
@@ -1058,7 +1041,7 @@ class NegotiationSession:
                 feedback_generated_at,
                 feedback_model
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             self.session_id,
@@ -1075,8 +1058,6 @@ class NegotiationSession:
             json.dumps(self.transcript),
             self.ai_memory,
             self.ai_plan,
-            json.dumps(self.ai_memory_history),
-            json.dumps(self.ai_plan_history),
             json.dumps(self.student_deal_json) if self.student_deal_json else None,
             json.dumps(self.ai_deal_json) if self.ai_deal_json else None,
             int(self.deal_reached),
@@ -1125,19 +1106,16 @@ class NegotiationSession:
         session.transcript = json.loads(row[11])
         session.ai_memory = row[12] or ""
         session.ai_plan = row[13] or ""
-        session.ai_memory_history = json.loads(row[14]) if row[14] else []
-        session.ai_plan_history = json.loads(row[15]) if row[15] else []
-
-        session.student_deal_json = json.loads(row[16]) if row[16] else None  
-        session.ai_deal_json = json.loads(row[17]) if row[17] else None       
-        session.deal_reached = bool(row[18])                                   
-        session.deal_failed = bool(row[19])                                    
-        session.status = row[20]                                               
-        session.created_at = row[21]                                           
-        session.updated_at = row[22]                                           
-        session.feedback_text = row[23]                                        
-        session.feedback_generated_at = row[24]                               
-        session.feedback_model = row[25]                                       
+        session.student_deal_json = json.loads(row[14]) if row[14] else None
+        session.ai_deal_json = json.loads(row[15]) if row[15] else None
+        session.deal_reached = bool(row[16])
+        session.deal_failed = bool(row[17])
+        session.status = row[18]
+        session.created_at = row[19]
+        session.updated_at = row[20]
+        session.feedback_text = row[21]
+        session.feedback_generated_at = row[22]
+        session.feedback_model = row[23]
         
         return session
     
