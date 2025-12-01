@@ -420,13 +420,15 @@ class NegotiationSession:
                 option_b_body = (
                     f"If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
                     f"then output the agreed terms in JSON format on subsequent lines. {value_instruction}\n"
-                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{json_schema_text}\n\n"
+                    f"JSON FORMAT: Output a JSON instance with actual values, NOT the schema definition.\n"
+                    f"The schema below shows the structure - fill in the actual deal values:\n{json_schema_text}\n\n"
                 )
             else:
                 option_b_body = (
                     "If you want to accept the most recent terms offered by the other side, output ONLY the token '$DEAL_REACHED$' on the first line, "
                     "then output the agreed terms in JSON format on subsequent lines.\n"
-                    f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION B):\n{json_schema_text}\n\n"
+                    f"JSON FORMAT: Output a JSON instance with actual values, NOT the schema definition.\n"
+                    f"The schema below shows the structure - fill in the actual deal values:\n{json_schema_text}\n\n"
                 )
             
             option_c = (
@@ -487,7 +489,7 @@ class NegotiationSession:
         
         memory_system = (
             "You are a state tracking module for an AI negotiator. "
-            "Produce a CONCISE, ACTIONABLE negotiation state that survives limited transcript windows.\n\n"
+            "Produce a CONCISE, USABLE negotiation state that survives limited transcript windows.\n\n"
             "REQUIRED SECTIONS:\n"
             "OFFERS: [Us: <our latest position on each issue>; Them: <their latest position on each issue>; Them-best-for-us: <track complete offer they've proposed historically that has highest value to us>] (Format for Us/Them excluding Them-best-for-us: 'issue: old→new [updated]' if value changed this round; 'issue: value [unchanged]' if value unchanged from earlier rounds; 'issue: not yet' if never discussed by this party; If multiple offer packages proposed, state primary + note alternatives exist with their key trade-offs)\n"
             "OPPONENT PATTERNS: [Concession/firmness behaviors on issues; any acceptance of our proposals (specify full package or partial issues); strong commitments they stated; questions/requests they raised]\n"
@@ -549,16 +551,17 @@ class NegotiationSession:
         
         plan_system = (
             "You are a strategic planning module for an AI negotiator. "
-            "Generate a SMART and ASSERTIVE plan for THIS round based on current state and context.\n\n"
-            "OUTPUT SKELETON (≤8 lines, bullet format):\n"
-            "- ROUND GOAL: <concrete objective for this round; if accepting, write 'consider accepting current offer'>\n"
-            "- KEY LEVERS: <issues where we have flexibility to trade or push; if accepting, write 'N/A'>\n"
-            "- TACTICS: <concrete moves this round; if accepting, write 'consider accepting current offer'>\n"
+            "Generate a SMART and ACTIONABLE plan for THIS round based on current state and context.\n\n"
+            "OUTPUT SKELETON (aim for ≤10 lines; maximum 12 lines if complexity requires):\n"
+            "- ROUND GOAL: <concrete objectives for this round; if accepting, write 'consider accepting current offer'>\n"
+            "- KEY LEVERS: <issues where we have flexibility to trade or push; if none or accepting, write 'N/A'>\n"
+            "- TACTICS: <specific actions this round; if accepting, write 'consider accepting current offer'>\n"
             "- OFFER SCAFFOLD: <our package to propose for this round; if accepting, refer to opponent's current offer>\n"
             "PLANNING RULES:\n"
             "- READ STATE – Use OFFERS, PATTERNS, PRIORITIES, and CONSTRAINTS from the State exactly as the source of truth.\n"
-            "- VALUE MAXIMIZATION – Focus on securing high-value outcomes, and look for opportunities to trade lower-value items for larger gains.\n"
-            "- STRATEGIC SIGNALING – When advantageous, consider signaling relative priorities (without exact value scoring rules) to enable favorable trades. Be strategic about what you reveal and when.\n"
+            "- ANCHORING – In early rounds, consider anchoring aggressively to create concession space.\n"
+            "- VALUE MAXIMIZATION – Focus on securing high-value outcomes. When appropriate, consider probing for and using opponent's priorities and constraints to look for opportunities to trade lower-value items for ambitious and credible gains.\n"
+            "- COMMUNICATION – When you want to explain your positions or respond to questions, consider providing brief rationale that frames your offers/response as reasonable. Be strategic: you could explain to build credibility, but avoid over-justifying or revealing weaknesses."
             "- ADAPT & NON-REPETITION – If last round's strategy didn't move the opponent, consider adapting tactics.\n"
             "- CLOSING DECISION – If you judge that now is the right time to close, consider accepting current offer.\n"
             "- HONOR ACCEPTANCES - If STATE indicates the opponent has fully and accurately accepted one of your proposed offers/packages, plan to reach the deal with those exact terms. Do not attempt to extract additional value.\n"
@@ -881,13 +884,14 @@ class NegotiationSession:
         
         if value_field_instruction:
             conf_prompt += f"OPTION 1: If the terms ARE consistent with your most recent offer:\n"
-            conf_prompt += f"Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format. {value_field_instruction}\n"
+            conf_prompt += f"Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format on subsequent lines. {value_field_instruction}\n"
         else:
             conf_prompt += "OPTION 1: If the terms ARE consistent with your most recent offer:\n"
-            conf_prompt += "Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format.\n"
+            conf_prompt += "Output ONLY the token '$DEAL_REACHED$' on the first line, then output the agreed terms in JSON format on subsequent lines.\n"
         
         conf_prompt += (
-            f"JSON FORMAT (FOLLOW THIS EXACTLY IF CHOOSING OPTION 1):\n{json_schema_text}\n\n"
+            f"JSON FORMAT: Output a JSON instance with actual values, NOT the schema definition.\n"
+            f"The schema below shows the structure - fill in the actual deal values:\n{json_schema_text}\n\n"
             "OPTION 2: If the terms are NOT consistent with your most recent offer:\n"
             "Output ONLY the token '$DEAL_MISUNDERSTANDING$' (no explanation needed).\n\n"
             "DO NOT output anything else besides the token and JSON (for Option 1) or just the token (for Option 2)."
