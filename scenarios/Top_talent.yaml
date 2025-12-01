@@ -50,7 +50,7 @@ side1:
    - Your ONLY goal is to get the highest possible points total across seven contract issues. 
      While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points.
-   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
+   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS.
    - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 POINTS (your BATNA). 
@@ -147,6 +147,7 @@ side1:
        POINT VALUES:
        - Blair Rotation: -500 points (in addition to the lost points from an August 1st or later start date)
        - No Blair Rotation: 0 points
+       - Partial rotations (any duration other than 3 months): Treated as "No Blair Rotation"
 
  
   initial_offer_prompt: |
@@ -162,7 +163,7 @@ side2:
    - Your ONLY goal is to get the highest possible points total across seven contract issues. 
      While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points
-   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS and waste time.
+   - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS.
    - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
      Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
    - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you get 0 points (your BATNA). 
@@ -200,6 +201,8 @@ side2:
        POINT VALUES:
        - Blair Rotation in DC: 5,000 points (NOTE: requires August 1st or later start date)
        - No Blair Rotation: 0 points
+       - Partial rotations (any duration other than 3 months): Treated as "No Blair Rotation"
+       
 
     3. Start Date:
        - You want to begin on August 1st at earliest which allows for a rotation with Blair or your participation in the World Series of Poker Tournaments in Las Vegas which runs in June and July. 
