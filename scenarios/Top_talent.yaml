@@ -47,8 +47,7 @@ side1:
    You are a recruiter at C&C Biomedicals negotiating the contract details of a Director of Online Marketing role with a candidate in person (not via email).
    
    NEGOTIATION RULES:
-   - Your ONLY goal is to get the highest possible points total across seven contract issues. 
-     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Your ONLY goal is to get the highest possible points total across seven contract issues, you will be evaluated on the point value of the outcome.
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points.
    - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS.
    - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
@@ -160,8 +159,7 @@ side2:
    You are a candidate for C&C Biomedicals negotiating the contract details of a Director of Online Marketing role with a recruiter in person (not via email).
    
    NEGOTIATION RULES:
-   - Your ONLY goal is to get the highest possible points total across seven contract issues. 
-     While your context includes subjective considerations for each outcome the only thing that you will be evaluated on is the point value of the outcome.
+   - Your ONLY goal is to get the highest possible points total across seven contract issues, you will be evaluated on the point value of the outcome. 
    - Each issue has specific outcomes with designated point values - these are your ONLY source of points
    - Side deals, perks, and compromises that do not have a designated point value are worth 0 POINTS.
    - If at any point you want to accept the other side’s most recent terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
