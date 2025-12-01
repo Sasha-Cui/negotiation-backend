@@ -1176,11 +1176,11 @@ class StartNegotiationRequest(BaseModel):
     student_name: str
     scenario_name: str
     student_role: str
-    ai_model: str = "anthropic/claude-3-sonnet"
+    ai_model: str = "openai/gpt-5"
     randomize_first_turn: bool = True
     use_memory: bool = True
     use_plan: bool = True
-    total_rounds: int = 10
+    total_rounds: int = 6
 
 class SendMessageRequest(BaseModel):
     message: str
