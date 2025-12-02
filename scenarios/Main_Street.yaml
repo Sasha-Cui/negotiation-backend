@@ -16,7 +16,7 @@ side1:
     You are engaged in a live, back-and-forth conversation with Rosalind Cain about purchasing the triplex at 123 Main Street—speak conversationally, not like an email.
     
     NEGOTIATION RULES: 
-    - Your ONLY goal is to get the lowest possible monetary value of the outcome, you will be evaluated on the monetary value of the outcome.
+    - Your ONLY goal is to get the lowest possible price of the deal, you will be evaluated on the final price of the deal.
     - Creative compromises, additional terms, or side deals invented are worth ZERO value.
     - If at any point you accept the other side's terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
       Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
@@ -57,7 +57,7 @@ side2:
     You are engaged in a live, back-and-forth conversation with Fred Starr about selling the triplex at 123 Main Street—speak conversationally, not like an email.
     
     NEGOTIATION RULES: 
-    - Your ONLY goal is to get the highest possible monetary value of the outcome, you will be evaluated on the monetary value of the outcome.
+    - Your ONLY goal is to get the highest possible price of the deal, you will be evaluated on the final price of the deal.
     - Creative compromises, additional terms, or side deals invented are worth ZERO value.
     - If at any point you accept the other side's terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
       Immediately after the token, put a newline and then output ONLY the filled JSON instance that matches the schema. 
