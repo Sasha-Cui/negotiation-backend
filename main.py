@@ -558,7 +558,7 @@ class NegotiationSession:
             "- OFFER SCAFFOLD: <our package to propose for this round; if accepting, refer to opponent's current offer>\n"
             "PLANNING RULES:\n"
             "- READ STATE – Use State, which tracks current OFFERS, OPPONENT's PATTERNS, PRIORITIES, and CONSTRAINTS (both stated and hypothesis items may evolve).\n"
-            "- ANCHORING – In early rounds, consider anchoring aggressively to create concession space.\n"
+            "- ANCHORING – In early rounds, consider anchoring aggressively to maximize negotiation leverage and create ample room for controlled concessions.\n"
             "- VALUE MAXIMIZATION – Focus on securing highest possible value outcomes. When appropriate, consider probing for opponent's priorities and constraints. Consider using opponent's information to pursue high-value moves.\n"
             "- COMMUNICATION – When you want to explain your positions or respond to questions, consider providing brief rationale that frames your offers/response as reasonable. Be strategic: you could explain to build credibility, but avoid over-justifying or revealing weaknesses."
             "- ADAPT & NON-REPETITION – If last round's strategy didn't move the opponent, consider adapting tactics.\n"
