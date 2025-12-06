@@ -381,11 +381,11 @@ class NegotiationSession:
         if ai_goes_first:
             base_prompt = f"It is now round 1 out of {self.total_rounds} total rounds. You go first, so you are starting the negotiation. Generate your starting message. Be strategic, clear, and professional.\n"
             user_prompt = f"{context}\n\n"
-            user_prompt += base_prompt
             
             # Add Planning module if available for opening move
             if self.use_plan and self.ai_plan:
-                user_prompt += f"=== Current Strategy Planning Module ===\n{self.ai_plan}\n"
+                user_prompt += f"=== Current Strategy Planning Module ===\n{self.ai_plan}\n\n"
+            user_prompt += base_prompt
             
         else:
             ai_round, ai_position = self.get_ai_next_round_info()
