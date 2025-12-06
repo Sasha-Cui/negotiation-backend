@@ -1251,6 +1251,8 @@ def start_negotiation(request: StartNegotiationRequest):
         
         ai_first_message = None
         if not student_goes_first:
+            if session.use_plan:
+                session._generate_plan()
             ai_response = session._generate_ai_response()
             ai_cfg = session.scenario_config[session.ai_role]
             ai_label = ai_cfg.get("label", "AI")
