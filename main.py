@@ -379,8 +379,14 @@ class NegotiationSession:
         
         # Choose prompt based on situation
         if ai_goes_first:
-            base_prompt = ai_cfg["initial_offer_prompt"]
-            user_prompt = f"{context}\n\n{base_prompt}"
+            base_prompt = f"It is now round 1 out of {self.total_rounds} total rounds. You go first, so you are starting the negotiation. Generate your starting message. Be strategic, clear, and professional.\n"
+            user_prompt = f"{context}\n\n"
+            user_prompt += base_prompt
+            
+            # Add Planning module if available for opening move
+            if self.use_plan and self.ai_plan:
+                user_prompt += f"=== Current Strategy Planning Module ===\n{self.ai_plan}\n"
+            
         else:
             ai_round, ai_position = self.get_ai_next_round_info()
             
@@ -401,8 +407,7 @@ class NegotiationSession:
             
             universal_continuation_prompt = (
                 "CURRENT ROUND INFORMATION:\n"
-                f"It is now round {ai_round}/{self.total_rounds}. You are {turn_position} this round, so it is your turn to {turn_action} the round. "
-                f"You have {self.total_rounds - ai_round} rounds remaining after this one.\n\n"
+                f"It is now round {ai_round} out of {self.total_rounds} total rounds. You are {turn_position} this round, so it is your turn to {turn_action} the round.\n"
                 f"<BEGIN COMPLETE NEGOTIATION TRANSCRIPT>\n{history}\n\n"
                 "<END NEGOTIATION TRANSCRIPT>\n\n"
                 "OUTPUT INSTRUCTIONS:\n"
@@ -558,10 +563,10 @@ class NegotiationSession:
             "- OFFER SCAFFOLD: <our package to propose for this round; if accepting, refer to opponent's current offer>\n"
             "PLANNING RULES:\n"
             "- READ STATE – Use State, which tracks current OFFERS, OPPONENT's PATTERNS, PRIORITIES, and CONSTRAINTS (both stated and hypothesis items may evolve).\n"
-            "- ANCHORING – In early rounds, consider anchoring aggressively to maximize negotiation leverage and create ample room for controlled concessions.\n"
+            "- ANCHORING – In early rounds, consider anchoring aggressively to create ample concession space.\n"
             "- VALUE MAXIMIZATION – Focus on securing highest possible value outcomes. When appropriate, consider probing for opponent's priorities and constraints. Consider using opponent's information to pursue high-value moves.\n"
             "- COMMUNICATION – When you want to explain your positions or respond to questions, consider providing brief rationale that frames your offer/response as reasonable. However, be strategic: you are explaining to strengthen your position. Avoid over-justifying or revealing weaknesses that would undermine your leverage."
-            "- ADAPT & NON-REPETITION – If last round's strategy didn't move the opponent, consider adapting tactics.\n"
+            "- ADAPT & NON-REPETITION – If the previous round's strategy didn't move the opponent, consider adapting tactics.\n"
             "- CLOSING DECISION – If you judge that now is the right time to close, consider accepting current offer.\n"
             "- HONOR ACCEPTANCES - If STATE indicates the opponent has fully and accurately accepted one of your proposed offers/packages, plan to reach the deal with those exact terms. Do not attempt to extract additional value.\n"
             "- WALKBACK RESISTANCE – If opponent proposes worse offer than their Them-best-for-us, resist by anchoring to that better historical offer.\n"
@@ -574,8 +579,8 @@ class NegotiationSession:
             f"You are now in round {ai_round} out of {self.total_rounds} total rounds. You are {position_text} this round, so it is your turn to {turn_action} the round.\n\n"
             f"=== Scenario Rules & Objective ===\n{rules_objective}\n\n"
             f"=== Scenario Facts & Value model ===\n{context}\n\n"
-            f"=== Current State ===\n{self.ai_memory or '(empty)'}\n\n"
-            f"=== Previous Strategy ===\n{self.ai_plan or 'N/A'}\n\n"
+            f"=== Current State ===\n{self.ai_memory or '(You are starting the negotiation. No negotiation state yet.)'}\n\n"
+            f"=== Previous Strategy ===\n{self.ai_plan or '(empty)'}\n\n"
             f"=== Output Strategy ===\n"
         )
         
@@ -780,8 +785,14 @@ class NegotiationSession:
                 "round": f"{round_number}.{last_msg_in_round}"
             }
         
+
         # Update Memory & Plan
-        if len(self.transcript) >= 1:
+        # For round 1.1 (opening move): skip Memory (no transcript), but allow Planning
+        if len(self.transcript) == 0:
+            # Opening move - only Planning available (Memory needs transcript)
+            self._generate_plan()
+        elif len(self.transcript) >= 1:
+            # Normal rounds - both Memory and Planning available
             self._update_memory()
             self._generate_plan()
         
@@ -992,8 +1003,8 @@ class NegotiationSession:
             "═══════════════════════════════════════\n\n"
             
             "One concrete tactical change that would have gained the most value:\n"
-            "• Specific negotiation move (e.g., 'anchor at X instead of Y')\n"
-            "• Which issue to apply it to\n"
+            "• Specific negotiation move\n"
+            "• Which issue(s) to apply it to\n"
             "• Expected value gain from this tactic\n"
         )
 
