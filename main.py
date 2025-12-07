@@ -565,7 +565,7 @@ class NegotiationSession:
             "- READ STATE – Use State, which tracks current OFFERS, OPPONENT's PATTERNS, PRIORITIES, and CONSTRAINTS (both stated and hypothesis items may evolve).\n"
             "- ANCHORING – In early rounds, consider anchoring aggressively to create ample concession space.\n"
             "- VALUE MAXIMIZATION – Focus on securing highest possible value outcomes. When appropriate, consider probing for opponent's priorities and constraints. Consider using opponent's information to pursue high-value moves.\n"
-            "- COMMUNICATION – When you want to explain your positions or respond to questions, consider providing brief rationale that frames your offer/response as reasonable. However, be strategic: you are explaining to strengthen your position. Avoid over-justifying or revealing weaknesses that would undermine your leverage."
+            "- COMMUNICATION – When you want to explain your positions or respond to questions, consider providing brief rationale that frames your offer/response as reasonable. However, be strategic: you are explaining to strengthen your position. Avoid over-justifying or revealing weaknesses that would undermine your leverage.\n"
             "- ADAPT & NON-REPETITION – If the previous round's strategy didn't move the opponent, consider adapting tactics.\n"
             "- CLOSING DECISION – If you judge that now is the right time to close, consider accepting current offer.\n"
             "- HONOR ACCEPTANCES - If STATE indicates the opponent has fully and accurately accepted one of your proposed offers/packages, plan to reach the deal with those exact terms. Do not attempt to extract additional value.\n"
