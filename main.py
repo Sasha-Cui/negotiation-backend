@@ -1207,8 +1207,6 @@ class NegotiationSession:
         """Convert session to dictionary"""
         return {
             "session_id": self.session_id,
-            "student_id": self.student_id,
-            "student_name": self.student_name,
             "scenario_name": self.scenario_name,
             "student_role": self.student_role,
             "ai_role": self.ai_role,
