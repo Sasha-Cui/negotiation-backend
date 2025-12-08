@@ -100,16 +100,8 @@ def init_db():
     c.execute("""
         CREATE TABLE IF NOT EXISTS negotiation_sessions (
             session_id TEXT PRIMARY KEY,
-            current_program TEXT,
-            undergrad_major TEXT,
-            gender TEXT,
-            age_range TEXT,
-            race_ethnicity TEXT,
-            work_experience TEXT,
-            first_gen_student TEXT,
-            english_proficiency TEXT,
-            negotiation_courses TEXT,
-            negotiation_experience TEXT,
+            student_id TEXT NOT NULL,
+            student_name TEXT,
             scenario_name TEXT NOT NULL,
             student_role TEXT NOT NULL,
             ai_role TEXT NOT NULL,
@@ -279,35 +271,19 @@ class NegotiationSession:
     def __init__(
         self,
         session_id: str,
-        current_program: str = "",
-        undergrad_major: str = "",
-        gender: str = "",
-        age_range: str = "",
-        race_ethnicity: str = "",
-        work_experience: str = "",
-        first_gen_student: str = "",
-        english_proficiency: str = "",
-        negotiation_courses: str = "",
-        negotiation_experience: str = "",
-        scenario_name: str = "",
-        student_role: str = "",
-        ai_model: str = "",
-        student_goes_first: bool = True,
-        use_memory: bool = True,
-        use_plan: bool = True,
+        student_id: str,
+        student_name: str,
+        scenario_name: str,
+        student_role: str,
+        ai_model: str,
+        student_goes_first: bool,
+        use_memory: bool,
+        use_plan: bool,
         total_rounds: int = 6,
     ):
         self.session_id = session_id
-        self.current_program = current_program
-        self.undergrad_major = undergrad_major
-        self.gender = gender
-        self.age_range = age_range
-        self.race_ethnicity = race_ethnicity
-        self.work_experience = work_experience
-        self.first_gen_student = first_gen_student
-        self.english_proficiency = english_proficiency
-        self.negotiation_courses = negotiation_courses
-        self.negotiation_experience = negotiation_experience
+        self.student_id = student_id
+        self.student_name = student_name
         self.scenario_name = scenario_name
         self.student_role = student_role
         self.ai_model = ai_model
@@ -1070,16 +1046,8 @@ class NegotiationSession:
         c.execute("""
             INSERT OR REPLACE INTO negotiation_sessions (
                 session_id,
-                current_program,
-                undergrad_major,
-                gender,
-                age_range,
-                race_ethnicity,
-                work_experience,
-                first_gen_student,
-                english_proficiency,
-                negotiation_courses,
-                negotiation_experience,
+                student_id,
+                student_name,
                 scenario_name,
                 student_role,
                 ai_role,
@@ -1104,20 +1072,12 @@ class NegotiationSession:
                 feedback_generated_at,
                 feedback_model
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """, (
             self.session_id,
-            self.current_program,
-            self.undergrad_major,
-            self.gender,
-            self.age_range,
-            self.race_ethnicity,
-            self.work_experience,
-            self.first_gen_student,
-            self.english_proficiency,
-            self.negotiation_courses,
-            self.negotiation_experience,
+            self.student_id,
+            self.student_name,
             self.scenario_name,
             self.student_role,
             self.ai_role,
@@ -1164,42 +1124,34 @@ class NegotiationSession:
         
         session = NegotiationSession(
             session_id=row[0],
-            current_program=row[1],
-            undergrad_major=row[2],
-            gender=row[3],
-            age_range=row[4],
-            race_ethnicity=row[5],
-            work_experience=row[6],
-            first_gen_student=row[7],
-            english_proficiency=row[8],
-            negotiation_courses=row[9],
-            negotiation_experience=row[10],
-            scenario_name=row[11],
-            student_role=row[12],
-            ai_model=row[14],
-            student_goes_first=bool(row[15]),
-            use_memory=bool(row[16]),
-            use_plan=bool(row[17]),
-            total_rounds=row[18]
+            student_id=row[1],
+            student_name=row[2],
+            scenario_name=row[3],
+            student_role=row[4],
+            ai_model=row[6],
+            student_goes_first=bool(row[7]),
+            use_memory=bool(row[8]),
+            use_plan=bool(row[9]),
+            total_rounds=row[10]
         )
         
-        session.ai_role = row[13]
-        session.transcript = json.loads(row[19])
-        session.ai_memory = row[20] or ""
-        session.ai_plan = row[21] or ""
-        session.ai_memory_history = json.loads(row[22]) if row[22] else []
-        session.ai_plan_history = json.loads(row[23]) if row[23] else []
+        session.ai_role = row[5]
+        session.transcript = json.loads(row[11])
+        session.ai_memory = row[12] or ""
+        session.ai_plan = row[13] or ""
+        session.ai_memory_history = json.loads(row[14]) if row[14] else []
+        session.ai_plan_history = json.loads(row[15]) if row[15] else []
 
-        session.student_deal_json = json.loads(row[24]) if row[24] else None  
-        session.ai_deal_json = json.loads(row[25]) if row[25] else None       
-        session.deal_reached = bool(row[26])                                   
-        session.deal_failed = bool(row[27])                                    
-        session.status = row[28]                                               
-        session.created_at = row[29]                                           
-        session.updated_at = row[30]                                           
-        session.feedback_text = row[31]                                        
-        session.feedback_generated_at = row[32]                               
-        session.feedback_model = row[33]                                       
+        session.student_deal_json = json.loads(row[16]) if row[16] else None  
+        session.ai_deal_json = json.loads(row[17]) if row[17] else None       
+        session.deal_reached = bool(row[18])                                   
+        session.deal_failed = bool(row[19])                                    
+        session.status = row[20]                                               
+        session.created_at = row[21]                                           
+        session.updated_at = row[22]                                           
+        session.feedback_text = row[23]                                        
+        session.feedback_generated_at = row[24]                               
+        session.feedback_model = row[25]                                       
         
         return session
     
@@ -1230,20 +1182,12 @@ class NegotiationSession:
 # Request/Response Models
 # ============================================================================
 class StartNegotiationRequest(BaseModel):
-    current_program: Optional[str] = ""
-    undergrad_major: Optional[str] = ""
-    gender: Optional[str] = ""
-    age_range: Optional[str] = ""
-    race_ethnicity: Optional[str] = ""
-    work_experience: Optional[str] = ""
-    first_gen_student: Optional[str] = ""
-    english_proficiency: Optional[str] = ""
-    negotiation_courses: Optional[str] = ""
-    negotiation_experience: Optional[str] = ""
+    student_id: str
+    student_name: str
     scenario_name: str
     student_role: str
     ai_model: str = "openai/gpt-5"
-    student_goes_first: bool = True
+    randomize_first_turn: bool = True
     use_memory: bool = True
     use_plan: bool = True
     total_rounds: int = 6
@@ -1287,21 +1231,15 @@ def start_negotiation(request: StartNegotiationRequest):
     try:
         session_id = str(uuid.uuid4())
         
-        # Directly use student_goes_first from request (no randomization)
-        student_goes_first = request.student_goes_first
+        if request.randomize_first_turn:
+            student_goes_first = random.choice([True, False])
+        else:
+            student_goes_first = True
         
         session = NegotiationSession(
             session_id=session_id,
-            current_program=request.current_program,
-            undergrad_major=request.undergrad_major,
-            gender=request.gender,
-            age_range=request.age_range,
-            race_ethnicity=request.race_ethnicity,
-            work_experience=request.work_experience,
-            first_gen_student=request.first_gen_student,
-            english_proficiency=request.english_proficiency,
-            negotiation_courses=request.negotiation_courses,
-            negotiation_experience=request.negotiation_experience,
+            student_id=request.student_id,
+            student_name=request.student_name,
             scenario_name=request.scenario_name,
             student_role=request.student_role,
             ai_model=request.ai_model,

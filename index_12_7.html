@@ -721,33 +721,6 @@
         .checkbox-container input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; }
         .checkbox-container label { margin: 0; cursor: pointer; user-select: none; font-size: 14px; }
         
-        /* Radio button selection hover and checked states */
-        input[type="radio"]:checked + div {
-            font-weight: 600;
-        }
-
-        label:has(input[type="radio"]:checked) {
-            border-color: var(--primary-blue) !important;
-            background-color: #eff6ff;
-        }
-
-        label:has(input[type="radio"]):hover {
-            border-color: var(--primary-blue);
-            background-color: #f9fafb;
-        }
-
-        /* Consent option hover and selected states */
-        .consent-option:hover {
-            border-color: var(--primary-blue) !important;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
-        }
-
-        .consent-option:has(input:checked) {
-            border-color: var(--primary-blue) !important;
-            background: #eff6ff !important;
-            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
-        }
-        
         /* Timer display */
         .modal-timer {
             background: var(--warning-yellow);
@@ -784,157 +757,19 @@
              Scenario Selection Screen
              =================================================================== -->
         <div id="scenarioScreen">
-            <!-- ==================== DEMOGRAPHIC INFORMATION (OPTIONAL) ==================== -->
             <div class="form-section">
-                <h3>📋 Demographic Information</h3>
-                <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
-                    All fields below are optional. You may leave any field blank or select "Prefer not to say".
-                </p>
-
-                <!-- 1. Current Program -->
+                <h3>📋 Student Information</h3>
+                
                 <div class="form-group">
-                    <label>Current Program</label>
-                    <input type="text" id="currentProgram" 
-                           placeholder="e.g., MBA, MS Finance, MPA">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="Enter your student ID" required>
                 </div>
 
-                <!-- 2. Undergraduate Major -->
                 <div class="form-group">
-                    <label>Undergraduate Major</label>
-                    <input type="text" id="undergradMajor" 
-                           placeholder="e.g., Economics, Computer Science">
-                </div>
-
-                <!-- 3. Gender -->
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select id="gender">
-                        <option value="">Prefer not to say</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-binary">Non-binary</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="genderOther" class="hidden" 
-                           style="margin-top: 8px;" 
-                           placeholder="Please specify">
-                </div>
-
-                <!-- 4. Age Range -->
-                <div class="form-group">
-                    <label>Age Range</label>
-                    <select id="ageRange">
-                        <option value="">Prefer not to say</option>
-                        <option value="Under 18">Under 18</option>
-                        <option value="18-25">18-25</option>
-                        <option value="25-29">25-29</option>
-                        <option value="30-34">30-34</option>
-                        <option value="35-39">35-39</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="ageOther" class="hidden" 
-                           style="margin-top: 8px;" 
-                           placeholder="Please specify your age">
-                </div>
-
-                <!-- 5. Race/Ethnicity -->
-                <div class="form-group">
-                    <label>Race/Ethnicity</label>
-                    <select id="raceEthnicity">
-                        <option value="">Prefer not to say</option>
-                        <option value="Asian">Asian</option>
-                        <option value="Black/African American">Black or African American</option>
-                        <option value="Hispanic/Latino">Hispanic or Latino</option>
-                        <option value="White">White</option>
-                        <option value="Middle Eastern/North African">Middle Eastern or North African</option>
-                        <option value="Native American/Alaska Native">Native American or Alaska Native</option>
-                        <option value="Pacific Islander">Pacific Islander</option>
-                        <option value="Two or more races">Two or more races</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="raceOther" class="hidden" 
-                           style="margin-top: 8px;" 
-                           placeholder="Please specify">
-                </div>
-
-                <!-- 6. Work Experience -->
-                <div class="form-group">
-                    <label>Work Experience</label>
-                    <small style="color: #666; display: block; margin-bottom: 8px;">
-                        Excluding academic work, including internships
-                    </small>
-                    <select id="workExperience">
-                        <option value="">Prefer not to say</option>
-                        <option value="0 years">0 years (No experience)</option>
-                        <option value="0-1 years">0-1 years</option>
-                        <option value="1-2 years">1-2 years</option>
-                        <option value="2-3 years">2-3 years</option>
-                        <option value="3-4 years">3-4 years</option>
-                        <option value="4-5 years">4-5 years</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="workExpOther" class="hidden" 
-                           style="margin-top: 8px;" 
-                           placeholder="Please specify years of experience">
-                </div>
-
-                <!-- 7. First-Generation College Student -->
-                <div class="form-group">
-                    <label>First-Generation College Student</label>
-                    <select id="firstGenStudent">
-                        <option value="">Prefer not to say</option>
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
-
-                <!-- 8. English Proficiency -->
-                <div class="form-group">
-                    <label>English Proficiency</label>
-                    <small style="color: #666; display: block; margin-bottom: 8px;">
-                        How would you rate your English proficiency?
-                    </small>
-                    <select id="englishProficiency">
-                        <option value="">Prefer not to disclose</option>
-                        <option value="1 - Basic">1 - Basic: Can communicate simply, difficult with complex topics</option>
-                        <option value="2 - Intermediate">2 - Intermediate: Can handle most daily topics, limited in professional/complex expressions</option>
-                        <option value="3 - Upper-intermediate">3 - Upper-intermediate: Can express relatively smoothly, occasionally limited by vocabulary/grammar</option>
-                        <option value="4 - Advanced">4 - Advanced: Clear and natural expression, no obvious difficulty understanding complex content</option>
-                        <option value="5 - Native-like/Fluent">5 - Native-like/Fluent: Fluent in all contexts</option>
-                    </select>
-                </div>
-
-                <!-- 9. Negotiation Courses Taken -->
-                <div class="form-group">
-                    <label>Negotiation Courses Taken</label>
-                    <small style="color: #666; display: block; margin-bottom: 8px;">
-                        Have you taken any negotiation-related academic courses? (courses not completed to midterm don't count)
-                    </small>
-                    <select id="negotiationCourses">
-                        <option value="">Prefer not to disclose</option>
-                        <option value="Yes, one course">Yes, one course</option>
-                        <option value="Yes, more than one course">Yes, more than one course</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
-
-                <!-- 10. Real-world Negotiation Experience -->
-                <div class="form-group">
-                    <label>Real-world Negotiation Experience</label>
-                    <small style="color: #666; display: block; margin-bottom: 8px;">
-                        How much real-world negotiation experience do you have?
-                    </small>
-                    <select id="negotiationExperience">
-                        <option value="">Prefer not to disclose</option>
-                        <option value="None">None (almost no negotiation experience)</option>
-                        <option value="A few instances">A few instances (e.g., housing, salary, small purchases, etc., fewer than 5 times)</option>
-                        <option value="Occasional">Occasional negotiation experience (e.g., occasional negotiations in internships/part-time jobs, approximately 5-20 times)</option>
-                        <option value="Frequent">Frequent negotiation experience (e.g., regular negotiations in work such as project scope, pricing, contracts, more than 20 times)</option>
-                        <option value="Professional">Specialized or professional negotiation experience (e.g., negotiation is a core competency in sales/BD, consulting, law, procurement, etc.)</option>
-                    </select>
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" placeholder="Enter your full name" required>
                 </div>
             </div>
-            <!-- ==================== END DEMOGRAPHIC INFORMATION ==================== -->
 
             <div class="form-section">
                 <h3>🎯 Negotiation Scenario</h3>
@@ -967,26 +802,11 @@
                     <div class="form-hint">Choose the AI model for negotiation</div>
                 </div>
 
-                <!-- Who Goes First Selection -->
-                <div class="form-group">
-                    <label>Who Goes First?</label>
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; transition: all 0.2s;">
-                            <input type="radio" name="whoGoesFirst" value="student" checked style="width: auto;">
-                            <div>
-                                <div style="font-weight: 500;">Student goes first</div>
-                                <div style="font-size: 13px; color: #6b7280;">You will send the first message</div>
-                            </div>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; transition: all 0.2s;">
-                            <input type="radio" name="whoGoesFirst" value="ai" style="width: auto;">
-                            <div>
-                                <div style="font-weight: 500;">AI goes first</div>
-                                <div style="font-size: 13px; color: #6b7280;">AI will send the first message</div>
-                            </div>
-                        </label>
-                    </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="randomFirstTurn" checked>
+                    <label for="randomFirstTurn">Randomize who goes first</label>
                 </div>
+                <div class="form-hint">When enabled, the system will randomly decide if you or the AI goes first</div>
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="useMemory" checked>
@@ -1173,104 +993,13 @@
             jsonExampleContent: document.getElementById('jsonExampleContent'),
             jsonCleanExample: document.getElementById('jsonCleanExample')
         };
-   
 
         // ===================================================================
         // Initialization
         // ===================================================================
         async function init() {
-            // ⭐ NEW: Check for locked mode FIRST
-            const urlParams = new URLSearchParams(window.location.search);
-            const locked = urlParams.get('lock') === 'true';
-            const presetScenario = urlParams.get('scenario');
-            const presetRole = urlParams.get('role');
-            
-            // Load scenarios first
             await loadScenarios();
             attachEventListeners();
-            
-            // ⭐ NEW: Apply locked mode after scenarios are loaded
-            if (locked && presetScenario && presetRole) {
-                applyLockedMode(presetScenario, presetRole);
-            }
-        }
-
-        // ===================================================================
-        // Apply Locked Mode (FINAL FIX - Case Insensitive)
-        // ===================================================================
-        function applyLockedMode(scenarioId, roleId) {
-            // First delay: ensure DOM is fully ready
-            setTimeout(() => {
-                // Find the correct scenario value (case-insensitive match)
-                const scenarioOptions = Array.from(elements.scenarioSelect.options);
-                const matchedOption = scenarioOptions.find(opt => 
-                    opt.value.toLowerCase() === scenarioId.toLowerCase()
-                );
-                
-                if (!matchedOption) {
-                    console.error('Scenario not found:', scenarioId);
-                    console.log('Available scenarios:', scenarioOptions.map(o => o.value));
-                    return;
-                }
-                
-                const correctScenarioValue = matchedOption.value;
-                console.log('Matched scenario:', scenarioId, '→', correctScenarioValue);
-                
-                // Auto-select scenario with correct value
-                elements.scenarioSelect.value = correctScenarioValue;
-                elements.scenarioSelect.dispatchEvent(new Event('change'));
-                
-                // Second delay: wait for role options to be populated after scenario change
-                setTimeout(() => {
-                    // Auto-select role
-                    elements.roleSelect.value = roleId;
-                    elements.roleSelect.dispatchEvent(new Event('change'));
-                    
-                    // Third delay: ensure DOM updates are complete before reading values
-                    setTimeout(() => {
-                        // Get scenario name from the populated select dropdown
-                        const selectedScenario = elements.scenarioSelect.options[elements.scenarioSelect.selectedIndex];
-                        const scenarioName = selectedScenario ? selectedScenario.textContent : scenarioId;
-                        
-                        // Get role name from the populated select dropdown
-                        const selectedRole = elements.roleSelect.options[elements.roleSelect.selectedIndex];
-                        const roleName = selectedRole ? selectedRole.textContent : roleId;
-                        
-                        console.log('DEBUG - scenarioName:', scenarioName);
-                        console.log('DEBUG - roleName:', roleName);
-                        
-                        // Lock both dropdowns using pointer-events (keeps values accessible unlike disabled)
-                        elements.scenarioSelect.style.pointerEvents = 'none';
-                        elements.roleSelect.style.pointerEvents = 'none';
-                        elements.scenarioSelect.style.opacity = '0.6';
-                        elements.roleSelect.style.opacity = '0.6';
-                        elements.scenarioSelect.style.cursor = 'not-allowed';
-                        elements.roleSelect.style.cursor = 'not-allowed';
-                        
-                        // Add lock indicator with proper scenario and role names
-                        const lockDiv = document.createElement('div');
-                        lockDiv.style.cssText = 'background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin-top: 16px; border-radius: 8px;';
-                        lockDiv.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                                <span style="font-size: 20px;">🔒</span>
-                                <strong style="color: #92400e;">Locked Mode</strong>
-                            </div>
-                            <div style="color: #78350f; font-size: 14px; line-height: 1.6;">
-                                <div style="margin-bottom: 6px;">
-                                    <strong>Scenario:</strong> ${scenarioName}
-                                </div>
-                                <div>
-                                    <strong>Your Role:</strong> ${roleName}
-                                </div>
-                            </div>
-                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #fde68a; color: #666; font-size: 13px;">
-                                Your scenario and role have been pre-assigned for this session.
-                            </div>
-                        `;
-                        elements.roleSelect.parentNode.appendChild(lockDiv);
-                    }, 100);  // Third delay: ensure values can be read correctly
-                }, 300);  // Second delay: ensure role dropdown is fully populated
-            }, 300);  // First delay: ensure scenario dropdown is fully populated
         }
 
         // ===================================================================
@@ -1377,28 +1106,16 @@
         async function startNegotiation() {
             hideError('errorMessage');
             
-            // Validate inputs (only scenario and role are required)
+            // Validate inputs
+            const studentId = elements.studentId.value.trim();
+            const studentName = elements.studentName.value.trim();
             const scenarioName = elements.scenarioSelect.value;
             const studentRole = elements.roleSelect.value;
             
-            if (!scenarioName || !studentRole) {
-                showError('errorMessage', 'Please select scenario and role');
+            if (!studentId || !studentName || !scenarioName || !studentRole) {
+                showError('errorMessage', 'Please fill in all required fields');
                 return;
             }
-            
-            // Helper function to handle "Other" values
-            function getFieldValue(selectId, otherInputId) {
-                const selectValue = document.getElementById(selectId).value;
-                if (selectValue === 'Other') {
-                    const otherValue = document.getElementById(otherInputId).value.trim();
-                    return otherValue ? `Other: ${otherValue}` : 'Other';
-                }
-                return selectValue;
-            }
-            
-            // Get who goes first selection
-            const whoGoesFirst = document.querySelector('input[name="whoGoesFirst"]:checked').value;
-            const studentGoesFirst = (whoGoesFirst === 'student');
             
             // Show loading
             elements.startBtn.disabled = true;
@@ -1411,23 +1128,15 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        current_program: document.getElementById('currentProgram').value.trim(),
-                        undergrad_major: document.getElementById('undergradMajor').value.trim(),
-                        gender: getFieldValue('gender', 'genderOther'),
-                        age_range: getFieldValue('ageRange', 'ageOther'),
-                        race_ethnicity: getFieldValue('raceEthnicity', 'raceOther'),
-                        work_experience: getFieldValue('workExperience', 'workExpOther'),
-                        first_gen_student: document.getElementById('firstGenStudent').value,
-                        english_proficiency: document.getElementById('englishProficiency').value,
-                        negotiation_courses: document.getElementById('negotiationCourses').value,
-                        negotiation_experience: document.getElementById('negotiationExperience').value,
+                        student_id: studentId,
+                        student_name: studentName,
                         scenario_name: scenarioName,
                         student_role: studentRole,
                         ai_model: elements.modelSelect.value,
-                        student_goes_first: studentGoesFirst,
+                        randomize_first_turn: elements.randomFirstTurn.checked,
                         use_memory: elements.useMemory.checked,
                         use_plan: elements.usePlan.checked,
-                        total_rounds: parseInt(elements.totalRoundsInput.value)
+                        total_rounds: parseInt(elements.totalRoundsInput.value)  // ⭐ v3: New
                     })
                 });
                 
@@ -2046,11 +1755,10 @@ ${simpleExample}</pre>
             elements.statusDisplay.classList.remove('active');
             elements.statusDisplay.classList.add('success-text');
             
-            // Change end button to feedback button (but hide it)
+            // Change end button to feedback button
             elements.endBtn.textContent = 'Get Feedback';
             elements.endBtn.onclick = getFeedback;
             elements.endBtn.disabled = false; // ⭐ Re-enable for feedback
-            elements.endBtn.style.display = 'none'; // ⭐ Hide feedback button
             
             // ⭐ FIX: Initialize feedback flag
             elements.endBtn.dataset.feedbackGenerated = 'false';
@@ -2193,11 +1901,10 @@ ${simpleExample}</pre>
                 
                 addSystemMessage('⚠️ Negotiation ended early. Click "Get Feedback" to see your performance analysis.');
                 
-                // Change button to feedback (but hide it)
+                // Change button to feedback
                 elements.endBtn.textContent = 'Get Feedback';
                 elements.endBtn.onclick = getFeedback;
                 elements.endBtn.disabled = false;
-                elements.endBtn.style.display = 'none'; // ⭐ Hide feedback button
             } else {
                 // Already ended, act as feedback button
                 await getFeedback();
@@ -2398,8 +2105,8 @@ ${simpleExample}</pre>
             const timerElement = document.getElementById('modal1Timer');
             
             if (useTimer && continueBtn && timerElement) {
-                // Start 10 second timer
-                let timeLeft = 10;
+                // Start 15 second timer
+                let timeLeft = 15;
                 continueBtn.disabled = true;
                 timerElement.style.display = 'inline-block';
                 timerElement.style.background = 'var(--warning-yellow)';
@@ -2495,8 +2202,8 @@ ${simpleExample}</pre>
                 totalRoundsSpan.textContent = totalRoundsValue;
             }
             
-            // Start 20 second timer
-            let timeLeft = 20;
+            // Start 45 second timer
+            let timeLeft = 45;
             const timerElement = document.getElementById('modal2Timer');
             const nextBtn = document.getElementById('modal2NextBtn');
             nextBtn.disabled = true;
@@ -2591,9 +2298,9 @@ ${simpleExample}</pre>
                 
                 // Show initial message
                 if (data.student_goes_first) {
-                    addSystemMessage(`Welcome! You will go first. Start the negotiation by typing your opening message.`);
+                    addSystemMessage(`Welcome, ${data.student_name}! You will go first. Start the negotiation by typing your opening message.`);
                 } else {
-                    addSystemMessage(`Welcome! The AI will go first.`);
+                    addSystemMessage(`Welcome, ${data.student_name}! The AI will go first.`);
                     
                     // ⭐ FIX: Show AI's first message from transcript
                     if (data.transcript && data.transcript.length > 0) {
@@ -2621,161 +2328,16 @@ ${simpleExample}</pre>
 
         // Call checkShowInstructions when page loads
         window.addEventListener('DOMContentLoaded', () => {
-            // Consent modal will be shown first instead of instructions
-            // checkShowInstructions();
+            checkShowInstructions();
         });
     </script>
-
-
-    <!-- ==================== Consent Modal - FIRST SCREEN ==================== -->
-    <div id="consentModal" class="modal" style="display: flex; align-items: center; justify-content: center;">
-        <div class="modal-content" style="max-width: 850px; max-height: 92vh;">
-            <div class="modal-header" style="border-bottom: 2px solid var(--border-color);">
-                <h2 style="font-size: 24px;">📋 Research Participation - Optional Negotiation Exercise</h2>
-            </div>
-            
-            <div class="modal-body" style="overflow-y: auto; max-height: calc(92vh - 200px); padding: 32px 40px;">
-                
-                <!-- Important Notice -->
-                <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 28px; border-left: 3px solid #d1d5db;">
-                    <p style="font-size: 16px; line-height: 1.7; color: #4b5563; margin: 0;">
-                        Your grade and standing in the course are not affected by your decision to participate or opt out.
-                    </p>
-                </div>
-
-
-                <!-- About This Exercise -->
-                <div style="margin-bottom: 28px;">
-                    <h3 style="font-size: 20px; margin-bottom: 14px; color: var(--primary-blue); display: flex; align-items: center; gap: 8px;">
-                        <span>📚</span> About This Exercise
-                    </h3>
-                    <p style="line-height: 1.8; color: var(--text-primary); margin-bottom: 14px; font-size: 15px;">
-                        As part of <strong>MGT 880 Sales and Negotiation: Figure Out the Other Side</strong>, you are invited to participate 
-                        in an optional research exercise examining how students negotiate with conversational AIs.
-                    </p>
-                    
-                    <div style="background: #f9fafb; border-radius: 10px; padding: 18px; margin-top: 14px;">
-                        <p style="line-height: 1.7; color: var(--text-primary); margin: 0 0 12px 0; font-weight: 600;">
-                            Your Options:
-                        </p>
-                        <ul style="margin: 0; padding-left: 24px; line-height: 2;">
-                            <li><strong>Opt-in:</strong> Complete one negotiation exercise with an AI chatbot</li>
-                            <li><strong>Opt-out:</strong> Complete an alternative written reflection on reading materials for full participation credit</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Privacy & Data Use -->
-                <div style="background: white; border: 2px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                    <h3 style="font-size: 20px; margin-bottom: 18px; color: var(--primary-blue); display: flex; align-items: center; gap: 8px;">
-                        <span>🔒</span> Privacy & Data Use
-                    </h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
-                        <div style="display: flex; gap: 12px;">
-                            <span style="color: var(--success-green); font-size: 20px; flex-shrink: 0;">✓</span>
-                            <div>
-                                <p style="line-height: 1.7; margin: 0; font-weight: 600;">The chatbot does not store or learn from your data</p>
-                                <p style="line-height: 1.6; color: var(--text-secondary); margin: 4px 0 0 0; font-size: 14px;">
-                                    Your conversation is not used to train AI models.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 12px;">
-                            <span style="color: var(--success-green); font-size: 20px; flex-shrink: 0;">✓</span>
-                            <div>
-                                <p style="line-height: 1.7; margin: 0; font-weight: 600;">Transcripts are de-identified before analysis</p>
-                                <p style="line-height: 1.6; color: var(--text-secondary); margin: 4px 0 0 0; font-size: 14px;">
-                                    Your identity will not be linked to your negotiation transcript.
-                                </p>
-                            </div>
-                        </div>
-
-
-                        <div style="display: flex; gap: 12px;">
-                            <span style="color: var(--success-green); font-size: 20px; flex-shrink: 0;">✓</span>
-                            <div>
-                                <p style="line-height: 1.7; margin: 0; font-weight: 600;">Demographic information is optional but encouraged</p>
-                                <p style="line-height: 1.6; color: var(--text-secondary); margin: 4px 0 0 0; font-size: 14px;">
-                                    You may choose not to disclose, but this information helps our research on negotiation patterns.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Consent Statement -->
-                <div style="background: #f9fafb; border-radius: 12px; padding: 24px; margin-bottom: 28px;">
-                    <h3 style="font-size: 20px; margin-bottom: 16px; color: var(--primary-blue); display: flex; align-items: center; gap: 8px;">
-                        <span>📝</span> Consent Statement
-                    </h3>
-                    <p style="line-height: 1.8; margin-bottom: 14px; font-size: 15px;">
-                        By selecting <strong>"I agree to participate"</strong> below, you indicate that you:
-                    </p>
-                    <ol style="margin: 0; padding-left: 24px; line-height: 2; font-size: 15px;">
-                        <li>Are enrolled in this course</li>
-                        <li>Understand that this exercise is voluntary and can be stopped at any time without penalty</li>
-                        <li>Understand that your negotiation transcript will be de-identified before analysis</li>
-                        <li>Understand that the chatbot does not retain or train on any data from this session</li>
-                        <li>
-                            Understand that your name will not be linked to your negotiation transcript.<br>
-                            You provide your name separately only for the instructor to record your completion.
-                        </li>
-                    </ol>
-                </div>
-
-                <!-- Choice Selection -->
-                <div style="border: 3px solid var(--primary-blue); border-radius: 12px; padding: 24px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);">
-                    <p style="margin: 0 0 18px 0; font-size: 16px; font-weight: 600; color: var(--primary-blue);">
-                        Please select one option:
-                    </p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 14px;">
-                        <label style="display: flex; align-items: start; gap: 14px; cursor: pointer; background: white; padding: 18px; border-radius: 10px; border: 2px solid transparent; transition: all 0.2s;" class="consent-option">
-                            <input type="radio" name="consentChoice" value="optin" style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; font-size: 16px; color: var(--primary-blue); margin-bottom: 4px;">
-                                    ✅ I agree to participate
-                                </div>
-                                <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                                    I will complete the AI negotiation exercise
-                                </div>
-                            </div>
-                        </label>
-                        
-                        <label style="display: flex; align-items: start; gap: 14px; cursor: pointer; background: white; padding: 18px; border-radius: 10px; border: 2px solid transparent; transition: all 0.2s;" class="consent-option">
-                            <input type="radio" name="consentChoice" value="optout" style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; font-size: 16px; color: var(--text-secondary); margin-bottom: 4px;">
-                                    📄 I prefer the alternative assignment
-                                </div>
-                                <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">
-                                    I will complete the written reflection instead
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-footer" style="border-top: 2px solid var(--border-color); padding: 20px 40px;">
-                <p style="color: var(--text-secondary); font-size: 13px; margin: 0; flex: 1;">
-                    Questions? Contact Prof. Daylian Cain or the research team
-                </p>
-                <button class="btn-primary" id="consentContinueBtn" onclick="processConsent()" disabled style="min-width: 140px;">
-                    Continue →
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Instructions Modal -->
     <div id="instructionsModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>📚 Negotiation Guidelines</h2>
-                <span class="modal-timer" id="modal1Timer">10s</span>
+                <span class="modal-timer" id="modal1Timer">15s</span>
             </div>
             
             <div class="modal-body">
@@ -2844,12 +2406,12 @@ ${simpleExample}</pre>
         </div>
     </div>
 
-    <!-- Modal 2: Negotiation Instructions (20s timer) -->
+    <!-- Modal 2: Negotiation Instructions (45s timer) -->
     <div id="negotiationModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>🎯 Negotiation Guidelines</h2>
-                <span class="modal-timer" id="modal2Timer">20s</span>
+                <span class="modal-timer" id="modal2Timer">45s</span>
             </div>
             
             <div class="modal-body">
@@ -2912,6 +2474,11 @@ ${simpleExample}</pre>
                             <li>Don't worry. When verification is needed, the chat interface will provide specific instructions on how to proceed</li>
                         </ul>
                     </div>
+                    
+                    <div class="instruction-item">
+                        <strong>4. Get AI Feedback</strong>
+                        <p>After the negotiation ends, click "Get Feedback" to receive AI analysis of your performance.</p>
+                    </div>
                 </section>
             </div>
             
@@ -2967,100 +2534,6 @@ ${simpleExample}</pre>
             </div>
         </div>
     </div>
-
-    <script>
-    // ==================== Handle "Other" option visibility ====================
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gender Other
-        document.getElementById('gender').addEventListener('change', function() {
-            const otherBox = document.getElementById('genderOther');
-            if (this.value === 'Other') {
-                otherBox.classList.remove('hidden');
-            } else {
-                otherBox.classList.add('hidden');
-                otherBox.value = '';
-            }
-        });
-
-        // Age Range Other
-        document.getElementById('ageRange').addEventListener('change', function() {
-            const otherBox = document.getElementById('ageOther');
-            if (this.value === 'Other') {
-                otherBox.classList.remove('hidden');
-            } else {
-                otherBox.classList.add('hidden');
-                otherBox.value = '';
-            }
-        });
-
-        // Race/Ethnicity Other
-        document.getElementById('raceEthnicity').addEventListener('change', function() {
-            const otherBox = document.getElementById('raceOther');
-            if (this.value === 'Other') {
-                otherBox.classList.remove('hidden');
-            } else {
-                otherBox.classList.add('hidden');
-                otherBox.value = '';
-            }
-        });
-
-        // Work Experience Other
-        document.getElementById('workExperience').addEventListener('change', function() {
-            const otherBox = document.getElementById('workExpOther');
-            if (this.value === 'Other') {
-                otherBox.classList.remove('hidden');
-            } else {
-                otherBox.classList.add('hidden');
-                otherBox.value = '';
-            }
-        });
-    });
-
-    // ==================== Consent Form Handling ====================
-    
-    // Enable continue button when choice is made
-    document.querySelectorAll('input[name="consentChoice"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            document.getElementById('consentContinueBtn').disabled = false;
-        });
-    });
-
-    function processConsent() {
-        const choice = document.querySelector('input[name="consentChoice"]:checked');
-        
-        if (!choice) {
-            alert('Please select an option to continue');
-            return;
-        }
-        
-        if (choice.value === 'optout') {
-            // Show opt-out message
-            document.body.innerHTML = `
-                <div style="max-width: 700px; margin: 100px auto; padding: 50px; background: white; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                    <div style="font-size: 48px; margin-bottom: 20px;">📋</div>
-                    <h2 style="margin-bottom: 24px; color: var(--text-primary);">Thank you for your response</h2>
-                    <p style="line-height: 1.8; margin-bottom: 20px; color: var(--text-secondary); font-size: 16px;">
-                        You have chosen to opt out of the AI negotiation exercise.
-                    </p>
-                    <p style="line-height: 1.8; margin-bottom: 30px; color: var(--text-secondary); font-size: 16px;">
-                        Please contact <strong>Prof. Daylian Cain</strong> for information about the alternative assignment.
-                    </p>
-                    <div style="padding: 20px; background: #f9fafb; border-radius: 12px; border: 1px solid var(--border-color);">
-                        <p style="color: #666; margin: 0; font-size: 14px;">
-                            You may now close this window.
-                        </p>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-        
-        // If opt-in, hide consent modal and show instructions modal
-        document.getElementById('consentModal').style.display = 'none';
-        document.getElementById('instructionsModal').classList.remove('hidden');
-        showInstructionsModal(true);
-    }
-    </script>
 
 </body>
 </html>
