@@ -1238,18 +1238,11 @@ def start_negotiation(request: StartNegotiationRequest):
         
         # Directly use student_goes_first from request (no randomization)
         student_goes_first = request.student_goes_first
-        
+
         session = NegotiationSession(
             session_id=session_id,
-            current_program=request.current_program,
-            undergrad_major=request.undergrad_major,
+            major=request.major,
             gender=request.gender,
-            age_range=request.age_range,
-            race_ethnicity=request.race_ethnicity,
-            work_experience=request.work_experience,
-            first_gen_student=request.first_gen_student,
-            english_proficiency=request.english_proficiency,
-            negotiation_courses=request.negotiation_courses,
             negotiation_experience=request.negotiation_experience,
             scenario_name=request.scenario_name,
             student_role=request.student_role,
@@ -1259,6 +1252,7 @@ def start_negotiation(request: StartNegotiationRequest):
             use_plan=request.use_plan,
             total_rounds=request.total_rounds
         )
+
         
         ai_first_message = None
         if not student_goes_first:
@@ -1271,7 +1265,7 @@ def start_negotiation(request: StartNegotiationRequest):
             ai_first_message = ai_response
         
         session.save_to_db()
-        
+
         return {
             "session_id": session_id,
             "student_goes_first": student_goes_first,
@@ -1282,6 +1276,7 @@ def start_negotiation(request: StartNegotiationRequest):
             "ai_role": session.ai_role,
             "ai_model": request.ai_model
         }
+        
     
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Scenario '{request.scenario_name}' not found")
