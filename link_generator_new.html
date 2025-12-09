@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Link Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 32px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #1e40af;
+        }
+        .output {
+            margin-top: 32px;
+            display: none;
+        }
+        .output.show {
+            display: block;
+        }
+        .link-card {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .link-card h3 {
+            margin: 0 0 12px 0;
+            color: #1e40af;
+            font-size: 16px;
+        }
+        .link-url {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            font-family: monospace;
+            font-size: 13px;
+            word-break: break-all;
+            color: #374151;
+        }
+        .copy-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 8px;
+            width: auto;
+        }
+        .copy-btn:hover {
+            background: #059669;
+        }
+        .copied {
+            background: #6b7280 !important;
+        }
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 6px;
+        }
+        .info-box p {
+            margin: 0;
+            color: #92400e;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Student Link Generator</h1>
+        <p class="subtitle">Generate locked links for students - each link pre-assigns scenario, role, mode, and turn order</p>
+        
+        <div class="info-box">
+            <p><strong>📌 What gets locked:</strong> Scenario, Role, AI Mode (Base/Agent), Who Goes First, and Number of Rounds</p>
+        </div>
+        
+        <label>Base URL</label>
+        <input type="text" id="baseUrl" value="https://ubiquitous-tartufo-9dcff0.netlify.app/">
+        
+        <label>Select Scenario</label>
+        <select id="scenario">
+            <option value="">-- Choose a scenario --</option>
+            <option value="main_street">Main Street</option>
+            <option value="top_talent">Top Talent</option>
+        </select>
+        
+        <label>Select AI Mode</label>
+        <select id="mode">
+            <option value="">-- Choose mode --</option>
+            <option value="base">Base Mode (no Memory/Plan)</option>
+            <option value="mp">Agent Mode (Memory + Plan)</option>
+        </select>
+        
+        <label>Who Goes First</label>
+        <select id="first">
+            <option value="">-- Choose turn order --</option>
+            <option value="student">Student goes first</option>
+            <option value="ai">AI goes first</option>
+        </select>
+        
+        <label>Number of Rounds</label>
+        <input type="number" id="rounds" min="1" max="20" value="6">
+        
+        <button onclick="generateLinks()">Generate Links</button>
+        
+        <div class="output" id="output">
+            <h2 style="margin-bottom: 20px; color: #1f2937;">📋 Generated Links</h2>
+            <div id="linksContainer"></div>
+        </div>
+    </div>
+    
+    <script>
+        const roleLabels = {
+            'main_street': {
+                'side1': 'The Buyer',
+                'side2': 'The Seller'
+            },
+            'top_talent': {
+                'side1': 'The Recruiter',
+                'side2': 'The Candidate'
+            }
+        };
+        
+        const modeLabels = {
+            'base': 'Base Mode',
+            'mp': 'Agent Mode (M+P)'
+        };
+        
+        const firstLabels = {
+            'student': 'Student First',
+            'ai': 'AI First'
+        };
+        
+        function generateLinks() {
+            const baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');
+            const scenario = document.getElementById('scenario').value;
+            const mode = document.getElementById('mode').value;
+            const first = document.getElementById('first').value;
+            const rounds = document.getElementById('rounds').value;
+            
+            if (!scenario || !mode || !first) {
+                alert('Please select all options');
+                return;
+            }
+            
+            const labels = roleLabels[scenario];
+            const links = [
+                {
+                    role: 'side1',
+                    label: labels.side1,
+                    url: `${baseUrl}/?scenario=${scenario}&role=side1&mode=${mode}&first=${first}&rounds=${rounds}&lock=true`
+                },
+                {
+                    role: 'side2',
+                    label: labels.side2,
+                    url: `${baseUrl}/?scenario=${scenario}&role=side2&mode=${mode}&first=${first}&rounds=${rounds}&lock=true`
+                }
+            ];
+            
+            const modeLabel = modeLabels[mode];
+            const firstLabel = firstLabels[first];
+            
+            const container = document.getElementById('linksContainer');
+            container.innerHTML = `
+                <div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                    <h3 style="margin: 0 0 8px 0; color: #1e40af;">📊 Configuration</h3>
+                    <p style="margin: 0; color: #1e40af;">
+                        <strong>Scenario:</strong> ${scenario === 'main_street' ? 'Main Street' : 'Top Talent'} | 
+                        <strong>Mode:</strong> ${modeLabel} | 
+                        <strong>Turn Order:</strong> ${firstLabel} | 
+                        <strong>Rounds:</strong> ${rounds}
+                    </p>
+                </div>
+                ${links.map((link, index) => `
+                    <div class="link-card">
+                        <h3>👤 ${link.label}</h3>
+                        <div class="link-url" id="url-${index}">${link.url}</div>
+                        <button class="copy-btn" onclick="copyLink('url-${index}', this)">📋 Copy Link</button>
+                    </div>
+                `).join('')}
+            `;
+            
+            document.getElementById('output').classList.add('show');
+        }
+        
+        function copyLink(elementId, button) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

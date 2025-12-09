@@ -788,13 +788,21 @@
             <div class="form-section">
                 <h3>📋 Demographic Information</h3>
 
-                <!-- 1. Major -->
+                <!-- 1. Current Program -->
                 <div class="form-group">
-                    <label>Major</label>
-                    <input type="text" id="major">
+                    <label>Current Program</label>
+                    <input type="text" id="currentProgram" 
+                           placeholder="e.g., MBA, MS Finance, MPA">
                 </div>
 
-                <!-- 2. Gender -->
+                <!-- 2. Undergraduate Major -->
+                <div class="form-group">
+                    <label>Undergraduate Major</label>
+                    <input type="text" id="undergradMajor" 
+                           placeholder="e.g., Economics, Computer Science">
+                </div>
+
+                <!-- 3. Gender -->
                 <div class="form-group">
                     <label>Gender</label>
                     <select id="gender">
@@ -809,7 +817,105 @@
                            placeholder="Please specify">
                 </div>
 
-                <!-- 3. Real-world Negotiation Experience -->
+                <!-- 4. Age Range -->
+                <div class="form-group">
+                    <label>Age Range</label>
+                    <select id="ageRange">
+                        <option value="">Prefer not to say</option>
+                        <option value="Under 18">Under 18</option>
+                        <option value="18-25">18-25</option>
+                        <option value="25-29">25-29</option>
+                        <option value="30-34">30-34</option>
+                        <option value="35-39">35-39</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="ageOther" class="hidden" 
+                           style="margin-top: 8px;" 
+                           placeholder="Please specify your age">
+                </div>
+
+                <!-- 5. Race/Ethnicity -->
+                <div class="form-group">
+                    <label>Race/Ethnicity</label>
+                    <select id="raceEthnicity">
+                        <option value="">Prefer not to say</option>
+                        <option value="Asian">Asian</option>
+                        <option value="Black/African American">Black or African American</option>
+                        <option value="Hispanic/Latino">Hispanic or Latino</option>
+                        <option value="White">White</option>
+                        <option value="Middle Eastern/North African">Middle Eastern or North African</option>
+                        <option value="Native American/Alaska Native">Native American or Alaska Native</option>
+                        <option value="Pacific Islander">Pacific Islander</option>
+                        <option value="Two or more races">Two or more races</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="raceOther" class="hidden" 
+                           style="margin-top: 8px;" 
+                           placeholder="Please specify">
+                </div>
+
+                <!-- 6. Work Experience -->
+                <div class="form-group">
+                    <label>Work Experience</label>
+                    <small style="color: #666; display: block; margin-bottom: 8px;">
+                        Excluding academic work, including internships
+                    </small>
+                    <select id="workExperience">
+                        <option value="">Prefer not to say</option>
+                        <option value="0 years">0 years (No experience)</option>
+                        <option value="0-1 years">0-1 years</option>
+                        <option value="1-2 years">1-2 years</option>
+                        <option value="2-3 years">2-3 years</option>
+                        <option value="3-4 years">3-4 years</option>
+                        <option value="4-5 years">4-5 years</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="workExpOther" class="hidden" 
+                           style="margin-top: 8px;" 
+                           placeholder="Please specify years of experience">
+                </div>
+
+                <!-- 7. First-Generation College Student -->
+                <div class="form-group">
+                    <label>First-Generation College Student</label>
+                    <select id="firstGenStudent">
+                        <option value="">Prefer not to say</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <!-- 8. English Proficiency -->
+                <div class="form-group">
+                    <label>English Proficiency</label>
+                    <small style="color: #666; display: block; margin-bottom: 8px;">
+                        How would you rate your English proficiency?
+                    </small>
+                    <select id="englishProficiency">
+                        <option value="">Prefer not to disclose</option>
+                        <option value="1 - Basic">1 - Basic: Can communicate simply, difficult with complex topics</option>
+                        <option value="2 - Intermediate">2 - Intermediate: Can handle most daily topics, limited in professional/complex expressions</option>
+                        <option value="3 - Upper-intermediate">3 - Upper-intermediate: Can express relatively smoothly, occasionally limited by vocabulary/grammar</option>
+                        <option value="4 - Advanced">4 - Advanced: Clear and natural expression, no obvious difficulty understanding complex content</option>
+                        <option value="5 - Native-like/Fluent">5 - Native-like/Fluent: Fluent in all contexts</option>
+                    </select>
+                </div>
+
+                <!-- 9. Negotiation Courses Taken -->
+                <div class="form-group">
+                    <label>Negotiation Courses Taken</label>
+                    <small style="color: #666; display: block; margin-bottom: 8px;">
+                        Have you taken any negotiation-related academic courses? (courses not completed to midterm don't count)
+                    </small>
+                    <select id="negotiationCourses">
+                        <option value="">Prefer not to disclose</option>
+                        <option value="Yes, one course">Yes, one course</option>
+                        <option value="Yes, more than one course">Yes, more than one course</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
+                <!-- 10. Real-world Negotiation Experience -->
                 <div class="form-group">
                     <label>Real-world Negotiation Experience</label>
                     <small style="color: #666; display: block; margin-bottom: 8px;">
@@ -993,7 +1099,7 @@
                             <div class="example-box" style="background: #f0f9ff; border-left: 3px solid #2563eb;">
                                 <pre id="jsonCleanExample" style="margin: 0; font-size: 12px; line-height: 1.5;">Loading...</pre>
                             </div>
-                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #6b7280;">💡 <strong>Important:</strong> No blank lines between fields, no comments - just the clean format as shown above</p>
+                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #6b7280;">💡 <strong>Important:</strong> No blank lines between fields, no comments - just the clean JSON as shown above</p>
                             
                             <h4 style="margin-top: 16px;">Field Details (what to fill in):</h4>
                             <div class="example-box">
@@ -1075,9 +1181,6 @@
             const locked = urlParams.get('lock') === 'true';
             const presetScenario = urlParams.get('scenario');
             const presetRole = urlParams.get('role');
-            const presetMode = urlParams.get('mode');
-            const presetFirst = urlParams.get('first');
-            const presetRounds = urlParams.get('rounds');
             
             // Load scenarios first
             await loadScenarios();
@@ -1085,14 +1188,14 @@
             
             // ⭐ NEW: Apply locked mode after scenarios are loaded
             if (locked && presetScenario && presetRole) {
-                applyLockedMode(presetScenario, presetRole, presetMode, presetFirst, presetRounds);
+                applyLockedMode(presetScenario, presetRole);
             }
         }
 
         // ===================================================================
-        // Apply Locked Mode (FINAL FIX - Case Insensitive + Mode + First + Rounds)
+        // Apply Locked Mode (FINAL FIX - Case Insensitive)
         // ===================================================================
-        function applyLockedMode(scenarioId, roleId, mode, first, rounds) {
+        function applyLockedMode(scenarioId, roleId) {
             // First delay: ensure DOM is fully ready
             setTimeout(() => {
                 // Find the correct scenario value (case-insensitive match)
@@ -1119,44 +1222,6 @@
                     // Auto-select role
                     elements.roleSelect.value = roleId;
                     elements.roleSelect.dispatchEvent(new Event('change'));
-                    
-                    // Lock mode (use_memory + use_plan)
-                    if (mode) {
-                        if (mode === 'base') {
-                            elements.useMemory.checked = false;
-                            elements.usePlan.checked = false;
-                        } else if (mode === 'm') {
-                            elements.useMemory.checked = true;
-                            elements.usePlan.checked = false;
-                        } else if (mode === 'mp') {
-                            elements.useMemory.checked = true;
-                            elements.usePlan.checked = true;
-                        }
-                        elements.useMemory.disabled = true;
-                        elements.usePlan.disabled = true;
-                    }
-                    
-                    // Lock who goes first
-                    if (first) {
-                        const radioButtons = document.querySelectorAll('input[name="whoGoesFirst"]');
-                        radioButtons.forEach(radio => {
-                            if (radio.value === first) {
-                                radio.checked = true;
-                            }
-                            radio.disabled = true;
-                        });
-                    }
-                    
-                    // ⭐ NEW: Lock total rounds
-                    if (rounds) {
-                        const roundsValue = parseInt(rounds);
-                        if (roundsValue >= 1 && roundsValue <= 20) {
-                            elements.totalRoundsInput.value = roundsValue;
-                            elements.totalRoundsInput.disabled = true;
-                            elements.totalRoundsInput.style.opacity = '0.6';
-                            elements.totalRoundsInput.style.cursor = 'not-allowed';
-                        }
-                    }
                     
                     // Third delay: ensure DOM updates are complete before reading values
                     setTimeout(() => {
@@ -1343,8 +1408,15 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        major: document.getElementById('major').value.trim(),
+                        current_program: document.getElementById('currentProgram').value.trim(),
+                        undergrad_major: document.getElementById('undergradMajor').value.trim(),
                         gender: getFieldValue('gender', 'genderOther'),
+                        age_range: getFieldValue('ageRange', 'ageOther'),
+                        race_ethnicity: getFieldValue('raceEthnicity', 'raceOther'),
+                        work_experience: getFieldValue('workExperience', 'workExpOther'),
+                        first_gen_student: document.getElementById('firstGenStudent').value,
+                        english_proficiency: document.getElementById('englishProficiency').value,
+                        negotiation_courses: document.getElementById('negotiationCourses').value,
                         negotiation_experience: document.getElementById('negotiationExperience').value,
                         scenario_name: scenarioName,
                         student_role: studentRole,
@@ -1735,14 +1807,15 @@
                 
                 <div style="background: var(--deal-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
                     <strong>Option 1: Accept (if terms match your most recent offer)</strong>
-                    <p style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
-                        Send this exact message:
+                    <ol style="margin-top: 4px; padding-left: 20px; font-size: 13px;">
+                        <li>Type <code>$DEAL_REACHED$</code> on the first line</li>
+                        <li>On the next line, paste the terms in JSON format</li>
+                    </ol>
+                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+                        Example:
                     </p>
                     <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 4px;">$DEAL_REACHED$
 ${simpleExample}</pre>
-                    <p style="margin-top: 4px; font-size: 12px; color: var(--text-secondary);">
-                        Copy and paste the entire message above.
-                    </p>
                 </div>
                 
                 <div style="background: var(--system-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
@@ -1808,14 +1881,15 @@ ${simpleExample}</pre>
                 
                 <div style="background: var(--deal-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
                     <strong>Option 1: Accept</strong>
-                    <p style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
-                        Send this exact message:
+                    <ol style="margin-top: 4px; padding-left: 20px; font-size: 13px;">
+                        <li>Type <code>$DEAL_REACHED$</code> on the first line</li>
+                        <li>On the next line, paste the terms in JSON format</li>
+                    </ol>
+                    <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+                        Example:
                     </p>
                     <pre style="background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 4px;">$DEAL_REACHED$
 ${simpleExample}</pre>
-                    <p style="margin-top: 4px; font-size: 12px; color: var(--text-secondary);">
-                        Copy and paste the entire message above.
-                    </p>
                 </div>
                 
                 <div style="background: var(--system-bg); padding: 12px; border-radius: 8px; margin-top: 8px;">
@@ -2306,9 +2380,73 @@ ${simpleExample}</pre>
         window.addEventListener('DOMContentLoaded', init);
 
         // ===================================================================
-        // Modal Timer Variable
+        // Instructions Modal Functions - UPDATED WITH TIMER
         // ===================================================================
+        let modal1Timer = null;
         let modal2Timer = null;
+        
+        function showInstructionsModal(useTimer = true) {
+            const modal = document.getElementById('instructionsModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            
+            const continueBtn = document.getElementById('modal1ContinueBtn');
+            const timerElement = document.getElementById('modal1Timer');
+            
+            if (useTimer && continueBtn && timerElement) {
+                // Start 10 second timer
+                let timeLeft = 10;
+                continueBtn.disabled = true;
+                timerElement.style.display = 'inline-block';
+                timerElement.style.background = 'var(--warning-yellow)';
+                timerElement.textContent = `${timeLeft}s`;
+                
+                modal1Timer = setInterval(() => {
+                    timeLeft--;
+                    timerElement.textContent = `${timeLeft}s`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(modal1Timer);
+                        continueBtn.disabled = false;
+                        timerElement.textContent = '✓';
+                        timerElement.style.background = 'var(--success-green)';
+                    }
+                }, 1000);
+            } else {
+                // No timer - enable button immediately
+                if (continueBtn) continueBtn.disabled = false;
+                if (timerElement) timerElement.style.display = 'none';
+            }
+        }
+
+        function closeInstructionsModal() {
+            const modal = document.getElementById('instructionsModal');
+            modal.classList.remove('show');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            if (modal1Timer) {
+                clearInterval(modal1Timer);
+                modal1Timer = null;
+            }
+        }
+
+        function confirmInstructionsRead() {
+            const dontShowAgain = document.getElementById('dontShowAgain').checked;
+            if (dontShowAgain) {
+                localStorage.setItem('hideInstructions', 'true');
+            }
+            closeInstructionsModal();
+        }
+
+        function checkShowInstructions() {
+            const hideInstructions = localStorage.getItem('hideInstructions');
+            if (!hideInstructions) {
+                setTimeout(() => {
+                    showInstructionsModal();
+                }, 500);
+            }
+        }
 
         function openHelpModal() {
             showInstructionsModal(false); // No timer when opening from Help button
@@ -2316,13 +2454,20 @@ ${simpleExample}</pre>
 
         // Close modal on outside click - DISABLED for timed modals
         document.addEventListener('click', (e) => {
-            // Modal outside click handling disabled for consent flow
-            return;
+            if (e.target.classList.contains('modal') && e.target.id === 'instructionsModal') {
+                // Don't close if timer is still running
+                return;
+            }
         });
 
         // Close modal on ESC key - DISABLED for timed modals
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const modal = document.getElementById('instructionsModal');
+                if (modal.classList.contains('show')) {
+                    // Don't close if timer is still running
+                    return;
+                }
                 // Allow closing role preview modal
                 const rolePreviewModal = document.getElementById('rolePreviewModal');
                 if (rolePreviewModal && rolePreviewModal.classList.contains('show')) {
@@ -2347,8 +2492,8 @@ ${simpleExample}</pre>
                 totalRoundsSpan.textContent = totalRoundsValue;
             }
             
-            // Start 30 second timer
-            let timeLeft = 30;
+            // Start 20 second timer
+            let timeLeft = 20;
             const timerElement = document.getElementById('modal2Timer');
             const nextBtn = document.getElementById('modal2NextBtn');
             nextBtn.disabled = true;
@@ -2622,13 +2767,83 @@ ${simpleExample}</pre>
         </div>
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📚 Negotiation Guidelines</h2>
+                <span class="modal-timer" id="modal1Timer">10s</span>
+            </div>
+            
+            <div class="modal-body">
+                <section class="instruction-section">
+                    <h3>🎯 Before You Start</h3>
+                    
+                    <div class="instruction-item">
+                        <strong>1. Choose Your Scenario & Model Mode</strong>
+                        <p>Select the model mode and who goes first assigned to you in class. The negotiation has fixed 6 total rounds.</p>
 
-    <!-- Modal 2: Negotiation Instructions (30s timer) -->
+                        <p style="margin-top: 8px;">This platform supports three model modes:</p>
+                        <ul style="margin-left: 20px; line-height: 1.6;">
+                            
+                            <li>
+                                <strong>Base Mode:</strong>
+                                Leave both checkboxes <em>off</em>:
+                                “Enable AI Memory” and “Enable AI Strategic Planning.”
+                                
+                                <span style="color:#666; font-size: 14px;">Fastest (~1 minute per response).</span>
+                            </li>
+
+                            <li>
+                                <strong>Memory Mode (Base + State Tracking):</strong>
+                                Turn on <em>only</em> “Enable AI Memory.”
+                                
+                                <span style="color:#666; font-size: 14px;">Stronger consistency; moderate speed(~2 minute per response).</span>
+                            </li>
+
+                            <li>
+                                <strong>Memory + Plan Mode (Base + State Tracking + Strategy Planning):</strong>
+                                Turn on <em>both</em> checkboxes:
+                                “Enable AI Memory” and “Enable AI Strategic Planning.”
+                                
+                                <span style="color:#666; font-size: 14px;">Deepest reasoning; slowest (~3–4 minutes per response).</span>
+                            </li>
+
+                        </ul>
+
+                    </div>
+                                        
+                    <div class="instruction-item">
+                        <strong>2. Work Independently</strong>
+                        <p>Do not use AI tools (like ChatGPT) to help you negotiate. Rely on your own understanding of the negotiation scenario.</p>
+                    </div>
+                    
+                    
+                    <div class="instruction-item">
+                        <strong>3. Read Your Role Information Carefully</strong>
+                        <p>After entering the negotiation, carefully review your role details. This information is confidential—the AI cannot see it.</p>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="dontShowAgain" />
+                    <label for="dontShowAgain">Don't show this again</label>
+                </div>
+                <button class="btn-primary" id="modal1ContinueBtn" onclick="confirmInstructionsRead()">
+                    Got it, Start →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Negotiation Instructions (20s timer) -->
     <div id="negotiationModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>🎯 Negotiation Guidelines</h2>
-                <span class="modal-timer" id="modal2Timer">30s</span>
+                <span class="modal-timer" id="modal2Timer">20s</span>
             </div>
             
             <div class="modal-body">
@@ -2636,27 +2851,27 @@ ${simpleExample}</pre>
                     <h3>📋 Key Points</h3>
                     
                     <div class="instruction-item">
-                        <strong>1. Work Independently</strong>
-                        <p>Do not use AI tools (like ChatGPT) to help you negotiate. Rely on your own understanding of the negotiation scenario.</p>
+                        <strong>1. Plan Strategically</strong>
+                        <ul style="line-height: 1.7;">
+                            <li>You have only <span id="modalTotalRounds">6</span> rounds total</li>
+                            <li>Each round = both parties send one message each</li>
+                            <li>If neither you nor the AI sends the <code>$DEAL_REACHED$</code> token by the end of the last round, no deal will have been reached and you will get your BATNA</li>
+                            <li>Make each round count—don't waste turns with trivial messages</li>
+                        </ul>
                     </div>
 
                     <div class="instruction-item">
                         <strong>2. Be Patient with AI Responses</strong>
-                        
-                        <p>Your assigned configuration may use one of two AI modes:</p>
-                        <ul style="margin-left: 20px; line-height: 1.6;">
-                            <li>
-                                <strong>Base Mode:</strong> About 1 minute per response
-                            </li>
-                            <li>
-                                <strong>Agent Mode:</strong>
-                                <ul style="margin-left: 20px; margin-top: 4px;">
-                                    <li>Main Street scenario: Average 2 minutes per response</li>
-                                    <li>Top Talent scenario: Average 3-4 minutes per response</li>
-                                </ul>
-                            </li>
+                        <p>
+                            Depending on the model mode you selected, response times may vary:
+                        </p>
+
+                        <ul style="margin: 8px 0 12px 20px; line-height: 1.6;">
+                            <li><strong>Base Mode:</strong> about 1 minute per response</li>
+                            <li><strong>Memory Mode (Base + State Tracking):</strong> usually around 2 minutes per response</li>
+                            <li><strong>Memory + Plan Mode (Base + State Tracking + Strategy Planning):</strong> typically 3–4 minutes per response</li>
                         </ul>
-                        
+
                         <p>
                             Please wait patiently while the AI is generating its message. 
                             Do not refresh the page during this time.
@@ -2665,8 +2880,8 @@ ${simpleExample}</pre>
                         <p style="margin-top: 10px;">
                             If you encounter an error due to long processing time, record your messages,
                             and start a new negotiation session.
-                            If the issue persists, please contact your instructor.
-                            (Don't worry — based on testing, this situation is very rare.)
+                            If the issue persists, please contact your instructor — you may retry later or switch to Base Mode.
+                            (Don’t worry — based on testing, this situation is very rare.)
                         </p>
                     </div>
                     
@@ -2676,31 +2891,24 @@ ${simpleExample}</pre>
                         <p style="margin-top: 12px;"><strong>Option A: You accept the AI's offer</strong></p>
                         <p>If you agree with the AI's most recent proposal, send:</p>
                         <ul>
-                            <li><code>$DEAL_REACHED$</code> + the deal terms (matching the AI's proposal)</li>
+                            <li><code>$DEAL_REACHED$</code> + the JSON terms (matching the AI's proposal)</li>
                             <li>Don't worry about the exact format. When you start negotiating, check the guide in the bottom right corner</li>
                         </ul>
                         
                         <p style="margin-top: 12px;"><strong>Option B: AI accepts your offer</strong></p>
-                        <p>When the AI agrees with YOUR most recent proposal, it will send <code>$DEAL_REACHED$</code> + deal terms.</p>
+                        <p>When the AI agrees with YOUR most recent proposal, it will send <code>$DEAL_REACHED$</code> + JSON terms.</p>
                         <p><strong>You must verify and respond:</strong></p>
                         <ul>
-                            <li><strong>CONFIRM:</strong> If the AI's terms match your latest offer exactly, copy and paste the AI's entire message as your response</li>
-                            <li><strong>REJECT:</strong> If the AI's terms don't match your latest offer, respond with:<br>
+                            <li><strong>CONFIRM:</strong> If the AI's JSON matches your latest offer exactly, respond with:<br>
+                            <code>$DEAL_REACHED$</code> + the same JSON terms</li>
+                            <li><strong>REJECT:</strong> If the AI's JSON doesn't match your latest offer, respond with:<br>
                             <code>$DEAL_MISUNDERSTANDING$</code></li>
                             <li>Don't worry. When verification is needed, the chat interface will provide specific instructions on how to proceed</li>
                         </ul>
                     </div>
-
-                    <div class="instruction-item">
-                        <strong>4. Plan Strategically</strong>
-                        <ul style="line-height: 1.7;">
-                            <li>You have only <span id="modalTotalRounds">6</span> rounds total</li>
-                            <li>Each round = both parties send one message each</li>
-                            <li>If neither you nor the AI sends the <code>$DEAL_REACHED$</code> token by the end of the last round, no deal will have been reached and you will get your BATNA</li>
-                            <li>Make each round count—don't waste turns with trivial messages</li>
-                        </ul>
-                    </div>
                 </section>
+            </div>
+            
             <div class="modal-footer">
                 <div></div>
                 <button class="btn-primary" id="modal2NextBtn" onclick="goToRolePreview()">
@@ -2720,7 +2928,7 @@ ${simpleExample}</pre>
             
             <div class="modal-body" style="padding: 24px 40px;">
                 <p style="margin-bottom: 24px; color: var(--text-secondary); font-size: 15px;">
-                    This information will be displayed on the right side when you start negotiating, so you can reference it at any time. However, we recommend reading it carefully now when the content is most convenient to review. This information is confidential—the AI cannot see it.
+                    This information will be displayed on the right side when you start negotiating, so you can reference it at any time.
                 </p>
 
                 <div style="background: var(--bg-gray); padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--primary-blue);">
@@ -2760,6 +2968,39 @@ ${simpleExample}</pre>
         // Gender Other
         document.getElementById('gender').addEventListener('change', function() {
             const otherBox = document.getElementById('genderOther');
+            if (this.value === 'Other') {
+                otherBox.classList.remove('hidden');
+            } else {
+                otherBox.classList.add('hidden');
+                otherBox.value = '';
+            }
+        });
+
+        // Age Range Other
+        document.getElementById('ageRange').addEventListener('change', function() {
+            const otherBox = document.getElementById('ageOther');
+            if (this.value === 'Other') {
+                otherBox.classList.remove('hidden');
+            } else {
+                otherBox.classList.add('hidden');
+                otherBox.value = '';
+            }
+        });
+
+        // Race/Ethnicity Other
+        document.getElementById('raceEthnicity').addEventListener('change', function() {
+            const otherBox = document.getElementById('raceOther');
+            if (this.value === 'Other') {
+                otherBox.classList.remove('hidden');
+            } else {
+                otherBox.classList.add('hidden');
+                otherBox.value = '';
+            }
+        });
+
+        // Work Experience Other
+        document.getElementById('workExperience').addEventListener('change', function() {
+            const otherBox = document.getElementById('workExpOther');
             if (this.value === 'Other') {
                 otherBox.classList.remove('hidden');
             } else {
@@ -2808,8 +3049,10 @@ ${simpleExample}</pre>
             return;
         }
         
-        // If opt-in, hide consent modal and show scenario screen
+        // If opt-in, hide consent modal and show instructions modal
         document.getElementById('consentModal').style.display = 'none';
+        document.getElementById('instructionsModal').classList.remove('hidden');
+        showInstructionsModal(true);
     }
     </script>
 
