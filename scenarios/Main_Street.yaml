@@ -59,7 +59,7 @@ side2:
     NEGOTIATION RULES: 
     - Your ONLY goal is to get the highest possible price of the deal, you will be evaluated on the final price of the deal.
     - Creative compromises, additional terms, or side deals invented are worth ZERO value.
-    - If at any point you accept the other side's terms, output ONLY the token '$DEAL_REACHED$' at the beginning of your output. 
+    - If at any point you accept the other side's terms, output the token '$DEAL_REACHED$' at the beginning of your output. 
     - If neither you nor the other side sends that token by the end of the last round, no deal will have been reached and you be forced to settle for your BATNA: $475,000. 
       You should never propose or agree to a deal that goes below your BATNA.
     - Each party goes once per round. 
