@@ -500,7 +500,7 @@ class NegotiationSession:
             "Produce a CONCISE, USABLE negotiation state that survives limited transcript windows.\n\n"
             "OUTPUT SKELETON (aim for ≤10 lines; maximum 12 lines if complexity requires):\n"
             "OFFERS: [Us: <our latest position on each issue>; Them: <their latest position on each issue>; Them-best-for-us: <track complete offer they've proposed historically that has highest value to us>] (Format for Us/Them excluding Them-best-for-us: 'issue: old→new [updated]' if value changed this round; 'issue: value [unchanged]' if value unchanged from earlier rounds; 'issue: not yet' if never discussed by this party; If multiple offer packages proposed, state primary + note alternatives exist with their key trade-offs)\n"
-            "OPPONENT PATTERNS: [Concession/firmness behaviors on issues; any acceptance of our proposals (specify full package or partial issues); strong commitments they stated; questions/requests they raised]\n"
+            "OPPONENT PATTERNS: [Concession/firmness behaviors on issues; strength of reactions (strong resistance or minimal pushback), which signal issue importance; any acceptance of our proposals (specify full package or partial issues); strong commitments they stated; questions/requests they raised]\n"
             "OPPONENT PRIORITIES: [List what matters to them: mark Stated if they stated directly; mark Hypothesis if inferred from resistance/concession patterns. If relative importance is clear, optionally indicate level and whether that importance level is Stated or Hypothesis]\n"
             "OPPONENT CONSTRAINTS: [Opponent's boundaries, red lines, or requirements. Mark as Stated if opponent stated directly; mark Hypothesis if inferred.]\n\n"
             "HARD RULES:\n"
