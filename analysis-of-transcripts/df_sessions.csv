@@ -1,0 +1,295 @@
+session_id,scenario_name,student_role,ai_model,first_mover,config,total_rounds,outcome,major,gender,negotiation_experience,created_at,updated_at
+9af28f0d-3d18-4b70-b2e1-7773fafdc0de,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Male,None,2025-12-18 17:31,2025-12-18 18:06
+acba1c13-84a4-49f2-b0ab-f395e2f18b0b,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,None,2025-12-18 17:28,2025-12-18 17:30
+9b9e1aad-fd82-4f01-a07d-081f19dfa1d4,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Sociology with a Concentration in Business and Sustainability,Male,A few instances,2025-12-18 16:24,2025-12-18 17:11
+78362bc1-3b2a-4109-bf15-5a9b4b9687dd,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 16:21,2025-12-18 16:23
+f21c7237-b3c7-483d-a026-685af683f821,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Law,Male,None,2025-12-18 15:34,2025-12-18 17:01
+454fe2c9-42a4-4cd0-a7fa-594a3e28d2e5,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Sociology with a Concentration in Business and Sustainability,Male,A few instances,2025-12-18 15:23,2025-12-18 16:19
+6d01ea78-83bb-4d98-8996-eed4aa2c214e,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-18 14:26,2025-12-18 16:16
+ae9c8d87-ef3d-4586-8e37-c8a5c2f137a1,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 08:43,2025-12-18 08:44
+9c352ca7-6d7b-4b6d-a626-840a09db06eb,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 08:25,2025-12-18 08:43
+7ec9821f-df73-46d6-9e10-090d096f4a18,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 06:21,2025-12-18 06:22
+75f7a778-9d2e-40a4-8923-79a8f5556a60,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 04:10,2025-12-18 04:46
+4c1b8090-f4f8-422f-bc5a-a2db1b0d6bd0,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 03:50,2025-12-18 04:00
+3a13a821-690e-4e60-b7d4-3f7edd0b22cd,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 03:44,2025-12-18 03:46
+e49642a8-dd6b-446a-a088-d74fb42f3b06,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-18 00:25,2025-12-18 00:26
+757091a3-8a80-46ca-9c0b-fc8c7ef25f10,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 failed,GBS,Male,None,2025-12-17 20:45,2025-12-18 17:27
+c8c539ad-9623-4f28-b9cb-144ff86386b7,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,None,2025-12-17 20:44,2025-12-17 20:45
+6e9d376b-045c-47e8-9393-a07a78a8f2e6,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-17 19:42,2025-12-17 20:53
+ec7f59c1-8f02-4487-9cc4-10c8e1693724,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Public Health,Female,None,2025-12-17 18:34,2025-12-17 19:32
+d56929dd-a801-4c93-b0d8-4f3ebf4b4f25,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Management Science,Male,None,2025-12-17 14:47,2025-12-17 16:38
+f7e5118c-93e0-4df9-b031-8c0cf4cc94e3,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Management - GBS,Male,A few instances,2025-12-17 09:54,2025-12-17 19:04
+6d76e42e-f0f5-486b-9458-fda9caf74988,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,❌ Failed,,,,2025-12-17 05:00,2025-12-17 05:53
+a40b0b33-4936-4e5b-a264-bacd52a1d726,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Global Business and Society,Female,A few instances,2025-12-17 04:11,2025-12-17 04:33
+b9ada2c5-b1b5-4282-8cf9-31b2a07993ad,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-17 02:40,2025-12-17 03:13
+62d1e4fa-941a-4cf6-9be7-54e76606b599,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Management Science,Female,A few instances,2025-12-17 01:01,2025-12-17 02:24
+3441b586-fb12-4718-8c00-0e4c81502111,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,,,,2025-12-16 23:17,2025-12-16 23:40
+5e205a76-c223-4239-b9d3-a98d769ea3c4,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Global business and society,Male,None,2025-12-16 23:16,2025-12-16 23:16
+5750dafe-848c-4f21-a9ab-12aef3e8fbce,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Male,A few instances,2025-12-16 23:07,2025-12-16 23:10
+342b2a02-3e37-4e74-815f-d8902ef65529,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 failed,Global business and society,Male,None,2025-12-16 22:25,2025-12-16 23:13
+511d7f28-cffd-4699-afb4-4415824929d8,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Female,Occasional,2025-12-16 21:58,2025-12-16 22:48
+8974a678-953d-4673-b6d3-9318b159d9b6,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,⏹️ No Deal,MBA,Male,A few instances,2025-12-16 21:55,2025-12-16 22:46
+d81a04a6-19d0-4813-bcd6-b0117c718978,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Global Business and Society,Female,A few instances,2025-12-16 21:38,2025-12-17 01:03
+a8937e7d-b73b-4d21-8cac-0e401756fd19,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Female,Occasional,2025-12-16 21:14,2025-12-16 23:09
+35ba2190-3bcf-47fd-b60e-148db85016ee,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 failed,GBS,Female,None,2025-12-16 20:22,2025-12-16 21:44
+02e4f7ab-f50c-456c-bba1-a1eea9341b4a,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Management Science,Male,Occasional,2025-12-16 20:09,2025-12-16 20:58
+bcb5eec3-732a-42c2-9544-566c82eacd40,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 20:06,2025-12-16 20:08
+ece8ce8f-3510-4200-9cc6-cbf85fcda2ec,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Management Science,Male,Occasional,2025-12-16 20:05,2025-12-16 20:06
+0337dfc4-e949-4ac2-8a66-01d7f39c0873,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 19:45,2025-12-16 20:03
+6772b4eb-ef25-46d7-8bd1-7a2d20ca1d73,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,None,2025-12-16 19:32,2025-12-16 19:34
+80bb5fa0-cdc0-4048-acd0-f7f728597856,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,None,2025-12-16 19:29,2025-12-16 19:32
+5906fb96-b0be-4714-8d33-0bcc73a5f3f7,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,None,2025-12-16 19:26,2025-12-16 19:29
+e1efe30c-8480-43b6-a423-9693ce97bf9d,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,entrepreneurship,Male,Occasional,2025-12-16 19:11,2025-12-16 20:09
+48bef1c4-53fc-4085-ba38-268a700e4f3c,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 18:52,2025-12-16 18:52
+1b02c0a3-7d95-46e9-97a9-1066271014b3,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Management Science,Male,Occasional,2025-12-16 17:29,2025-12-16 19:46
+51d34fc5-1c2a-412f-8b50-17356f8b0785,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Male,Frequent,2025-12-16 17:09,2025-12-16 18:30
+294cb28c-3a7f-4277-9f5d-bb8aa43f3110,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Global Business and Society,Male,Occasional,2025-12-16 16:58,2025-12-16 17:49
+588afea5-e2be-4815-b92d-fdf35b948f8b,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Global Business and Society,Male,Occasional,2025-12-16 16:38,2025-12-16 16:52
+4aef70e4-0796-4391-af99-e823b4e86b54,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,,,2025-12-16 15:39,2025-12-16 16:21
+213057ba-b33a-47c8-af40-fa51f70e9c35,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 10:02,2025-12-16 10:13
+a0a6b1c9-a6d8-496a-b8e6-1e6356837c68,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 09:58,2025-12-16 10:00
+abe023a7-334b-4889-97d9-b003f71ae6ab,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 09:35,2025-12-16 09:37
+55424b03-69c5-4b7c-8e21-1f9568bc9c1d,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 09:08,2025-12-16 10:00
+7b76b602-eb3c-42b6-b3a3-90ce13609442,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 08:16,2025-12-16 08:17
+1a1e1656-3aba-404f-8320-298cf8937e0f,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 08:06,2025-12-16 08:07
+a6c1af70-9388-4127-95b6-36cd193a7fb0,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Healthcare Management,Female,A few instances,2025-12-16 08:00,2025-12-16 09:15
+c595f4c1-f731-49e9-bf61-02d98733d714,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 06:52,2025-12-16 07:06
+9bb77d3c-8186-46fa-babc-3e345d917b95,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 06:19,2025-12-16 06:37
+c529dabc-e4a2-45f7-9673-4327900e1ab8,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 06:18,2025-12-16 06:28
+10aefc91-53bc-406a-92a2-6d1cdfa1ba83,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:53,2025-12-16 06:11
+759e2cb6-9cea-443f-be67-c1ba262d2c58,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:52,2025-12-16 05:55
+19cfaa29-599a-4431-81fb-b16c9bf591f3,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:43,2025-12-16 05:54
+7ddd1723-4ab0-4100-9d6b-328e8185a1e6,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:41,2025-12-16 05:43
+ed6e74fe-72f7-4571-8264-9bf318d8b16d,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:24,2025-12-16 05:40
+ba9dceb1-78eb-40d6-9028-1ecd81ad7d10,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-16 05:23,2025-12-16 05:25
+a9c8b97b-8117-45eb-ade9-10b44afc5812,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Asset Management,Male,A few instances,2025-12-16 03:38,2025-12-16 04:54
+7c22103b-9e86-43a6-ab9e-5a06a8a4a286,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Public Health,Female,None,2025-12-16 03:28,2025-12-16 04:47
+a82cf232-c03b-43f0-a4ad-71e32a94ab6d,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Asset Management,Male,A few instances,2025-12-16 03:07,2025-12-16 03:38
+c3d80294-60f3-4cc8-bb94-6644503ce532,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Female,Occasional,2025-12-15 23:47,2025-12-16 00:57
+2622fb2f-71c9-4dac-92f2-1e44ea7e5dfa,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Epidemiology,Female,None,2025-12-15 22:23,2025-12-15 23:23
+c978c1a5-38bb-4eb2-b47b-983b7031f162,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-15 22:22,2025-12-15 22:23
+25f98936-220c-43cb-a1d2-15c200f3e1f8,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Epidemiology,Female,None,2025-12-15 22:21,2025-12-15 22:22
+b6a7a7da-2991-4f51-8665-a894b844c395,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Epidemiology,Female,None,2025-12-15 22:20,2025-12-15 22:21
+58bb3885-5c8b-4af0-a16e-30f22aaf88e3,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Business,Male,None,2025-12-15 22:08,2025-12-16 20:33
+2ba4f8f4-9dee-4ca4-aa02-584bcac69782,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Master of Business Administration,Female,A few instances,2025-12-15 20:28,2025-12-15 22:06
+8609369e-d553-4770-9bc6-fbf23e26ba34,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Master of Business Administration,Female,A few instances,2025-12-15 20:10,2025-12-15 20:13
+d5d61cc7-ca42-474f-8ed6-2657591b8127,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Female,Occasional,2025-12-15 19:32,2025-12-15 20:41
+94336fb2-fcb1-4bbe-8bc0-65859b60eb61,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Female,Occasional,2025-12-15 19:30,2025-12-15 19:32
+250a2b4a-f041-4f89-977b-e611add7438e,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Male,None,2025-12-15 19:24,2025-12-15 21:02
+8966a517-e5a3-4f57-9f9b-bd53a3b2463f,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Theater Management,Female,Occasional,2025-12-15 18:00,2025-12-15 19:22
+8ffca646-02c4-4854-ab9a-1cc6a6edb4ac,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Arrchitecture,Male,A few instances,2025-12-15 16:00,2025-12-16 02:04
+b15807c1-e9e1-4700-9ed8-809f2a471dba,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Arrchitecture,Male,A few instances,2025-12-15 15:59,2025-12-15 16:00
+cbc7bdb2-4926-44e5-8191-1ac43804e682,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Male,A few instances,2025-12-15 14:05,2025-12-15 14:54
+4c7d9487-803a-4243-8517-fa564322ec99,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,A few instances,2025-12-15 14:03,2025-12-15 14:06
+e2c74589-a254-4c07-b9bf-30c6e7731dc5,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Management Science,Female,Occasional,2025-12-15 04:15,2025-12-15 05:22
+193137c9-e98c-4469-a6d5-8a7cdc64a888,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Business,Male,Occasional,2025-12-15 03:37,2025-12-15 04:25
+7ec48d17-e6f3-42a4-9f46-3904aa1981fe,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Business,Male,Occasional,2025-12-15 02:01,2025-12-15 03:20
+ee761dd4-c282-4d2d-8f64-ffbea87bf4a9,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Business,Male,A few instances,2025-12-14 22:29,2025-12-15 00:14
+19a684fd-c073-4efa-be42-5fb8fb0c71cc,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Male,None,2025-12-14 19:01,2025-12-14 20:02
+d5dec634-5257-4842-88e2-2e757861c7af,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,,,2025-12-14 15:32,2025-12-14 16:25
+3a671be8-c525-48c3-bc3a-4704d3082994,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,SOM-GBS,Female,A few instances,2025-12-14 11:51,2025-12-14 13:22
+ac95e52f-7f5d-406c-847a-918b0720abae,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,,,,2025-12-14 08:50,2025-12-14 09:51
+1b32a648-9b8b-40d7-b1d0-6f168942eccd,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,GBS,Male,A few instances,2025-12-14 07:35,2025-12-14 08:49
+cce8dc84-416a-4c58-a660-25123483772a,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Master in Management GBS,Female,,2025-12-14 03:16,2025-12-14 04:15
+38206701-9a24-4081-96dd-33516b224464,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-14 00:32,2025-12-14 01:38
+27211dcc-8bdb-4065-8570-5981f8935eb5,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,MBA,Male,A few instances,2025-12-14 00:05,2025-12-14 00:31
+c1ce4aa2-4fc5-4c90-a6b6-d5dc34ed8123,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Master in Management GBS,Female,,2025-12-13 20:05,2025-12-13 21:19
+bf6b7605-584c-4ae4-b251-87b03eb63ef8,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,⏹️ No Deal,,Female,A few instances,2025-12-13 19:55,2025-12-13 21:48
+e0c4f291-77ad-4f1f-8811-b428ef4e49fb,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 failed,GBS,Female,Occasional,2025-12-13 19:53,2025-12-13 22:17
+73d0ca69-0653-4239-a5c3-8c11a77ec19d,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,math,Male,None,2025-12-13 18:42,2025-12-13 18:51
+25fb4f5f-4920-4f1d-ae27-0fd6c381d54d,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Management (MBA),Male,A few instances,2025-12-13 15:36,2025-12-14 02:31
+f81fa2d0-2ce4-4e8d-bb90-46387c98f7e9,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 07:37,2025-12-13 07:38
+9f3067eb-b95e-43b9-b49d-f74b1460149c,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 06:56,2025-12-13 07:30
+51657fbc-e729-4d22-a895-df5262401d70,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 06:56,2025-12-13 06:57
+5a3fab1f-9be3-45d1-a37f-bc71fed22a69,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 05:06,2025-12-13 05:07
+7312ba2c-21f9-4ed2-b9f2-33040aa5961b,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 05:04,2025-12-13 05:05
+a8e75f05-ea38-4263-8219-b11b3ecaa365,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 04:39,2025-12-13 04:41
+052d6abd-3877-4b7b-8ac9-e790d6dd09a9,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 04:07,2025-12-13 04:08
+c2fe8706-ed25-41d1-8d00-8f12da7c1cb6,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-13 04:04,2025-12-13 04:05
+091533dd-2369-428e-aa03-9bb93af1d1dc,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,,,,2025-12-13 02:49,2025-12-13 04:55
+26a8d256-cb29-4bb7-8f53-e70d8cfe2825,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Female,,2025-12-13 02:23,2025-12-13 03:16
+0be5ceb8-8433-4999-9e9d-89d6828c268c,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Management,Female,A few instances,2025-12-12 21:12,2025-12-13 19:56
+f90b10aa-49a4-4512-af34-da95c0507dab,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Law,Male,None,2025-12-12 19:41,2025-12-12 19:41
+d6ab1b78-b462-43cd-a323-4e2cd894b658,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Masters of Advanced Management,Male,Occasional,2025-12-12 17:56,2025-12-12 18:49
+179a5ec7-6854-4a97-91c9-436a65265f1f,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Male,A few instances,2025-12-12 17:47,2025-12-12 17:49
+786b18ef-568e-42ec-8bcd-9117ac56198d,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Male,A few instances,2025-12-12 17:45,2025-12-12 17:47
+fe608fa5-652e-4b7c-80c3-931c5c4d16a3,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Female,Occasional,2025-12-12 17:00,2025-12-12 18:12
+e1940b89-0e80-43a8-8862-b54dffd00237,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Global Business and Society,Male,A few instances,2025-12-12 16:15,2025-12-12 18:24
+e44c87a5-c483-4762-a799-50bb2877480a,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Global Business and Society,Male,A few instances,2025-12-12 16:13,2025-12-12 16:16
+abda911c-f7a6-493f-8ca4-d9cd69d32c71,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-12 16:03,2025-12-12 16:47
+fd60d9d4-e8a1-4e24-a6ef-1cf30334cc93,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Male,Occasional,2025-12-12 15:18,2025-12-12 16:18
+a2e6c00c-2df3-40ed-b721-dbd2a6297697,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Male,Occasional,2025-12-12 15:06,2025-12-12 15:20
+b9a25b21-5615-4c24-bf67-1ec9d592588d,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,⏹️ No Deal,Global Business and Society,Male,Occasional,2025-12-12 08:21,2025-12-12 09:34
+2e31e7da-b3f2-4115-a638-1fc7f9e933e1,Top_talent,side1,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,,,,2025-12-12 02:57,2025-12-12 02:57
+63792539-7312-44cb-8643-b971760d314f,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-12 02:33,2025-12-12 02:35
+a918d3e8-a9f5-4bbe-b96d-b8161546264a,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA outside,Female,A few instances,2025-12-11 14:43,2025-12-11 15:13
+6f1277fe-8910-4692-91b8-1ef1836a4b06,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-11 08:09,2025-12-11 08:13
+98ed3f28-11c2-4ab1-a83f-1453036bfed7,Top_talent,side1,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-11 08:08,2025-12-11 08:12
+82b2ad8a-66ce-435a-9190-cb65e7ff398a,Top_talent,side1,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,,,,2025-12-11 08:01,2025-12-11 08:03
+79357767-d47c-4d73-9019-98025bb9ae82,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,SDS,,,2025-12-11 07:53,2025-12-11 07:57
+af7ed1c0-df61-430b-b54c-89f7a0988c7f,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-11 07:50,2025-12-11 08:09
+f5fa1b3b-7f41-4582-acf7-7d514691e149,Top_talent,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,,,,2025-12-11 06:44,2025-12-11 06:51
+6e4b5a67-61e1-491a-b7b3-7f155f077df6,Top_talent,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-11 06:42,2025-12-11 06:42
+52bbb185-751d-484e-b4d3-35fb2208a2fe,Top_talent,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-11 06:42,2025-12-11 06:43
+59d93864-3569-4760-b454-fc4b5fec6d51,Top_talent,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-11 06:41,2025-12-11 06:54
+e9e64a71-da26-4426-8f86-e5313b7272df,Top_talent,side1,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-11 06:41,2025-12-11 06:53
+f81e9731-d2d1-4ff5-b0a8-9cf3c7eabb14,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 20:01,2025-12-10 20:08
+b37f26ac-3149-4003-950d-b3c9efe5c70a,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,4,✅ Deal,Theater,Female,Occasional,2025-12-10 19:52,2025-12-10 19:59
+33f1a7e7-557c-4c42-8889-497b1e7bf3b7,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,Theater,Female,Occasional,2025-12-10 19:51,2025-12-10 19:52
+1da9f9c4-9450-425b-bc34-d82ef2efaa64,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,,,2025-12-10 19:49,2025-12-10 20:18
+0ad06bea-d0a0-4eed-82be-cd1ea6d5f557,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,,,2025-12-10 19:44,2025-12-10 19:55
+d0f674cd-46c6-4639-8ec8-90bcb99bdcab,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,GBS,,,2025-12-10 19:44,2025-12-10 19:44
+799f52db-616d-4b6b-99fd-488c1c623e31,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,MBA Exchange,,A few instances,2025-12-10 19:39,2025-12-10 20:05
+95e44a5d-6529-49ae-ae99-c146b6cdfc7e,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 19:38,2025-12-10 19:46
+16eceb2c-fe06-4c6f-8d69-55a8d9624506,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-10 19:37,2025-12-10 20:20
+798d365f-292d-4a2f-8cf9-08c7a85da474,Main_Street,side1,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 19:36,2025-12-10 19:49
+31db345d-afd0-4714-ac7a-d6681fc76cbe,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Tech,Male,Occasional,2025-12-10 19:35,2025-12-10 19:58
+88bdd965-b58a-4bf8-9f8c-877d241e1cb4,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,,,,2025-12-10 19:35,2025-12-10 19:55
+50f35769-ef7f-4633-b4ce-69ef5d1ef0b9,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Business,Male,A few instances,2025-12-10 19:35,2025-12-10 19:55
+1c047b8c-310a-4aec-a26e-e03e9b0875bc,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,,,,2025-12-10 19:35,2025-12-10 20:00
+1accb1db-0b0d-4c2d-8dfc-4936a3737dd0,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Global Business and Society,Male,Occasional,2025-12-10 19:35,2025-12-10 20:19
+bb74becf-734e-45a8-b037-e01ca9e981b3,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Business,Male,None,2025-12-10 19:35,2025-12-10 19:53
+91bf642e-d8fc-4c11-8a14-628b7d5e3c82,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Female,Occasional,2025-12-10 19:34,2025-12-10 19:55
+7443cda3-2dfd-4aa1-9b6c-1c18cc2c4371,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Female,,2025-12-10 19:34,2025-12-10 19:52
+938b042a-344f-4b31-aeb8-33bdbe1a1f92,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 failed,2Y MBA,Female,A few instances,2025-12-10 19:34,2025-12-10 19:54
+562a5935-9a14-4542-970f-38f5e0f2a3b8,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,GBS,Female,Occasional,2025-12-10 19:33,2025-12-10 19:58
+0b0c3e36-0bd9-4238-8d25-3622e434fe02,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,GBS,Female,A few instances,2025-12-10 19:33,2025-12-10 19:34
+efc8ced7-5f3b-459c-8336-109e32d66de8,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Female,Occasional,2025-12-10 19:33,2025-12-10 19:57
+e4db51d8-ba2c-490d-9180-9f9804813026,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,MBA,Female,Occasional,2025-12-10 19:32,2025-12-10 19:33
+2707b436-df91-4b72-a0c0-5950a360677f,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Theater,Female,Occasional,2025-12-10 19:32,2025-12-10 19:45
+98028e11-8e88-42d4-9b2a-76255d18ba5b,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,,,,2025-12-10 19:31,2025-12-10 19:57
+9864a8ac-20aa-4afc-a273-f85c62f427c3,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,GBS,Female,A few instances,2025-12-10 19:31,2025-12-10 19:52
+19189653-dde7-45b9-8a41-ebf060437cf7,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-10 19:31,2025-12-10 20:03
+65568ba8-96c7-488f-bcd5-bf6ebbc1be4a,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,,,2025-12-10 19:30,2025-12-10 19:56
+09116786-9959-459a-9ede-3689803bc461,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Management,Male,A few instances,2025-12-10 19:29,2025-12-10 19:59
+350ef762-b4fe-4499-b089-6bab5fc2b3ff,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,,,,2025-12-10 19:29,2025-12-10 19:29
+f8b904d4-f7a7-44d3-a404-7ba2ce6c53b6,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,School of Management,Male,A few instances,2025-12-10 19:28,2025-12-10 20:10
+2b985adf-7bf1-4a59-b3e1-08f51fc159c3,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,GBS,Female,A few instances,2025-12-10 19:28,2025-12-10 20:18
+538cd73f-8fa5-4148-9694-fc3e2008b730,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,MBA,,,2025-12-10 19:28,2025-12-10 19:29
+516685e6-ec7a-4250-a2ff-d5673d98a94c,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Male,A few instances,2025-12-10 19:28,2025-12-10 20:06
+ee8d9c66-b9d0-420b-a698-6ebf6d1f3d64,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 failed,Healthcare Management,Female,A few instances,2025-12-10 19:27,2025-12-10 19:50
+d08ef3f9-f506-42da-b8be-81a89abdd3f8,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,,Male,A few instances,2025-12-10 19:26,2025-12-10 20:00
+e00fe024-072d-4094-b685-a2fa75e137bb,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,❌ Failed,MBA,Male,A few instances,2025-12-10 19:25,2025-12-10 20:06
+4eb7d6b7-8269-42d3-abf7-5911bd874682,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 19:23,2025-12-10 19:35
+0edb4787-09e2-44bb-9f97-7c76791ef315,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-10 19:23,2025-12-10 19:52
+b19200a0-42a5-472d-b31b-66597a8a477e,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,MBA,Male,A few instances,2025-12-10 19:23,2025-12-10 19:33
+4240e9c5-c537-48bf-a13a-0c56a12c6c63,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,⏹️ No Deal,MBA,Male,A few instances,2025-12-10 19:23,2025-12-10 19:35
+6c890dba-48b0-484a-9190-398ade45c35e,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 failed,Master of Business Administration (MBA),Male,None,2025-12-10 19:22,2025-12-10 19:39
+20b90946-0132-4ede-a5f8-a31539f55ca3,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,Management,Male,Occasional,2025-12-10 19:21,2025-12-10 19:21
+47ccd90e-2ae2-4686-8e16-563a3c1e6f91,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 17:30,2025-12-10 17:30
+aaf88b7e-9ba0-4300-8c4e-1cfebe3e0404,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 17:23,2025-12-10 17:23
+fef88ef0-ecc2-41ac-b9b0-1a43553edf84,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,GBS,Female,Occasional,2025-12-10 15:48,2025-12-10 16:18
+f8108b66-f933-4ae2-a7e2-3a9abfef4115,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Health Informatics,Female,None,2025-12-10 15:37,2025-12-10 15:53
+cba42d83-4de7-41aa-9c2d-fb6d6378355e,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 15:28,2025-12-10 15:29
+c18ba8b7-2605-441f-aa02-e9c0fc8cf80c,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 15:28,2025-12-10 15:29
+21380327-cdb4-4f7f-873b-cb1e6c012017,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 15:28,2025-12-10 15:28
+44902306-321c-4faf-8add-e73451889ad5,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,Business,,,2025-12-10 15:28,2025-12-10 15:28
+9b40af5c-bf64-483e-bb6b-e60855980604,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 15:28,2025-12-10 15:28
+519ed03e-cbf5-4ac8-b77a-1e4ee1b7d01f,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,Management,Male,A few instances,2025-12-10 15:25,2025-12-10 15:25
+d61b1421-2419-4a8a-832c-f426db673ebe,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,,,,2025-12-10 15:10,2025-12-10 15:22
+8f327691-8c64-4eb3-913a-a68d55ae1737,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,,,,2025-12-10 15:09,2025-12-10 15:27
+49f9367b-bdb8-44cf-b6d2-683f825e5e96,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,Business,,,2025-12-10 15:09,2025-12-10 15:09
+def6ce77-9078-42e8-989d-7ec7e9135680,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,public health,Female,None,2025-12-10 15:07,2025-12-10 15:18
+a6587ccb-1bab-48c3-9b0c-4104012b5bc9,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,MBA,Male,Frequent,2025-12-10 15:01,2025-12-10 15:01
+ff4187e1-4dc8-402b-bdd5-b45367d2adfa,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-10 15:00,2025-12-10 15:20
+2c58997c-c9ca-4932-9680-a291dd38a20c,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Global Business & Society,Male,Occasional,2025-12-10 14:59,2025-12-10 15:08
+1c64c52d-f094-45f2-a650-e5d4479e6843,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Global Business & Society,Male,A few instances,2025-12-10 14:57,2025-12-10 15:12
+22e1c990-13d3-422d-a65f-28bfd39879a9,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,GBS,Female,A few instances,2025-12-10 14:52,2025-12-10 15:00
+320f365c-6fa0-4659-8776-ec2c713b18db,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,GBS,Female,None,2025-12-10 14:50,2025-12-10 15:08
+583603ec-ba24-427b-9baf-63744aa4088d,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Male,None,2025-12-10 14:50,2025-12-10 15:07
+f727eff6-ec0b-4a13-85d6-d3818b5a85a2,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Mechanical Engineering,Male,Occasional,2025-12-10 14:49,2025-12-10 14:50
+24a24ce4-e9e7-4b2a-98b5-2049fd0a0faa,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,GBS,Male,A few instances,2025-12-10 14:49,2025-12-10 15:04
+a027bad3-4823-4695-9c64-9f091c83eeb9,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,❌ Failed,GBS,Male,Professional,2025-12-10 14:48,2025-12-10 15:09
+da8e805c-e5f6-4ae6-bc66-808432ffe371,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Management,Male,None,2025-12-10 14:48,2025-12-10 15:17
+bb4f01c8-cf3a-44a8-a4f1-1a608c7c51e4,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Female,Occasional,2025-12-10 14:48,2025-12-10 14:59
+6ba03567-2445-42ea-ab67-08d03d7978e0,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,Global Business & Society,Male,A few instances,2025-12-10 14:48,2025-12-10 14:53
+fefa4d90-b748-4d49-9a34-a77917d2cf10,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Management,Female,A few instances,2025-12-10 14:48,2025-12-10 15:16
+3ce4dbec-f326-4d36-850d-72e03ee059c4,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,,,,2025-12-10 14:47,2025-12-10 15:09
+53c67d59-4bf2-4f47-9a89-eaab2359fa21,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Business,Male,Occasional,2025-12-10 14:47,2025-12-10 15:17
+fae036e8-a68c-433e-ab24-92a581f8f85b,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Management Science,Female,Occasional,2025-12-10 14:47,2025-12-10 15:08
+e014a8cd-73de-4e33-a21e-d45fec8fadc2,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Technology Management,Male,Occasional,2025-12-10 14:47,2025-12-10 15:19
+bf242471-f66d-4d5a-89d3-2ca1f1de2d28,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Female,A few instances,2025-12-10 14:47,2025-12-10 14:58
+daa71a3a-4b60-46ad-bd8d-04e03aa299fa,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Master of Business Administration,Male,None,2025-12-10 14:47,2025-12-10 15:13
+187ee6e1-b92d-46cc-aad6-765d8bd6d391,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,MBA,Male,Frequent,2025-12-10 14:47,2025-12-10 15:05
+7ab01b6d-88b8-4565-884d-ea7256547287,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,MBA,Male,A few instances,2025-12-10 14:47,2025-12-10 15:06
+a5a7bbed-af95-434c-9b57-64dc818dae14,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-10 14:47,2025-12-10 15:12
+f0c044d9-bfbe-41e3-8de8-cd0e39452782,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,GBS,Female,A few instances,2025-12-10 14:46,2025-12-10 14:58
+cba8d9c9-e5a2-4a30-9385-1f1bce1bbdfa,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Management Science,Male,None,2025-12-10 14:46,2025-12-10 15:07
+dd354523-b315-4914-8e67-af350e75e679,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 failed,MBA,Male,A few instances,2025-12-10 14:46,2025-12-10 14:54
+5c9d6f09-7ed0-4359-bc88-703210879766,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Yale SOM - GBS,Female,Occasional,2025-12-10 14:46,2025-12-10 15:10
+118af3de-68df-4b26-ad2d-94dfb3821d32,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 14:46,2025-12-10 14:59
+486f9419-be21-4888-9733-9555fc50fb1e,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 14:46,2025-12-10 15:01
+13697589-e7d3-4c28-98f9-b276bf95a61c,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Arrchitecture,Male,A few instances,2025-12-10 14:46,2025-12-10 15:08
+81eafc5a-bc21-4519-999c-17065c832e1e,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Management,Female,A few instances,2025-12-10 14:45,2025-12-10 15:08
+fe68b67b-d1f9-4bec-b02a-d28b8ae21e72,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Master in Management GBS,Female,,2025-12-10 14:45,2025-12-10 15:04
+a5291dbb-a694-4be4-ae7e-bafac34f070d,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Female,Frequent,2025-12-10 14:45,2025-12-10 15:26
+baf91c79-b1a3-405b-b6ef-7388e9011ea7,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Mathematics,Male,A few instances,2025-12-10 14:45,2025-12-10 15:15
+f167c9c9-0e40-428b-8154-5718248ce8af,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,Global Business & Society,Male,Occasional,2025-12-10 14:44,2025-12-10 14:56
+ed40d7bb-e528-471c-9527-ed06bd6fe4fc,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Global Business and Society,Non-binary,Occasional,2025-12-10 14:44,2025-12-10 15:15
+9a00be6e-6717-4b29-ad44-c4d632cdc649,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,,,,2025-12-10 14:43,2025-12-10 15:02
+da734cf6-5022-48df-b3d3-2cbeb9170df4,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Asset Management,Male,A few instances,2025-12-10 14:43,2025-12-10 15:17
+023fa610-c0e8-421c-9116-7a5eaf48551c,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,public health,Female,None,2025-12-10 14:43,2025-12-10 15:01
+2e473faf-35b5-4fe6-b3a9-143ca6519b43,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Masters of Advanced Management,Male,Occasional,2025-12-10 14:43,2025-12-10 15:05
+35cd2da6-a451-4e58-937b-7705e2fcc15d,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,✅ Deal,Management,Male,None,2025-12-10 14:42,2025-12-10 15:10
+73297254-b67a-4890-9ae3-f6afea408ca4,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Mechanical Engineering,Male,Occasional,2025-12-10 14:42,2025-12-10 14:48
+34bd3d91-61c5-4681-9f40-bc059f53269a,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Master of Business Administration,Female,A few instances,2025-12-10 14:41,2025-12-10 15:12
+fef6c2b3-1b4f-43e4-ac56-8908f2db35a9,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Male,None,2025-12-10 14:41,2025-12-10 15:13
+e15e86b4-cf6d-4325-887c-cc9cb417adf9,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,GBS,Female,A few instances,2025-12-10 14:40,2025-12-10 15:15
+cdb4b68d-b0e8-4609-ad07-eb92dc0657f3,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Global Affairs,Male,A few instances,2025-12-10 14:40,2025-12-10 15:07
+33365183-4645-49aa-829c-4d96cc172520,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,MBA,Male,Occasional,2025-12-10 14:39,2025-12-10 15:20
+fabc68b2-dd67-4287-af43-5ec68365ae1f,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,Management,Male,A few instances,2025-12-10 14:39,2025-12-10 15:22
+526567fb-b574-4eab-ab23-96a820f6a184,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,,,,2025-12-10 14:39,2025-12-10 15:03
+6a1f1023-f690-4291-b5e3-04f83092f8c4,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Management,Male,Occasional,2025-12-10 14:39,2025-12-10 15:08
+746b9508-0fac-4135-a7af-451ac7e26c83,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,,,,2025-12-10 14:39,2025-12-10 15:14
+2527e1ea-5ba3-45b6-b891-7c076d874b61,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,MBA,Male,A few instances,2025-12-10 14:39,2025-12-10 14:57
+4093ffc5-427c-4bf9-a18e-f7ff3c07f89b,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Global business and society,Male,A few instances,2025-12-10 14:38,2025-12-10 14:59
+073b248f-5aaa-4c6b-98ae-fa0102ff3a7a,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,✅ Deal,Law,Male,None,2025-12-10 14:38,2025-12-10 15:12
+82de1f8e-b080-4b4c-a45a-147d4a9a3c98,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Management,Male,Occasional,2025-12-10 14:38,2025-12-10 14:39
+20260374-2d79-40da-9cc0-fb4f400a9580,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,✅ Deal,Global Business and Society,,A few instances,2025-12-10 14:38,2025-12-10 15:04
+8fe436e8-b3a1-4b57-90fd-2c2e45d99f38,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,Management,Male,Occasional,2025-12-10 14:37,2025-12-10 14:38
+c29a5a57-5d56-4e87-b9fd-f4a543820078,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 failed,MBA,,,2025-12-10 14:37,2025-12-10 15:03
+7fe2649b-f709-477a-8689-4ec1ddcb3881,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,⏹️ No Deal,MBA,Male,Frequent,2025-12-10 14:36,2025-12-10 14:56
+7f6097c2-de65-4af2-b06d-362ebf642c09,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,⏹️ No Deal,Management Science,Male,Occasional,2025-12-10 14:36,2025-12-10 15:05
+71b68756-9e4d-4133-a100-d026baa3366b,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 13:28,2025-12-10 13:32
+2c8f497a-8876-49f2-a110-3df9a0a2d593,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,prof,Male,Professional,2025-12-10 11:19,2025-12-10 11:20
+30fb5303-4dff-4ea5-8846-5782d5c32dd8,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,,,,2025-12-10 11:16,2025-12-10 11:18
+62bf1baa-e787-4d19-b54b-269b4f238ab1,Top_talent,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 05:28,2025-12-10 06:50
+2d84161a-af45-4a9f-8f5d-509b33c6c5fc,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,sds,,,2025-12-10 05:24,2025-12-10 06:51
+839df400-5714-4737-a7d4-49b11a0f9331,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 05:08,2025-12-10 05:09
+2d8133ce-19cd-46a1-a19a-6dcf58891e4d,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 05:08,2025-12-10 05:09
+c909aecd-1ecc-407e-bf15-277e34af387c,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 05:08,2025-12-10 05:09
+d32b69d6-5cd3-47fb-953f-185bfd2b8427,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:09
+875b6386-7932-4e06-88ea-9d73e4f14854,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:09
+78b1039b-98a8-410c-a49b-f5209042ab0d,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:08
+e6dcac4e-6af8-4c12-bbce-90c1f113447d,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:08
+8a73a6b2-2ecb-4093-a32d-0ca9c1782d55,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:08
+b8e3a740-52c7-4610-8024-9d05d25e1776,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:08
+452f8c2b-22dd-477a-8710-fcd295d02e3b,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,,,2025-12-10 05:07,2025-12-10 05:08
+59abb8e6-f8ff-4bd1-b10f-691e82f44c97,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,Male,Professional,2025-12-10 04:22,2025-12-10 04:22
+e5b6107b-4d4f-46a1-a371-9e83528fd42d,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,Female,Frequent,2025-12-10 04:22,2025-12-10 04:22
+d1c19ae5-07a8-4f1c-af38-7c50758e9c32,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,Male,Occasional,2025-12-10 04:22,2025-12-10 04:23
+ac9d1e05-dd03-4e73-9ba8-d562aa7e8d1d,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,SDS,Male,A few instances,2025-12-10 04:21,2025-12-10 04:21
+7b0da794-c1b4-4d50-9615-669d1a8e0d0d,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 04:16,2025-12-10 04:16
+865142bf-5554-427e-a42c-fd179f211c01,Main_Street,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,SDS,Male,Frequent,2025-12-10 03:50,2025-12-10 03:50
+c38e57af-8c68-41bf-85e3-9ef49f7561c8,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,Male,None,2025-12-10 03:50,2025-12-10 03:50
+a9418128-0e7d-4f73-a480-b9e9852ebd5b,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,Male,Professional,2025-12-10 03:50,2025-12-10 03:51
+05013a9d-9da7-41fa-b857-9b1c4daec26f,Main_Street,side2,openai/gpt-5,🤖 AI,⚪ Base,6,🔄 active,SDS,Male,Occasional,2025-12-10 03:50,2025-12-10 03:50
+c0f1968e-8ba8-4ff1-afd4-19dcea2d02fc,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 02:16,2025-12-10 02:21
+aad0413f-4bdd-4b04-b6f6-5e1706d02cc0,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,prof,Male,Professional,2025-12-10 02:13,2025-12-10 02:19
+8489341a-5905-4ebe-888a-483c1530d7b6,Main_Street,side1,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 01:52,2025-12-10 01:52
+bd69dd72-c370-4b3c-b123-d7b6c47743f6,Main_Street,side1,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 01:52,2025-12-10 01:52
+97a5581f-ff0b-4e85-8249-48033ad2c1a8,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 01:51,2025-12-10 01:51
+8b6b248e-0f21-43d2-8ad2-5a31a583ab6d,Main_Street,side1,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,Male,,2025-12-10 01:46,2025-12-10 01:46
+caa1b230-f31a-418f-9268-8e5893173f0b,Main_Street,side1,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,Male,,2025-12-10 01:41,2025-12-10 01:41
+490f8110-3d57-4420-9611-45f0974f4577,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 00:57,2025-12-10 02:19
+b0acfa02-186b-485a-81cd-554410aec7e2,Top_talent,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,sds,,,2025-12-10 00:57,2025-12-10 00:57
+397272cd-ab3e-4a8f-b0af-4a320e69839f,Top_talent,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 00:48,2025-12-10 00:48
+e4be60ec-7de8-4b1d-8fe2-774a14f00464,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 00:46,2025-12-10 00:46
+f981cb0e-e460-4d57-981e-d24b4ad52b88,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,prof,Male,Professional,2025-12-10 00:44,2025-12-10 01:04
+addb2ad6-8eaf-49eb-a61b-5c89ee2f0958,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,,,2025-12-10 00:40,2025-12-10 00:44
+9992a0ff-7e44-4609-8a9c-54b21c0b5a53,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,prof,Male,Professional,2025-12-10 00:31,2025-12-10 00:43
+7271f344-12b8-46cf-8892-f69ebec7dde3,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,✅ Deal,SDS,,,2025-12-10 00:11,2025-12-10 00:16
+362cd512-ee83-4ed6-bf80-8d5ea8ce6f49,Top_talent,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 failed,SDS,,,2025-12-10 00:09,2025-12-10 00:16
+20b2f876-42ae-4be1-a9b5-a9347f3b50af,Top_talent,side2,openai/gpt-5,👤 Student,🧠🎯 M+P,6,🔄 active,SDS,,,2025-12-10 00:06,2025-12-10 00:06
+67f91417-c064-44ff-b0e9-65404a64f8df,Main_Street,side2,openai/gpt-5,🤖 AI,🧠🎯 M+P,6,🔄 active,SDS,Male,Occasional,2025-12-10 00:05,2025-12-10 00:06
+bbb6c9f7-95c9-4cd8-a1dc-5080ab5ce03e,Main_Street,side2,openai/gpt-5,👤 Student,⚪ Base,6,🔄 active,SDS,Male,Occasional,2025-12-10 00:04,2025-12-10 00:04
