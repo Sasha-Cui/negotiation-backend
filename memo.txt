@@ -1,36 +1,21 @@
-Short description of the repository
+Experiment design
 
-This repository implements a negotiation practice backend (FastAPI + SQLite) that runs structured negotiation sessions between students and an AI agent, logs detailed transcripts and deal terms, and then analyzes outcomes via notebooks/scripts. The system defines multiple scenarios (e.g., “Main_Street” real-estate bargaining and “Top_talent” recruiting/compensation negotiation), stores each session’s roles, who goes first, round count, and outcome, and supports AI configuration variants (Base vs. Memory+Planning) for experimentation and comparison. Analysis notebooks/scripts (e.g., Main Street dashboards) are designed to summarize outcomes, demographics, and process metrics like deal price, round count, and duration.
+• Unit of analysis: Each session involves an AI versus human negotiation matchup.  We record scenario_name, student_role, first_mover, AI agentic config, total_rounds, outcome, and demographic details.
+• Treatments/conditions: AI agent configuration toggles (Base vs. Memory + Planning mode), role assignment (student as side1 or side2), and first-mover assignment (student vs. AI). These are tracked per session to allow comparative analysis.
+• Scenarios: Two primary scenarios: Main_Street and Top_talent.  Main_Street is a single-issue price haggle case.  Top_talent is a multi-issue positive sum case.
+• Outcomes and metrics: session outcomes (deal reached vs. failed/no deal/active), plus in-depth analytics on prices, rounds, and durations.  The Top_talent and Main_Street analyses also plan to compare performance across demographics and treatment assignments.
 
-Experiment design (explicit)
 
-• Unit of analysis: a single negotiation session stored in the SQLite database (see the extracted df_sessions.csv). Each session records scenario_name, student_role, first_mover, AI config, total_rounds, and outcome.
-• Treatments/conditions: AI configuration toggles (Base vs. M+P), role assignment (student as side1 or side2), and first-mover assignment (student vs. AI). These are tracked per session to allow comparative analysis.
-• Scenarios: at least two primary scenarios are used in the data extract—Main_Street and Top_talent—with different payoff structures and success criteria (deal reached vs. no deal/failed/active).
-• Outcomes and metrics: session outcomes (deal reached vs. failed/no deal/active), plus in-depth analytics on prices, rounds, and durations in the analysis notebooks for Main_Street. The Top_talent and Main_Street analyses also plan to compare performance across demographics and treatment assignments.
 
-Preliminary findings (from analysis-of-transcripts/df_sessions.csv)
-
-These are high-level, early readouts from the existing session extract (294 total sessions):
-
+Preliminary findings.
 1) Scenario coverage and volume
    • Main_Street: 156 sessions.
    • Top_talent: 138 sessions.
 
 2) Configuration mix
-   • Main_Street: 87 Base vs. 69 M+P.
-   • Top_talent: 129 M+P vs. 9 Base (heavily skewed toward M+P).
+   • Main_Street: 87 Base vs. 69 Agent.
+   • Top_talent: all Agent.
 
-3) Deal rates by config (preliminary, not yet controlling for role or first-mover)
-   • Main_Street: M+P deals in 39/69 sessions (56.5%) vs. Base deals in 43/87 sessions (49.4%).
-   • Top_talent: M+P deals in 49/129 sessions (38.0%); Base has 0/9 deals so far.
+3) LLMs have achieved superhuman level of negotiation capabilities.
 
-4) Session state distribution suggests ongoing data collection
-   • Main_Street: 64 sessions are still active; Top_talent: 80 sessions are still active. This indicates that many sessions are still in progress or pending completion and results should be treated as preliminary.
-
-5) First-mover allocation
-   • AI starts more often in both scenarios: Main_Street (AI 87 vs. student 69) and Top_talent (AI 96 vs. student 42). This imbalance should be considered when interpreting early outcome differences.
-
-Summary takeaway
-
-The repository is running a controlled negotiation experiment where the AI agent’s memory and planning capabilities are toggled while observing outcomes across two scenarios. Early data suggests a modestly higher deal rate for M+P in Main_Street, while Top_talent has a strong skew toward M+P with incomplete outcomes. More sessions and stratified analysis (role, first-mover, demographics) are needed before drawing firm conclusions.
+4) LLMs lie to gain additional advantages in bargaining.
